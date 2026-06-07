@@ -6,776 +6,766 @@
 <title>IPS Brasil 2026 — Mapa de Indicadores</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+:root{
+  --bg:#f4f1eb; --surface:#fff; --border:#e2ddd4;
+  --text:#181614; --muted:#7a7268; --accent:#c93a0e;
+  --yellow:#f0c000;
+  --panel:340px; --hdr:52px; --r:10px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;background:var(--bg);
+  font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px;}
 
-  :root {
-    --bg: #f7f5f0;
-    --surface: #ffffff;
-    --border: #e8e4dc;
-    --text: #1a1814;
-    --muted: #7a7268;
-    --accent: #e8420a;
-    --accent2: #1a6b3c;
-    --accent3: #1644a8;
-    --yellow: #f5c800;
-    --panel-w: 360px;
-    --header-h: 56px;
-    --radius: 12px;
-    --shadow: 0 2px 16px rgba(0,0,0,0.10);
-  }
+/* HEADER */
+#hdr{
+  position:fixed;top:0;left:0;right:0;height:var(--hdr);
+  background:var(--text);color:#fff;z-index:1000;
+  display:flex;align-items:center;padding:0 14px;gap:8px;
+}
+#hdr-logo{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;
+  letter-spacing:-.02em;flex:1;}
+#hdr-logo span{color:var(--yellow);}
+.hdr-btn{
+  background:none;border:1.5px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.8);border-radius:6px;padding:4px 10px;
+  font-size:.72rem;font-family:'Syne',sans-serif;font-weight:700;
+  cursor:pointer;letter-spacing:.03em;transition:all .15s;white-space:nowrap;
+}
+.hdr-btn:hover,.hdr-btn.on{background:rgba(255,255,255,.12);color:#fff;}
+#btn-panel{display:none;}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* APP SHELL */
+#app{display:flex;height:100vh;padding-top:var(--hdr);}
 
-  html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'DM Sans', sans-serif; color: var(--text); }
+/* PAINEL — flex column, altura fixa */
+#panel{
+  width:var(--panel);min-width:var(--panel);
+  background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column; /* CRÍTICO: column com height definido */
+  height:calc(100vh - var(--hdr));
+  overflow:hidden;
+  z-index:200;transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
 
-  /* HEADER */
-  #header {
-    position: fixed; top: 0; left: 0; right: 0; height: var(--header-h);
-    background: var(--text); color: #fff; z-index: 1000;
-    display: flex; align-items: center; padding: 0 16px; gap: 12px;
-  }
-  #header h1 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; flex:1; }
-  #header h1 span { color: var(--yellow); }
-  #btn-mobile-toggle {
-    display: none; background: none; border: 1.5px solid rgba(255,255,255,0.3);
-    color: #fff; border-radius: 8px; padding: 5px 10px; font-size: 0.75rem;
-    font-family: 'Syne',sans-serif; cursor: pointer; white-space: nowrap;
-  }
+/* TABS — altura fixa */
+#tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;height:40px;}
+.tab{
+  flex:1;height:100%;background:none;
+  border:none;border-bottom:2.5px solid transparent;
+  font-family:'Syne',sans-serif;font-size:.67rem;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+  color:var(--muted);transition:all .14s;
+}
+.tab.on{color:var(--accent);border-bottom-color:var(--accent);}
 
-  /* LAYOUT */
-  #app { display: flex; height: 100vh; padding-top: var(--header-h); }
+/* CONTEÚDO DA TAB — flex:1, overflow:hidden, flex column interno */
+.tab-body{
+  flex:1; /* pega o espaço entre tabs e legenda */
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
 
-  /* LEFT PANEL */
-  #panel {
-    width: var(--panel-w); flex-shrink: 0;
-    background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; overflow: hidden;
-    z-index: 100; transition: transform 0.3s ease;
-  }
+/* ÁREA DE SCROLL dentro do tab-body */
+.scroll-area{
+  flex:1;
+  overflow-y:scroll; /* sempre mostrar scrollbar */
+  overflow-x:hidden;
+  padding:14px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--border) transparent;
+}
+.scroll-area::-webkit-scrollbar{width:5px;}
+.scroll-area::-webkit-scrollbar-track{background:transparent;}
+.scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.scroll-area::-webkit-scrollbar-thumb:hover{background:var(--muted);}
 
-  /* TABS */
-  #tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .tab {
-    flex: 1; padding: 12px 4px; text-align: center;
-    font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700;
-    letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer;
-    color: var(--muted); border-bottom: 3px solid transparent;
-    transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none;
-  }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* LEGENDA — altura fixa no fundo, nunca some */
+#legenda{
+  flex-shrink:0;
+  padding:10px 14px 13px;
+  border-top:1px solid var(--border);
+  background:var(--surface);
+  min-height:90px;
+}
+#leg-ind{font-size:.8rem;font-weight:600;margin-bottom:2px;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#leg-desc{font-size:.66rem;color:var(--muted);line-height:1.4;margin-bottom:6px;}
+#leg-bar{height:10px;border-radius:4px;margin-bottom:4px;
+  background:linear-gradient(to right,#2166ac,#f5f5f0,#b2182b);}
+#leg-labs{display:flex;justify-content:space-between;font-size:.64rem;color:var(--muted);gap:4px;}
+#leg-labs span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:33%;}
+#leg-note{margin-top:6px;font-size:.62rem;color:var(--muted);line-height:1.4;
+  padding:5px 7px;background:var(--bg);border-radius:5px;}
 
-  /* PANEL CONTENT */
-  #panel-content { flex: 1; overflow-y: auto; padding: 16px; }
-  #panel-content::-webkit-scrollbar { width: 4px; }
-  #panel-content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+/* SECTION LABEL */
+.slabel{
+  font-family:'Syne',sans-serif;font-size:.6rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  margin:14px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--border);
+}
+.slabel:first-child{margin-top:0;}
 
-  /* SECTION BLOCKS */
-  .section-label {
-    font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
-    margin: 16px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border);
-  }
-  .section-label:first-child { margin-top: 0; }
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.chip{
+  padding:4px 10px;border-radius:20px;font-size:.67rem;font-weight:700;
+  font-family:'Syne',sans-serif;cursor:pointer;
+  border:1.5px solid;transition:all .13s;white-space:nowrap;
+}
 
-  /* INDICADOR SELECTOR */
-  .ind-group { margin-bottom: 4px; }
-  .ind-group-label {
-    display: flex; align-items: center; gap: 6px; cursor: pointer;
-    padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 500;
-    transition: background 0.1s; user-select: none;
-  }
-  .ind-group-label:hover { background: var(--bg); }
-  .ind-group-label .dot {
-    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-  }
-  .ind-group-label .arrow { margin-left: auto; font-size: 0.6rem; color: var(--muted); transition: transform 0.2s; }
-  .ind-group-label.open .arrow { transform: rotate(90deg); }
-  .ind-items { display: none; padding-left: 26px; }
-  .ind-items.open { display: block; }
-  .ind-item {
-    display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px;
-    border-radius: 6px; cursor: pointer; font-size: 0.75rem; line-height: 1.35;
-    transition: background 0.1s; color: var(--text);
-  }
-  .ind-item:hover { background: var(--bg); }
-  .ind-item.selected { background: #fff3f0; color: var(--accent); font-weight: 500; }
-  .ind-item .ind-name { flex: 1; }
-  .ind-item .ind-unit { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+/* INDICADOR LISTA */
+.ind-item{
+  display:flex;align-items:flex-start;gap:8px;padding:7px 8px;
+  border-radius:7px;cursor:pointer;font-size:.75rem;line-height:1.35;
+  transition:background .1s;border:1.5px solid transparent;
+}
+.ind-item:hover{background:var(--bg);}
+.ind-item.on{background:#fff5f3;border-color:#f5cdc5;color:var(--accent);}
+.ind-name{flex:1;}
+.ind-unit{font-size:.62rem;color:var(--muted);margin-top:1px;}
+.ind-dir{font-size:.59rem;font-family:'Syne',sans-serif;font-weight:700;opacity:.6;}
 
-  /* SEARCH */
-  #search-wrap { position: relative; margin-bottom: 12px; }
-  #search-input {
-    width: 100%; padding: 9px 12px 9px 34px; border: 1.5px solid var(--border);
-    border-radius: 8px; font-size: 0.82rem; font-family: inherit;
-    background: var(--bg); outline: none; transition: border-color 0.15s;
-  }
-  #search-input:focus { border-color: var(--accent); background: #fff; }
-  #search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85rem; pointer-events: none; }
-  #search-results { max-height: 200px; overflow-y: auto; }
-  .search-result {
-    padding: 8px 10px; border-radius: 6px; cursor: pointer;
-    font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;
-    transition: background 0.1s;
-  }
-  .search-result:hover { background: var(--bg); }
-  .search-result .sr-uf { font-size: 0.7rem; color: var(--muted); font-family: 'Syne',sans-serif; font-weight: 700; }
+/* BUSCA */
+#srch-wrap{position:relative;margin-bottom:10px;}
+#srch-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);
+  opacity:.4;pointer-events:none;}
+#srch{
+  width:100%;padding:8px 10px 8px 30px;border:1.5px solid var(--border);
+  border-radius:7px;font-size:.79rem;font-family:inherit;
+  background:var(--bg);outline:none;transition:border-color .14s;
+}
+#srch:focus{border-color:var(--accent);background:#fff;}
+.sr{
+  padding:7px 9px;border-radius:6px;cursor:pointer;
+  font-size:.77rem;display:flex;justify-content:space-between;align-items:center;
+  transition:background .1s;
+}
+.sr:hover{background:var(--bg);}
+.sr-uf{font-size:.65rem;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;}
 
-  /* LEGENDA */
-  #legenda-wrap { padding: 0 16px 12px; flex-shrink: 0; border-top: 1px solid var(--border); }
-  #legenda-title { font-family: 'Syne',sans-serif; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 10px 0 6px; }
-  #legenda-bar { height: 10px; border-radius: 4px; margin-bottom: 4px; }
-  #legenda-labels { display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--muted); }
-  #legenda-ind-name { font-size: 0.78rem; font-weight: 500; margin-bottom: 2px; color: var(--text); }
-  #legenda-ind-desc { font-size: 0.7rem; color: var(--muted); line-height: 1.4; }
+/* FICHA */
+#ficha-back{
+  display:none;align-items:center;gap:5px;padding:6px 0 10px;
+  font-size:.74rem;color:var(--muted);cursor:pointer;
+  background:none;border:none;font-family:inherit;
+}
+#ficha-back:hover{color:var(--accent);}
+#ficha-hdr{
+  padding:14px;background:var(--text);color:#fff;
+  border-radius:var(--r);margin-bottom:10px;
+}
+.f-nome{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;}
+.f-sub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:2px;}
+.f-ips{display:flex;align-items:baseline;gap:6px;margin-top:10px;}
+.f-ips-v{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--yellow);}
+.f-ips-l{font-size:.69rem;color:rgba(255,255,255,.5);line-height:1.4;}
+.fgrp{margin-bottom:14px;}
+.fgrp-t{
+  font-family:'Syne',sans-serif;font-size:.59rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  padding:7px 0 5px;border-bottom:1px solid var(--border);margin-bottom:6px;
+  display:flex;align-items:center;gap:5px;
+}
+.fgrp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.find{
+  display:flex;align-items:center;padding:5px 0;
+  border-bottom:1px solid #f0ece6;gap:8px;
+}
+.find:last-child{border:none;}
+.find-info{flex:1;min-width:0;}
+.find-n{font-size:.72rem;font-weight:500;line-height:1.3;}
+.find-s{font-size:.62rem;color:var(--muted);margin-top:1px;}
+.find-bar-wrap{height:3px;background:#ede9e2;border-radius:2px;margin-top:3px;}
+.find-bar{height:100%;border-radius:2px;}
+.find-v{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;
+  text-align:right;flex-shrink:0;}
+.find-u{font-size:.58rem;color:var(--muted);display:block;}
 
-  /* FICHA DO MUNICÍPIO */
-  #ficha { display: none; padding: 0; }
-  #ficha.active { display: block; }
-  #ficha-header {
-    padding: 16px; background: var(--text); color: #fff;
-    border-radius: var(--radius); margin-bottom: 12px;
-  }
-  #ficha-nome { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 800; }
-  #ficha-sub { font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
-  #ficha-ips-big {
-    margin-top: 10px; display: flex; align-items: baseline; gap: 6px;
-  }
-  #ficha-ips-val { font-family: 'Syne',sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--yellow); }
-  #ficha-ips-label { font-size: 0.75rem; color: rgba(255,255,255,0.6); }
-  #ficha-back {
-    display: flex; align-items: center; gap: 6px; padding: 8px 0;
-    font-size: 0.78rem; color: var(--muted); cursor: pointer; margin-bottom: 4px;
-    background: none; border: none; font-family: inherit;
-  }
-  #ficha-back:hover { color: var(--accent); }
-  .ficha-grupo { margin-bottom: 16px; }
-  .ficha-grupo-titulo {
-    font-family: 'Syne',sans-serif; font-size: 0.65rem; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
-    padding: 8px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .ficha-grupo-titulo .dot { width: 8px; height: 8px; border-radius: 50%; }
-  .ficha-ind {
-    display: flex; align-items: center; padding: 6px 0;
-    border-bottom: 1px solid #f0ede8; gap: 8px;
-  }
-  .ficha-ind:last-child { border-bottom: none; }
-  .ficha-ind-info { flex: 1; min-width: 0; }
-  .ficha-ind-nome { font-size: 0.75rem; font-weight: 500; line-height: 1.3; }
-  .ficha-ind-simples { font-size: 0.67rem; color: var(--muted); margin-top: 1px; line-height: 1.3; }
-  .ficha-ind-val { font-family: 'Syne',sans-serif; font-size: 0.85rem; font-weight: 700; text-align: right; flex-shrink: 0; }
-  .ficha-ind-bar { height: 3px; border-radius: 2px; margin-top: 3px; }
-  .ficha-ind-unidade { font-size: 0.6rem; color: var(--muted); display: block; }
+/* RANKINGS */
+.rk-sel{
+  width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:7px;
+  font-size:.75rem;font-family:inherit;background:var(--bg);outline:none;
+  margin-bottom:8px;cursor:pointer;
+}
+.toggle-g{display:flex;gap:4px;margin-bottom:10px;}
+.tog{
+  padding:5px 12px;border-radius:6px;font-size:.69rem;font-weight:700;
+  font-family:'Syne',sans-serif;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--bg);
+  color:var(--muted);transition:all .13s;
+}
+.tog.on{background:var(--text);color:#fff;border-color:var(--text);}
+.rk-item{
+  display:flex;align-items:center;gap:7px;padding:6px 7px;
+  border-radius:7px;cursor:pointer;transition:background .1s;font-size:.75rem;
+}
+.rk-item:hover{background:var(--bg);}
+.rk-pos{font-family:'Syne',sans-serif;font-weight:800;font-size:.65rem;
+  color:var(--muted);width:16px;flex-shrink:0;}
+.rk-nm{flex:1;font-weight:500;}
+.rk-uf{font-size:.61rem;color:var(--muted);}
+.rk-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.77rem;}
 
-  /* MAP */
-  #map-wrap { flex: 1; position: relative; }
-  #map { height: 100%; width: 100%; }
+/* MAPA */
+#map-wrap{flex:1;position:relative;overflow:hidden;}
+#map{position:absolute;inset:0;}
 
-  /* TOOLTIP */
-  .mapa-tooltip {
-    background: var(--text) !important; color: #fff !important;
-    border: none !important; border-radius: 8px !important;
-    padding: 8px 12px !important; font-family: 'DM Sans',sans-serif !important;
-    font-size: 0.78rem !important; box-shadow: var(--shadow) !important;
-    pointer-events: none !important;
+/* MUNICÍPIO SELECIONADO — destaque neutro, sem cor de indicador */
+.mun-selecionado{
+  fill:none !important;
+  stroke:#1a1814 !important;
+  stroke-width:2.5 !important;
+  stroke-dasharray:none !important;
+}
+/* Marcador do município selecionado no mapa */
+.marcador-sel{
+  background:var(--text);color:#fff;
+  font-family:'Syne',sans-serif;font-weight:800;
+  font-size:.72rem;padding:5px 10px;border-radius:20px;
+  white-space:nowrap;box-shadow:0 2px 10px rgba(0,0,0,.25);
+  border:2px solid var(--yellow);
+}
+
+/* TOOLTIP */
+.mtt{
+  background:var(--text) !important;color:#fff !important;
+  border:none !important;border-radius:8px !important;
+  padding:8px 11px !important;font-family:'DM Sans',sans-serif !important;
+  font-size:.74rem !important;box-shadow:0 4px 20px rgba(0,0,0,.25) !important;
+  pointer-events:none !important;min-width:120px;
+}
+.mtt-nm{font-family:'Syne',sans-serif;font-weight:800;font-size:.79rem;}
+.mtt-v{color:var(--yellow);font-weight:600;margin-top:3px;}
+.mtt-ind{color:rgba(255,255,255,.45);font-size:.66rem;margin-top:2px;}
+
+/* LOADING */
+#loading{
+  position:fixed;inset:0;background:var(--text);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+}
+.ld-logo{font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;color:var(--yellow);}
+.ld-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;}
+.ld-msg{font-size:.8rem;color:rgba(255,255,255,.4);}
+.ld-track{width:220px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
+.ld-fill{height:100%;background:var(--yellow);border-radius:2px;width:0;transition:width .3s;}
+
+/* MOBILE */
+@media(max-width:768px){
+  #btn-panel{display:block;}
+  #panel{
+    position:fixed;top:var(--hdr);left:0;bottom:0;
+    transform:translateX(-100%);
+    box-shadow:4px 0 24px rgba(0,0,0,.15);
+    width:min(var(--panel),93vw);
   }
-  .mapa-tooltip .tt-nome { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 0.82rem; }
-  .mapa-tooltip .tt-val { color: var(--yellow); font-weight: 600; margin-top: 2px; }
-  .mapa-tooltip .tt-label { color: rgba(255,255,255,0.6); font-size: 0.7rem; }
-
-  /* LOADING */
-  #loading {
-    position: fixed; inset: 0; background: var(--text); z-index: 9999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-  }
-  #loading h2 { font-family: 'Syne',sans-serif; font-size: 1.4rem; font-weight: 800; color: #fff; }
-  #loading p { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
-  #loading-bar-wrap { width: 240px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-  #loading-bar { height: 100%; background: var(--yellow); border-radius: 2px; width: 0; transition: width 0.3s; }
-  #loading .logo { font-family: 'Syne',sans-serif; font-size: 2rem; font-weight: 800; color: var(--yellow); margin-bottom: 8px; }
-
-  /* MOBILE */
-  @media (max-width: 768px) {
-    #btn-mobile-toggle { display: block; }
-    #panel {
-      position: fixed; top: var(--header-h); left: 0; bottom: 0;
-      transform: translateX(-100%); width: min(var(--panel-w), 92vw);
-      box-shadow: var(--shadow);
-    }
-    #panel.open { transform: translateX(0); }
-    #map-wrap { width: 100%; }
-  }
-
-  /* MODO COMPUTADOR no celular */
-  body.desktop-mode #panel { position: relative; transform: none !important; }
-  body.desktop-mode #btn-mobile-toggle { display: none; }
-
-  /* CHIPS de categoria */
-  .cat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .cat-chip {
-    padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600;
-    font-family: 'Syne',sans-serif; cursor: pointer; border: 1.5px solid transparent;
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .cat-chip.active { color: #fff; }
-
-  /* RANKINGS */
-  .ranking-list { }
-  .ranking-item {
-    display: flex; align-items: center; gap: 8px; padding: 7px 8px;
-    border-radius: 8px; cursor: pointer; transition: background 0.1s; font-size: 0.78rem;
-  }
-  .ranking-item:hover { background: var(--bg); }
-  .rank-pos { font-family: 'Syne',sans-serif; font-weight: 800; font-size: 0.7rem; color: var(--muted); width: 18px; flex-shrink: 0; }
-  .rank-nome { flex: 1; font-weight: 500; }
-  .rank-uf { font-size: 0.65rem; color: var(--muted); }
-  .rank-val { font-family: 'Syne',sans-serif; font-weight: 700; font-size: 0.8rem; }
-
-  .toggle-btn {
-    padding: 5px 12px; border-radius: 6px; font-size: 0.72rem; font-weight: 600;
-    font-family: 'Syne',sans-serif; cursor: pointer; border: 1.5px solid var(--border);
-    background: var(--bg); color: var(--muted); transition: all 0.15s;
-  }
-  .toggle-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
-  .toggle-group { display: flex; gap: 4px; margin-bottom: 10px; }
+  #panel.open{transform:translateX(0);}
+}
+body.desktop #panel{position:relative;transform:none !important;}
+body.desktop #btn-panel{display:none;}
 </style>
 </head>
 <body>
 
 <div id="loading">
-  <div class="logo">IPS</div>
-  <h2>Brasil 2026</h2>
-  <p id="loading-msg">Carregando dados...</p>
-  <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+  <div class="ld-logo">IPS</div>
+  <div class="ld-title">Brasil 2026</div>
+  <div class="ld-msg" id="ld-msg">Carregando dados…</div>
+  <div class="ld-track"><div class="ld-fill" id="ld-fill"></div></div>
 </div>
 
-<div id="header">
-  <h1>IPS <span>Brasil</span> 2026</h1>
-  <button id="btn-mobile-toggle" onclick="togglePanel()">☰ Painel</button>
-  <button class="toggle-btn" id="btn-desktop" onclick="toggleDesktopMode()" style="font-size:0.68rem;padding:4px 8px;">🖥 Desktop</button>
+<div id="hdr">
+  <div id="hdr-logo">IPS <span>Brasil</span> 2026</div>
+  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()">☰ Painel</button>
+  <button class="hdr-btn" id="btn-desktop" onclick="toggleDesktop()">🖥 Desktop</button>
 </div>
 
 <div id="app">
   <div id="panel">
     <div id="tabs">
-      <button class="tab active" onclick="showTab('mapa')">🗺 Mapa</button>
-      <button class="tab" onclick="showTab('explorar')">🔍 Explorar</button>
-      <button class="tab" onclick="showTab('rankings')">🏆 Rankings</button>
+      <button class="tab on" onclick="showTab('mapa',this)">🗺 Mapa</button>
+      <button class="tab"    onclick="showTab('explorar',this)">🔍 Explorar</button>
+      <button class="tab"    onclick="showTab('rankings',this)">🏆 Rankings</button>
     </div>
 
-    <!-- TAB: MAPA -->
-    <div id="tab-mapa" class="tab-content">
-      <div id="panel-content">
-        <div class="section-label">Indicador no mapa</div>
-        <div class="cat-chips" id="cat-chips"></div>
+    <!-- TAB MAPA -->
+    <div id="tab-mapa" class="tab-body">
+      <div class="scroll-area">
+        <div class="slabel">Categoria</div>
+        <div class="chips" id="mapa-chips"></div>
+        <div class="slabel">Indicador visualizado</div>
         <div id="ind-list"></div>
       </div>
-      <div id="legenda-wrap">
-        <div id="legenda-title">Legenda</div>
-        <div id="legenda-ind-name">—</div>
-        <div id="legenda-ind-desc"></div>
-        <div id="legenda-bar" style="background: linear-gradient(to right, #2166ac, #f7f7f7, #d73027);"></div>
-        <div id="legenda-labels"><span id="leg-min">—</span><span id="leg-mid">—</span><span id="leg-max">—</span></div>
-      </div>
     </div>
 
-    <!-- TAB: EXPLORAR -->
-    <div id="tab-explorar" class="tab-content" style="display:none;">
-      <div id="panel-content" style="overflow-y:auto;flex:1;">
-        <button id="ficha-back" onclick="backToSearch()">← voltar à busca</button>
-        <div id="search-section">
-          <div class="section-label">Buscar município</div>
-          <div id="search-wrap">
-            <span id="search-icon">🔍</span>
-            <input type="text" id="search-input" placeholder="Digite o nome..." oninput="searchMun(this.value)" autocomplete="off"/>
+    <!-- TAB EXPLORAR -->
+    <div id="tab-explorar" class="tab-body" style="display:none;">
+      <div class="scroll-area">
+        <button id="ficha-back" onclick="backSearch()">← voltar à busca</button>
+        <div id="srch-sec">
+          <div class="slabel">Buscar município</div>
+          <div id="srch-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="text" id="srch" placeholder="Nome do município…"
+              oninput="searchMun(this.value)" autocomplete="off"/>
           </div>
-          <div id="search-results"></div>
+          <div id="srch-res"></div>
         </div>
         <div id="ficha"></div>
       </div>
     </div>
 
-    <!-- TAB: RANKINGS -->
-    <div id="tab-rankings" class="tab-content" style="display:none;">
-      <div id="panel-content" style="overflow-y:auto;flex:1;">
-        <div class="section-label">Categoria</div>
-        <div class="cat-chips" id="rank-cat-chips"></div>
-        <div class="toggle-group">
-          <button class="toggle-btn active" id="btn-top" onclick="setRankDir('top')">↑ Maiores</button>
-          <button class="toggle-btn" id="btn-bot" onclick="setRankDir('bot')">↓ Menores</button>
+    <!-- TAB RANKINGS -->
+    <div id="tab-rankings" class="tab-body" style="display:none;">
+      <div class="scroll-area">
+        <div class="slabel">Categoria</div>
+        <div class="chips" id="rank-chips"></div>
+        <div class="toggle-g">
+          <button class="tog on" id="tog-top" onclick="setDir('top')">↑ Maiores</button>
+          <button class="tog"    id="tog-bot" onclick="setDir('bot')">↓ Menores</button>
         </div>
-        <div class="section-label">Top 10 municípios</div>
-        <div id="rank-list" class="ranking-list"></div>
-        <div class="section-label" style="margin-top:16px;">Por estado (média)</div>
-        <div id="rank-est-list" class="ranking-list"></div>
+        <select class="rk-sel" id="rk-sel" onchange="rankInd=this.value;buildRank()"></select>
+        <div class="slabel">Top 10 municípios</div>
+        <div id="rk-mun"></div>
+        <div class="slabel" style="margin-top:14px;">Por estado (média)</div>
+        <div id="rk-est"></div>
       </div>
+    </div>
+
+    <!-- LEGENDA — sempre visível, fora do scroll -->
+    <div id="legenda">
+      <div id="leg-ind">—</div>
+      <div id="leg-desc"></div>
+      <div id="leg-bar"></div>
+      <div id="leg-labs">
+        <span id="leg-lo"></span>
+        <span id="leg-md"></span>
+        <span id="leg-hi"></span>
+      </div>
+      <div id="leg-note"></div>
     </div>
   </div>
 
-  <div id="map-wrap">
-    <div id="map"></div>
-  </div>
+  <div id="map-wrap"><div id="map"></div></div>
 </div>
 
 <script>
-// ─── ESTADO GLOBAL ───────────────────────────────────────────────────────────
-let DADOS = null, GEO = null;
-let mapaLayer = null, mapa = null;
-let indicadorAtivo = 'Índice de Progresso Social';
-let rankIndAtivo = 'Índice de Progresso Social';
-let rankDir = 'top';
-let munIndex = {}; // chave norm -> municipio
-let panelOpen = false;
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+let D=null,GEO=null;
+let geoLayer=null,leaf=null;
+let IND='Índice de Progresso Social';
+let rankInd='Índice de Progresso Social';
+let rankDir='top';
+let munIdx={};
+let munSel=null;        // município selecionado atualmente
+let featureSel=null;    // layer do feature selecionado
+let markerSel=null;     // marcador no mapa
+let catMapa='Geral',catRank='Geral';
 
-const GRUPOS_CORES = {
-  'Geral':         '#1644a8',
-  'Saúde':         '#e8420a',
-  'Segurança':     '#8b1a1a',
-  'Educação':      '#1a6b3c',
-  'Infraestrutura':'#6b3fa0',
-  'Meio Ambiente': '#1a7a4a',
-  'Social':        '#b86b00',
-  'Justiça':       '#4a4a4a',
+const CORES={
+  'Geral':'#1644a8','Saúde':'#c93a0e','Segurança':'#7a1515',
+  'Educação':'#1a6b3c','Infraestrutura':'#6b3fa0',
+  'Meio Ambiente':'#0f7a3c','Social':'#b86b00','Justiça':'#4a4040'
+};
+const GRUPOS={
+  'Geral':['Índice de Progresso Social','Necessidades Humanas Básicas',
+    'Fundamentos do Bem-estar','Oportunidades','POPULAÇÃO 2025','PIB PER CAPITA','ÁREA km²'],
+  'Saúde':['Expectativa de Vida ','Mortalidade Infantil até 5 anos',
+    'Mortalidade entre 15 e 50 anos','Mortalidades por Doenças Crônicas Não Transmissíveis ',
+    'Obesidade','Suicídios','Subnutrição','Cobertura Vacinal (poliomielite)',
+    'Hospitalizações por Condições Sensíveis à Atenção Primária',
+    'Mortalidade Ajustada por Condições Sensíveis à Atenção Primária',
+    'Consumo de ultraprocessados','Nutrição e Cuidados Médicos Básicos','Saúde e Bem-estar'],
+  'Segurança':['Homicídios','Assassinatos de Jovens','Assassinatos de Mulheres',
+    'Mortes por Acidentes de Transporte','Violência Contra Mulheres',
+    'Violência Contra Negros','Violência Contra Indígenas',
+    'Famílias em Situação de Rua','Segurança Pessoal'],
+  'Educação':['Ideb Ensino Fundamental','Nota Mediana no Enem',
+    'Abandono no Ensino Fundamental','Abandono no Ensino Médio',
+    'Evasão no Ensino Médio','Distorção Idade-Série no Ensino Médio',
+    'Reprovação Escolar no Ensino Médio','Acesso ao Conhecimento Básico',
+    'Acesso à Educação Superior','Empregados com Ensino Superior',
+    'Mulheres Empregadas com Ensino Superior'],
+  'Infraestrutura':['Água e Saneamento','Abastecimento de Água Via Rede de Distribuição',
+    'Esgotamento Sanitário Adequado','Índice de Abastecimento de Água',
+    'Índice de Perdas de Água na Distribuição','Domicílios com Coleta de Resíduos Adequada',
+    'Domicílios com Iluminação Elétrica Adequada','Domicílios com Paredes Adequadas',
+    'Domicílios com Pisos Adequados','Moradia','Cobertura de Internet Móvel (4G/5G)',
+    'Densidade de Internet Banda Larga Fixa','Densidade Telefonia Móvel',
+    'Qualidade de Internet Móvel','Acesso à Informação e Comunicação'],
+  'Meio Ambiente':['Emissões de CO₂e por Habitante','Focos de Calor',
+    'Áreas Verdes Urbanas','Praças e Parques em Áreas Urbanas',
+    'Supressão da Vegetação Primária e Secundária','Qualidade do Meio Ambiente',
+    'Índice de Vulnerabilidade Climática dos Municípios (IVCM)'],
+  'Social':['Inclusão Social','Gravidez na Adolescência (<19)',
+    'Índice de Vulnerabilidade das Famílias do CadÚnico (IVCAD)',
+    'Paridade de Gênero na Câmara Municipal','Paridade de Negros na Câmara Municipal',
+    'Liberdades Individuais e de Escolha','Acesso à Cultura, Lazer e Esporte',
+    'Acesso a Programas de Direitos Humanos','Existência de Ações para Direitos de Minorias'],
+  'Justiça':['Direitos Individuais','Índice de Atendimento à Demanda de Justiça',
+    'Resposta a Processos Previdenciários','Resposta a Processos Familiares',
+    'Taxa de Congestionamento Líquida de Processos']
 };
 
-const GRUPOS = {
-  'Geral': ['Índice de Progresso Social','Necessidades Humanas Básicas','Fundamentos do Bem-estar','Oportunidades','POPULAÇÃO 2025','PIB PER CAPITA','ÁREA km²'],
-  'Saúde': ['Expectativa de Vida ','Mortalidade Infantil até 5 anos','Mortalidade entre 15 e 50 anos','Mortalidades por Doenças Crônicas Não Transmissíveis ','Obesidade','Suicídios','Subnutrição','Cobertura Vacinal (poliomielite)','Hospitalizações por Condições Sensíveis à Atenção Primária','Mortalidade Ajustada por Condições Sensíveis à Atenção Primária','Consumo de ultraprocessados','Nutrição e Cuidados Médicos Básicos','Saúde e Bem-estar'],
-  'Segurança': ['Homicídios','Assassinatos de Jovens','Assassinatos de Mulheres','Mortes por Acidentes de Transporte','Violência Contra Mulheres','Violência Contra Negros','Violência Contra Indígenas','Famílias em Situação de Rua','Segurança Pessoal'],
-  'Educação': ['Ideb Ensino Fundamental','Nota Mediana no Enem','Abandono no Ensino Fundamental','Abandono no Ensino Médio','Evasão no Ensino Médio','Distorção Idade-Série no Ensino Médio','Reprovação Escolar no Ensino Médio','Acesso ao Conhecimento Básico','Acesso à Educação Superior','Empregados com Ensino Superior','Mulheres Empregadas com Ensino Superior'],
-  'Infraestrutura': ['Água e Saneamento','Abastecimento de Água Via Rede de Distribuição','Esgotamento Sanitário Adequado','Índice de Abastecimento de Água','Índice de Perdas de Água na Distribuição','Domicílios com Coleta de Resíduos Adequada','Domicílios com Iluminação Elétrica Adequada','Domicílios com Paredes Adequadas','Domicílios com Pisos Adequados','Moradia','Cobertura de Internet Móvel (4G/5G)','Densidade de Internet Banda Larga Fixa','Densidade Telefonia Móvel','Qualidade de Internet Móvel','Acesso à Informação e Comunicação'],
-  'Meio Ambiente': ['Emissões de CO₂e por Habitante','Focos de Calor','Áreas Verdes Urbanas','Praças e Parques em Áreas Urbanas','Supressão da Vegetação Primária e Secundária','Qualidade do Meio Ambiente','Índice de Vulnerabilidade Climática dos Municípios (IVCM)'],
-  'Social': ['Inclusão Social','Gravidez na Adolescência (<19)','Índice de Vulnerabilidade das Famílias do CadÚnico (IVCAD)','Paridade de Gênero na Câmara Municipal','Paridade de Negros na Câmara Municipal','Liberdades Individuais e de Escolha','Acesso à Cultura, Lazer e Esporte','Acesso a Programas de Direitos Humanos','Existência de Ações para Direitos de Minorias'],
-  'Justiça': ['Direitos Individuais','Índice de Atendimento à Demanda de Justiça','Resposta a Processos Previdenciários','Resposta a Processos Familiares','Taxa de Congestionamento Líquida de Processos'],
-};
-
-// ─── CARREGAMENTO ────────────────────────────────────────────────────────────
-async function carregarTudo() {
-  setLoad('Carregando dados IPS...', 20);
-  try {
-    const r1 = await fetch('conhece_brasil_v1.json');
-    DADOS = await r1.json();
-  } catch(e) {
-    document.getElementById('loading-msg').textContent = 'Erro: conhece_brasil_v1.json não encontrado na pasta.';
-    return;
-  }
-
-  setLoad('Carregando geometrias...', 55);
-  try {
-    const r2 = await fetch('municipios_geo.geojson');
-    GEO = await r2.json();
-  } catch(e) {
-    document.getElementById('loading-msg').textContent = 'Erro: municipios_geo.geojson não encontrado na pasta.';
-    return;
-  }
-
-  setLoad('Indexando municípios...', 80);
-  // Indexar municípios por chave normalizada
-  for (const m of DADOS.municipios) {
-    const ch = norm(m.m) + '_' + norm(m.u);
-    munIndex[ch] = m;
-  }
-
-  // Indexar GeoJSON features pela chave
-  for (const f of GEO.features) {
-    const p = f.properties;
-    p._chave = norm(p.NM_MUN || p.chave || '') + '_' + norm(p.SIGLA_UF || '');
-    const md = munIndex[p._chave];
-    if (md) { p._dados = md; }
-  }
-
-  setLoad('Iniciando mapa...', 95);
-  await new Promise(r => setTimeout(r, 100));
-  initApp();
-  setLoad('Pronto', 100);
-  await new Promise(r => setTimeout(r, 300));
-  document.getElementById('loading').style.display = 'none';
+// ─── CORES: azul=menor, vermelho=maior, SEMPRE ────────────────────────────────
+function getEsc(ind){
+  const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
+  if(!vs.length) return {p5:0,p95:1,mid:.5};
+  return{
+    p5:vs[Math.floor(vs.length*.05)],
+    p95:vs[Math.floor(vs.length*.95)],
+    mid:vs[Math.floor(vs.length*.5)]
+  };
 }
-
-function setLoad(msg, pct) {
-  document.getElementById('loading-msg').textContent = msg;
-  document.getElementById('loading-bar').style.width = pct + '%';
+function getCor(v,esc){
+  const t=Math.max(0,Math.min(1,(v-esc.p5)/(esc.p95-esc.p5+.001)));
+  if(t<.5){const f=t*2; return`rgb(${lp(33,245,f)},${lp(102,245,f)},${lp(172,245,f)})`;}
+  const f=(t-.5)*2; return`rgb(${lp(245,178,f)},${lp(245,24,f)},${lp(245,43,f)})`;
 }
+function lp(a,b,t){return Math.round(a+(b-a)*t);}
 
-function norm(s) {
-  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+async function boot(){
+  prog('Carregando dados IPS…',15);
+  try{const r=await fetch('conhece_brasil_v1.json');D=await r.json();}
+  catch(e){setMsg('Erro: conhece_brasil_v1.json não encontrado.');return;}
+
+  prog('Carregando geometrias…',50);
+  try{const r=await fetch('municipios_geo.geojson');GEO=await r.json();}
+  catch(e){setMsg('Erro: municipios_geo.geojson não encontrado.');return;}
+
+  prog('Indexando…',80);
+  for(const m of D.municipios) munIdx[nrm(m.m)+'_'+nrm(m.u)]=m;
+  for(const f of GEO.features){
+    const p=f.properties;
+    p._k=nrm(p.NM_MUN||'')+'_'+nrm(p.SIGLA_UF||'');
+    p._d=munIdx[p._k]||null;
+  }
+  prog('Iniciando…',95);
+  await sleep(80);
+  initUI();
+  prog('',100);
+  await sleep(250);
+  document.getElementById('loading').style.display='none';
 }
+function prog(msg,pct){
+  document.getElementById('ld-msg').textContent=msg;
+  document.getElementById('ld-fill').style.width=pct+'%';
+}
+function setMsg(m){document.getElementById('ld-msg').textContent=m;}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function nrm(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();}
 
-// ─── INIT ────────────────────────────────────────────────────────────────────
-function initApp() {
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function initUI(){
   initMapa();
+  buildChips('mapa-chips',catMapa,cat=>{catMapa=cat;buildChips('mapa-chips',catMapa,arguments.callee);buildIndList();});
   buildIndList();
-  buildCatChips();
-  buildRankCatChips();
+  buildChips('rank-chips',catRank,cat=>{
+    catRank=cat;
+    const inds=GRUPOS[cat]||[];
+    rankInd=inds[0]||rankInd;
+    buildChips('rank-chips',catRank,arguments.callee);
+    buildRank();
+  });
+  buildRank();
   atualizarMapa();
 }
 
-// ─── MAPA ────────────────────────────────────────────────────────────────────
-function initMapa() {
-  mapa = L.map('map', { zoomControl: true, attributionControl: false });
-
-  // Tiles com fallback offline
-  const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18, attribution: '© OSM'
-  });
-  tiles.on('tileerror', () => {});
-  tiles.addTo(mapa);
-
-  mapa.setView([-14, -52], 4);
-  mapa.zoomControl.setPosition('bottomright');
+// ─── MAPA ─────────────────────────────────────────────────────────────────────
+function initMapa(){
+  leaf=L.map('map',{zoomControl:false,attributionControl:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(leaf);
+  L.control.zoom({position:'bottomright'}).addTo(leaf);
+  leaf.setView([-14,-52],4);
 }
 
-function getEscala(ind) {
-  const vals = DADOS.municipios.map(m => m.i[ind]).filter(v => v != null);
-  if (!vals.length) return { min: 0, max: 1, p5: 0, p95: 1 };
-  vals.sort((a,b) => a-b);
-  const p5 = vals[Math.floor(vals.length * 0.05)];
-  const p95 = vals[Math.floor(vals.length * 0.95)];
-  return { min: vals[0], max: vals[vals.length-1], p5, p95 };
-}
+function atualizarMapa(){
+  if(geoLayer){leaf.removeLayer(geoLayer);geoLayer=null;}
+  const ind=IND,meta=D.meta[ind],esc=getEsc(ind);
 
-function corParaValor(v, escala, maiorMelhor) {
-  // Paleta divergente: azul=bom, vermelho=ruim
-  const t = Math.max(0, Math.min(1, (v - escala.p5) / (escala.p95 - escala.p5 + 0.001)));
-  const tFinal = maiorMelhor ? t : 1 - t;
-  // azul escuro -> branco -> vermelho escuro
-  if (tFinal < 0.5) {
-    const f = tFinal * 2;
-    return `rgb(${Math.round(33 + f*(247-33))},${Math.round(102 + f*(247-102))},${Math.round(172 + f*(247-172))})`;
-  } else {
-    const f = (tFinal - 0.5) * 2;
-    return `rgb(${Math.round(247 + f*(215-247))},${Math.round(247 + f*(48-247))},${Math.round(247 + f*(39-247))})`;
-  }
-}
-
-function atualizarMapa() {
-  if (mapaLayer) { mapa.removeLayer(mapaLayer); mapaLayer = null; }
-
-  const ind = indicadorAtivo;
-  const meta = DADOS.meta[ind];
-  const maiorMelhor = meta ? meta.maior === 'melhor' : true;
-  const escala = getEscala(ind);
-
-  mapaLayer = L.geoJSON(GEO, {
-    style: feature => {
-      const d = feature.properties._dados;
-      const v = d ? d.i[ind] : null;
-      if (v == null) return { fillColor: '#ddd', weight: 0.3, color: '#ccc', fillOpacity: 0.7 };
-      return {
-        fillColor: corParaValor(v, escala, maiorMelhor),
-        weight: 0.3, color: 'rgba(0,0,0,0.15)', fillOpacity: 0.85
-      };
+  geoLayer=L.geoJSON(GEO,{
+    style:f=>{
+      const d=f.properties._d,v=d?d.i[ind]:null;
+      if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
+      return{fillColor:getCor(v,esc),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.88};
     },
-    onEachFeature: (feature, layer) => {
-      const d = feature.properties._dados;
-      const v = d ? d.i[ind] : null;
-      const nome = feature.properties.NM_MUN || '';
-      const uf = feature.properties.SIGLA_UF || '';
-      const metaInd = DADOS.meta[ind];
-      const unidade = metaInd ? metaInd.unidade : '';
+    onEachFeature:(f,layer)=>{
+      const d=f.properties._d,v=d?d.i[ind]:null;
+      const nm=f.properties.NM_MUN||'',uf=f.properties.SIGLA_UF||'';
+      const un=meta?meta.unidade:'';
+      layer.bindTooltip(()=>`
+        <div class="mtt-nm">${nm} — ${uf}</div>
+        <div class="mtt-v">${v!=null?fmt(v)+' <span style="opacity:.6;font-size:.68em">'+un+'</span>':'sem dado'}</div>
+        <div class="mtt-ind">${meta?meta.nome:ind}</div>
+      `,{className:'mtt',sticky:true,opacity:1});
 
-      layer.bindTooltip(() => {
-        const valStr = v != null ? `${fmtVal(v)} <span class="tt-label">${unidade}</span>` : 'sem dado';
-        return `<div class="tt-nome">${nome} - ${uf}</div><div class="tt-val">${valStr}</div>`;
-      }, { className: 'mapa-tooltip', sticky: true, opacity: 1 });
-
-      layer.on('click', () => {
-        if (d) abrirFicha(d);
+      layer.on('click',()=>{
+        if(d) selecionarMun(d,layer);
       });
-      layer.on('mouseover', e => e.target.setStyle({ weight: 1.5, color: '#333' }));
-      layer.on('mouseout', e => mapaLayer.resetStyle(e.target));
+      layer.on('mouseover',e=>{
+        if(e.target!==featureSel) e.target.setStyle({weight:1.5,color:'#333'});
+      });
+      layer.on('mouseout',e=>{
+        if(e.target!==featureSel) geoLayer.resetStyle(e.target);
+      });
     }
-  }).addTo(mapa);
+  }).addTo(leaf);
 
-  // Atualiza legenda
-  atualizarLegenda(ind, escala, maiorMelhor);
+  // Reaplica destaque se tinha município selecionado
+  if(munSel&&featureSel){
+    destacarFeature(featureSel);
+  }
+
+  atualizarLegenda(ind,esc,meta);
 }
 
-function atualizarLegenda(ind, escala, maiorMelhor) {
-  const meta = DADOS.meta[ind];
-  document.getElementById('legenda-ind-name').textContent = meta ? meta.nome : ind;
-  document.getElementById('legenda-ind-desc').textContent = meta ? meta.simples : '';
+function selecionarMun(m,layer){
+  // Remove destaque anterior
+  if(featureSel&&geoLayer){
+    geoLayer.resetStyle(featureSel);
+  }
+  if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
 
-  const gradDir = maiorMelhor ? 'to right' : 'to left';
-  document.getElementById('legenda-bar').style.background =
-    `linear-gradient(${gradDir}, #2166ac, #f7f7f7, #d73027)`;
+  munSel=m;
+  featureSel=layer;
+  destacarFeature(layer);
 
-  const mn = fmtVal(escala.p5), mx = fmtVal(escala.p95);
-  document.getElementById('leg-min').textContent = maiorMelhor ? mn : mx;
-  document.getElementById('leg-mid').textContent = fmtVal((escala.p5+escala.p95)/2);
-  document.getElementById('leg-max').textContent = maiorMelhor ? mx : mn;
+  // Marcador com nome no mapa
+  if(m.lat&&m.lon){
+    const icon=L.divIcon({
+      className:'',
+      html:`<div class="marcador-sel">${m.m}</div>`,
+      iconAnchor:[0,0]
+    });
+    markerSel=L.marker([m.lat,m.lon],{icon,zIndexOffset:1000}).addTo(leaf);
+  }
+
+  abrirFicha(m);
 }
 
-// ─── BUILD PANEL ─────────────────────────────────────────────────────────────
-let catAtiva = 'Geral';
-function buildCatChips() {
-  const wrap = document.getElementById('cat-chips');
-  wrap.innerHTML = '';
-  for (const [cat, cor] of Object.entries(GRUPOS_CORES)) {
-    const el = document.createElement('button');
-    el.className = 'cat-chip' + (cat === catAtiva ? ' active' : '');
-    el.textContent = cat;
-    el.style.borderColor = cor;
-    el.style.color = cat === catAtiva ? '#fff' : cor;
-    el.style.background = cat === catAtiva ? cor : 'transparent';
-    el.onclick = () => { catAtiva = cat; buildCatChips(); buildIndList(); };
+function destacarFeature(layer){
+  // Borda preta espessa, sem alterar a cor de preenchimento do indicador
+  layer.setStyle({weight:3,color:'#1a1814',fillOpacity:.88});
+  layer.bringToFront();
+}
+
+function atualizarLegenda(ind,esc,meta){
+  const un=meta?meta.unidade:'';
+  const maior=meta?meta.maior:'';
+  document.getElementById('leg-ind').textContent=meta?meta.nome:ind;
+  document.getElementById('leg-desc').textContent=meta?meta.simples:'';
+  document.getElementById('leg-bar').style.background=
+    'linear-gradient(to right,#2166ac,#f5f5f0,#b2182b)';
+  document.getElementById('leg-lo').textContent='← '+fmt(esc.p5)+' '+un;
+  document.getElementById('leg-md').textContent=fmt(esc.mid);
+  document.getElementById('leg-hi').textContent=fmt(esc.p95)+' '+un+' →';
+  const nota=maior==='melhor'
+    ?'🔵 Azul = menor valor  ·  🔴 Vermelho = maior valor  ·  Para este indicador MAIOR É MELHOR'
+    :maior==='pior'
+    ?'🔵 Azul = menor valor  ·  🔴 Vermelho = maior valor  ·  Para este indicador MAIOR É PIOR'
+    :'🔵 Azul = menor valor  ·  🔴 Vermelho = maior valor';
+  document.getElementById('leg-note').textContent=nota;
+}
+
+// ─── CHIPS ────────────────────────────────────────────────────────────────────
+function buildChips(id,ativa,cb){
+  const wrap=document.getElementById(id);
+  wrap.innerHTML='';
+  for(const[cat,cor]of Object.entries(CORES)){
+    const el=document.createElement('button');
+    el.className='chip';
+    el.textContent=cat;
+    el.style.borderColor=cor;
+    if(cat===ativa){el.style.color='#fff';el.style.background=cor;}
+    else{el.style.color=cor;el.style.background='transparent';}
+    el.onclick=()=>cb(cat);
     wrap.appendChild(el);
   }
 }
 
-function buildIndList() {
-  const wrap = document.getElementById('ind-list');
-  wrap.innerHTML = '';
-  const inds = GRUPOS[catAtiva] || [];
-  const cor = GRUPOS_CORES[catAtiva];
-  for (const ind of inds) {
-    const meta = DADOS.meta[ind];
-    if (!meta) continue;
-    const el = document.createElement('div');
-    el.className = 'ind-item' + (ind === indicadorAtivo ? ' selected' : '');
-    el.innerHTML = `
-      <div class="ind-name">
-        ${meta.nome}
-        <div class="ind-unit">${meta.unidade} · ${meta.maior === 'melhor' ? '↑ maior = melhor' : meta.maior === 'pior' ? '↓ maior = pior' : '—'}</div>
-      </div>`;
-    el.onclick = () => {
-      indicadorAtivo = ind;
-      buildIndList();
-      atualizarMapa();
-    };
+function buildIndList(){
+  const wrap=document.getElementById('ind-list');
+  wrap.innerHTML='';
+  for(const ind of GRUPOS[catMapa]||[]){
+    const meta=D.meta[ind];if(!meta) continue;
+    const dir=meta.maior==='melhor'?'↑ maior = melhor':meta.maior==='pior'?'↑ maior = pior':'—';
+    const el=document.createElement('div');
+    el.className='ind-item'+(ind===IND?' on':'');
+    el.innerHTML=`<div class="ind-name">${meta.nome}
+      <div class="ind-unit">${meta.unidade} <span class="ind-dir">${dir}</span></div></div>`;
+    el.onclick=()=>{IND=ind;buildIndList();atualizarMapa();};
     wrap.appendChild(el);
   }
 }
 
-// ─── FICHA DO MUNICÍPIO ───────────────────────────────────────────────────────
-function abrirFicha(m) {
-  showTab('explorar');
-  document.getElementById('search-section').style.display = 'none';
-  document.getElementById('ficha-back').style.display = 'flex';
+// ─── FICHA ────────────────────────────────────────────────────────────────────
+function abrirFicha(m){
+  showTab('explorar',document.querySelectorAll('.tab')[1]);
+  document.getElementById('srch-sec').style.display='none';
+  document.getElementById('ficha-back').style.display='flex';
 
-  const ficha = document.getElementById('ficha');
-  ficha.className = 'active';
+  const ips=m.i['Índice de Progresso Social'];
+  const pop=m.i['POPULAÇÃO 2025'];
+  const pib=m.i['PIB PER CAPITA'];
 
-  const ips = m.i['Índice de Progresso Social'];
-  const pop = m.i['POPULAÇÃO 2025'];
-  const pib = m.i['PIB PER CAPITA'];
+  let html=`<div id="ficha-hdr">
+    <div class="f-nome">${m.m}</div>
+    <div class="f-sub">${m.u} · ${m.r}${pop?' · '+fmtPop(pop)+' hab.':''}${pib?' · PIB pc R$'+fmt(pib):''}</div>
+    <div class="f-ips">
+      <span class="f-ips-v">${ips!=null?ips.toFixed(1):'—'}</span>
+      <span class="f-ips-l">IPS Brasil 2026<br>escala 0–100, maior = melhor</span>
+    </div>
+  </div>`;
 
-  let html = `
-    <div id="ficha-header">
-      <div id="ficha-nome">${m.m}</div>
-      <div id="ficha-sub">${m.u} · ${m.r} · ${pop ? fmtPop(pop) + ' hab.' : ''} · PIB pc R$ ${pib ? fmtVal(pib) : '—'}</div>
-      <div id="ficha-ips-big">
-        <span id="ficha-ips-val">${ips != null ? ips.toFixed(1) : '—'}</span>
-        <span id="ficha-ips-label">IPS Brasil 2026<br>(0–100, maior = melhor)</span>
-      </div>
-    </div>`;
-
-  for (const [grupo, inds] of Object.entries(GRUPOS)) {
-    const cor = GRUPOS_CORES[grupo];
-    const linhas = inds.map(ind => {
-      const meta = DADOS.meta[ind];
-      const v = m.i[ind];
-      if (!meta || v == null) return '';
-      const escala = getEscala(ind);
-      const maiorMelhor = meta.maior === 'melhor';
-      const pct = Math.max(0, Math.min(100, ((v - escala.p5) / (escala.p95 - escala.p5 + 0.001)) * 100));
-      const corBar = maiorMelhor
-        ? `hsl(${Math.round(pct * 1.2)}, 60%, 45%)`
-        : `hsl(${Math.round((100-pct)*1.2)}, 60%, 45%)`;
-      return `<div class="ficha-ind">
-        <div class="ficha-ind-info">
-          <div class="ficha-ind-nome">${meta.nome}</div>
-          <div class="ficha-ind-simples">${meta.simples}</div>
-          <div class="ficha-ind-bar" style="background:${corBar};width:${pct.toFixed(0)}%;max-width:100%;"></div>
+  for(const[grp,inds]of Object.entries(GRUPOS)){
+    const corGrp=CORES[grp];
+    const linhas=inds.map(ind=>{
+      const meta=D.meta[ind],v=m.i[ind];
+      if(!meta||v==null) return'';
+      const esc=getEsc(ind);
+      const pct=Math.max(0,Math.min(100,((v-esc.p5)/(esc.p95-esc.p5+.001))*100));
+      const barCor=getCor(v,esc);
+      return`<div class="find">
+        <div class="find-info">
+          <div class="find-n">${meta.nome}</div>
+          <div class="find-s">${meta.simples}</div>
+          <div class="find-bar-wrap"><div class="find-bar" style="width:${pct}%;background:${barCor}"></div></div>
         </div>
-        <div class="ficha-ind-val">${fmtVal(v)}<span class="ficha-ind-unidade">${meta.unidade}</span></div>
+        <div class="find-v">${fmt(v)}<span class="find-u">${meta.unidade}</span></div>
       </div>`;
     }).filter(Boolean).join('');
-
-    if (!linhas) continue;
-    html += `<div class="ficha-grupo">
-      <div class="ficha-grupo-titulo"><span class="dot" style="background:${cor}"></span>${grupo}</div>
+    if(!linhas) continue;
+    html+=`<div class="fgrp">
+      <div class="fgrp-t"><span class="fgrp-dot" style="background:${corGrp}"></span>${grp}</div>
       ${linhas}
     </div>`;
   }
 
-  ficha.innerHTML = html;
-
-  // Centralizar no mapa
-  if (m.lat && m.lon) {
-    mapa.setView([m.lat, m.lon], 10, { animate: true });
-  }
-
-  // Mobile: fechar painel após selecionar
-  if (window.innerWidth <= 768 && !document.body.classList.contains('desktop-mode')) {
-    closePanel();
-  }
+  document.getElementById('ficha').innerHTML=html;
+  if(m.lat&&m.lon) leaf.setView([m.lat,m.lon],9,{animate:true});
+  if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) closePanel();
 }
 
-function backToSearch() {
-  document.getElementById('ficha').className = '';
-  document.getElementById('ficha').innerHTML = '';
-  document.getElementById('search-section').style.display = 'block';
-  document.getElementById('ficha-back').style.display = 'none';
-  document.getElementById('search-input').value = '';
-  document.getElementById('search-results').innerHTML = '';
+function backSearch(){
+  document.getElementById('ficha').innerHTML='';
+  document.getElementById('srch-sec').style.display='block';
+  document.getElementById('ficha-back').style.display='none';
+  document.getElementById('srch').value='';
+  document.getElementById('srch-res').innerHTML='';
+  // Remove seleção do mapa
+  if(featureSel&&geoLayer){geoLayer.resetStyle(featureSel);featureSel=null;}
+  if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
+  munSel=null;
 }
 
 // ─── BUSCA ────────────────────────────────────────────────────────────────────
-function searchMun(q) {
-  const res = document.getElementById('search-results');
-  if (!q || q.length < 2) { res.innerHTML = ''; return; }
-  const qn = norm(q);
-  const found = DADOS.municipios.filter(m =>
-    norm(m.m).includes(qn) || norm(m.u).includes(qn)
-  ).slice(0, 12);
-
-  res.innerHTML = found.map(m => `
-    <div class="search-result" onclick="abrirFicha(munIndex['${norm(m.m)}_${norm(m.u)}'])">
-      <span>${m.m}</span>
-      <span class="sr-uf">${m.u}</span>
+function searchMun(q){
+  const res=document.getElementById('srch-res');
+  if(!q||q.length<2){res.innerHTML='';return;}
+  const qn=nrm(q);
+  const found=D.municipios.filter(m=>nrm(m.m).includes(qn)||nrm(m.u).includes(qn)).slice(0,12);
+  res.innerHTML=found.map(m=>`
+    <div class="sr" onclick="selecionarPorChave('${nrm(m.m)}_${nrm(m.u)}')">
+      <span>${m.m}</span><span class="sr-uf">${m.u}</span>
     </div>`).join('');
 }
 
-// ─── RANKINGS ────────────────────────────────────────────────────────────────
-let rankCatAtiva = 'Geral';
-function buildRankCatChips() {
-  const wrap = document.getElementById('rank-cat-chips');
-  wrap.innerHTML = '';
-  for (const [cat, cor] of Object.entries(GRUPOS_CORES)) {
-    const el = document.createElement('button');
-    el.className = 'cat-chip' + (cat === rankCatAtiva ? ' active' : '');
-    el.textContent = cat;
-    el.style.borderColor = cor;
-    el.style.color = cat === rankCatAtiva ? '#fff' : cor;
-    el.style.background = cat === rankCatAtiva ? cor : 'transparent';
-    el.onclick = () => {
-      rankCatAtiva = cat;
-      const inds = GRUPOS[cat];
-      rankIndAtivo = inds[0];
-      buildRankCatChips();
-      buildRankings();
-    };
-    wrap.appendChild(el);
+function selecionarPorChave(chave){
+  const m=munIdx[chave];
+  if(!m) return;
+  // Procura o layer correspondente
+  let layerAlvo=null;
+  if(geoLayer){
+    geoLayer.eachLayer(layer=>{
+      if(layer.feature&&layer.feature.properties._k===chave) layerAlvo=layer;
+    });
   }
-  buildRankings();
+  if(layerAlvo) selecionarMun(m,layerAlvo);
+  else abrirFicha(m);
 }
 
-function setRankDir(dir) {
-  rankDir = dir;
-  document.getElementById('btn-top').className = 'toggle-btn' + (dir==='top'?' active':'');
-  document.getElementById('btn-bot').className = 'toggle-btn' + (dir==='bot'?' active':'');
-  buildRankings();
+// ─── RANKINGS ─────────────────────────────────────────────────────────────────
+function setDir(d){
+  rankDir=d;
+  document.getElementById('tog-top').className='tog'+(d==='top'?' on':'');
+  document.getElementById('tog-bot').className='tog'+(d==='bot'?' on':'');
+  buildRank();
 }
 
-function buildRankings() {
-  const inds = GRUPOS[rankCatAtiva] || [];
-  if (!inds.includes(rankIndAtivo)) rankIndAtivo = inds[0];
-  const ind = rankIndAtivo;
-  const meta = DADOS.meta[ind];
-  if (!meta) return;
+function buildRank(){
+  const inds=GRUPOS[catRank]||[];
+  if(!inds.includes(rankInd)) rankInd=inds[0];
+  const sel=document.getElementById('rk-sel');
+  sel.innerHTML=inds.map(i=>`<option value="${i}" ${i===rankInd?'selected':''}>${D.meta[i]?D.meta[i].nome:i}</option>`).join('');
 
-  // Top municípios
-  let vals = DADOS.municipios.map(m => ({ m, v: m.i[ind] })).filter(x => x.v != null);
-  vals.sort((a,b) => rankDir === 'top' ? b.v - a.v : a.v - b.v);
-  const top = vals.slice(0, 10);
+  let vs=D.municipios.map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
+  vs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
+  document.getElementById('rk-mun').innerHTML=vs.slice(0,10).map((x,i)=>`
+    <div class="rk-item" onclick="selecionarPorChave('${nrm(x.m.m)}_${nrm(x.m.u)}')">
+      <span class="rk-pos">${i+1}</span>
+      <span class="rk-nm">${x.m.m} <span class="rk-uf">${x.m.u}</span></span>
+      <span class="rk-v">${fmt(x.v)}</span>
+    </div>`).join('');
 
-  document.getElementById('rank-list').innerHTML = `
-    <div style="margin-bottom:8px">
-      <select onchange="rankIndAtivo=this.value;buildRankings()" style="width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:0.78rem;font-family:inherit;background:var(--bg)">
-        ${inds.map(i => `<option value="${i}" ${i===ind?'selected':''}>${DADOS.meta[i]?DADOS.meta[i].nome:i}</option>`).join('')}
-      </select>
-    </div>` +
-    top.map((x,i) => `
-      <div class="ranking-item" onclick="abrirFicha(munIndex['${norm(x.m.m)}_${norm(x.m.u)}'])">
-        <span class="rank-pos">${i+1}</span>
-        <span class="rank-nome">${x.m.m} <span class="rank-uf">${x.m.u}</span></span>
-        <span class="rank-val">${fmtVal(x.v)}</span>
-      </div>`).join('');
-
-  // Por estado (média)
-  const porUF = {};
-  for (const m of DADOS.municipios) {
-    const v = m.i[ind];
-    if (v == null) continue;
-    if (!porUF[m.u]) porUF[m.u] = [];
-    porUF[m.u].push(v);
-  }
-  let estVals = Object.entries(porUF).map(([uf, arr]) => ({
-    uf, v: arr.reduce((a,b)=>a+b,0)/arr.length
-  }));
-  estVals.sort((a,b) => rankDir === 'top' ? b.v - a.v : a.v - b.v);
-
-  document.getElementById('rank-est-list').innerHTML = estVals.slice(0,10).map((x,i) => `
-    <div class="ranking-item">
-      <span class="rank-pos">${i+1}</span>
-      <span class="rank-nome">${x.uf}</span>
-      <span class="rank-val">${fmtVal(x.v)}</span>
+  const uf={};
+  for(const m of D.municipios){const v=m.i[rankInd];if(v!=null){if(!uf[m.u])uf[m.u]=[];uf[m.u].push(v);}}
+  let estVs=Object.entries(uf).map(([u,arr])=>({u,v:arr.reduce((a,b)=>a+b,0)/arr.length}));
+  estVs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
+  document.getElementById('rk-est').innerHTML=estVs.slice(0,10).map((x,i)=>`
+    <div class="rk-item">
+      <span class="rk-pos">${i+1}</span>
+      <span class="rk-nm">${x.u}</span>
+      <span class="rk-v">${fmt(x.v)}</span>
     </div>`).join('');
 }
 
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function fmtVal(v) {
-  if (v == null) return '—';
-  if (Math.abs(v) >= 1e6) return (v/1e6).toFixed(1)+'M';
-  if (Math.abs(v) >= 1e3) return (v/1e3).toFixed(1)+'k';
-  if (Math.abs(v) >= 100) return Math.round(v).toLocaleString('pt-BR');
+// ─── TABS & UI ────────────────────────────────────────────────────────────────
+function showTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  ['mapa','explorar','rankings'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'flex':'none';
+  });
+  if(tab==='mapa'){
+    document.getElementById('tab-mapa').style.flexDirection='column';
+  }
+  if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
+}
+
+let panelOpen=false;
+function togglePanel(){panelOpen=!panelOpen;document.getElementById('panel').classList.toggle('open',panelOpen);}
+function openPanel(){panelOpen=true;document.getElementById('panel').classList.add('open');}
+function closePanel(){panelOpen=false;document.getElementById('panel').classList.remove('open');}
+function toggleDesktop(){
+  document.body.classList.toggle('desktop');
+  const on=document.body.classList.contains('desktop');
+  document.getElementById('btn-desktop').classList.toggle('on',on);
+  document.getElementById('btn-desktop').textContent=on?'📱 Mobile':'🖥 Desktop';
+  setTimeout(()=>leaf&&leaf.invalidateSize(),350);
+}
+
+// ─── FORMAT ───────────────────────────────────────────────────────────────────
+function fmt(v){
+  if(v==null) return'—';
+  if(Math.abs(v)>=1e6) return(v/1e6).toFixed(1)+'M';
+  if(Math.abs(v)>=1e3) return(v/1e3).toFixed(1)+'k';
+  if(Math.abs(v)>=100) return Math.round(v).toLocaleString('pt-BR');
   return parseFloat(v.toFixed(2)).toString();
 }
-
-function fmtPop(v) {
-  if (v >= 1e6) return (v/1e6).toFixed(1)+'M';
-  if (v >= 1e3) return (v/1e3).toFixed(0)+'k';
+function fmtPop(v){
+  if(v>=1e6) return(v/1e6).toFixed(1)+'M';
+  if(v>=1e3) return(v/1e3).toFixed(0)+'k';
   return Math.round(v).toString();
 }
 
-// ─── UI HELPERS ──────────────────────────────────────────────────────────────
-let tabAtiva = 'mapa';
-function showTab(tab) {
-  tabAtiva = tab;
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['mapa','explorar','rankings'][i] === tab);
-  });
-  document.querySelectorAll('.tab-content').forEach(c => c.style.display='none');
-  const el = document.getElementById('tab-'+tab);
-  if (el) el.style.display = 'flex';
-  // tab-mapa e tab-rankings usam flex-direction column
-  if (tab === 'mapa') {
-    el.style.flexDirection = 'column';
-    el.style.height = '100%';
-  }
-  if (tab === 'rankings' || tab === 'explorar') {
-    el.style.flexDirection = 'column';
-    el.style.height = '100%';
-    el.style.overflow = 'hidden';
-  }
-  if (tab !== 'explorar') {
-    backToSearch();
-  }
-  if (window.innerWidth <= 768 && !document.body.classList.contains('desktop-mode')) {
-    openPanel();
-  }
-}
-
-function togglePanel() {
-  panelOpen = !panelOpen;
-  document.getElementById('panel').classList.toggle('open', panelOpen);
-}
-function openPanel() { panelOpen=true; document.getElementById('panel').classList.add('open'); }
-function closePanel() { panelOpen=false; document.getElementById('panel').classList.remove('open'); }
-
-function toggleDesktopMode() {
-  document.body.classList.toggle('desktop-mode');
-  const btn = document.getElementById('btn-desktop');
-  btn.classList.toggle('active');
-  btn.textContent = document.body.classList.contains('desktop-mode') ? '📱 Mobile' : '🖥 Desktop';
-  setTimeout(() => mapa && mapa.invalidateSize(), 350);
-}
-
-// ─── START ───────────────────────────────────────────────────────────────────
-carregarTudo();
+// ─── START ────────────────────────────────────────────────────────────────────
+boot();
 </script>
 </body>
 </html>
