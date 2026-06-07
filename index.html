@@ -60,34 +60,39 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 }
 .tab.on{color:var(--accent);border-bottom-color:var(--accent);}
 
-/* CONTEÚDO DA TAB — flex:1, overflow:hidden, flex column interno */
+/* CONTEÚDO DA TAB — min-height:0 é o fix para scroll dentro de flex */
 .tab-body{
-  flex:1; /* pega o espaço entre tabs e legenda */
+  flex:1;
+  min-height:0; /* CRÍTICO: sem isso o flex filho ignora overflow */
+  display:flex;
+  flex-direction:column;
   overflow:hidden;
-  display:flex;flex-direction:column;
 }
 
-/* ÁREA DE SCROLL dentro do tab-body */
+/* ÁREA DE SCROLL — ocupa tudo acima da legenda */
 .scroll-area{
   flex:1;
-  overflow-y:scroll; /* sempre mostrar scrollbar */
+  min-height:0; /* idem */
+  overflow-y:scroll;
   overflow-x:hidden;
   padding:14px;
-  scrollbar-width:thin;
-  scrollbar-color:var(--border) transparent;
+  /* scrollbar sempre visível e com cor */
+  scrollbar-width:auto;
+  scrollbar-color:#c8c2b8 transparent;
 }
-.scroll-area::-webkit-scrollbar{width:5px;}
-.scroll-area::-webkit-scrollbar-track{background:transparent;}
-.scroll-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-.scroll-area::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+.scroll-area::-webkit-scrollbar{width:7px;}
+.scroll-area::-webkit-scrollbar-track{background:#f0ece6;border-radius:4px;}
+.scroll-area::-webkit-scrollbar-thumb{background:#c8c2b8;border-radius:4px;}
+.scroll-area::-webkit-scrollbar-thumb:hover{background:#9a9288;}
 
-/* LEGENDA — altura fixa no fundo, nunca some */
+/* LEGENDA — altura fixa, nunca some */
 #legenda{
   flex-shrink:0;
-  padding:10px 14px 13px;
-  border-top:1px solid var(--border);
+  height:110px; /* altura explícita garante que o scroll acima saiba o espaço */
+  padding:9px 14px 10px;
+  border-top:2px solid var(--border);
   background:var(--surface);
-  min-height:90px;
+  overflow:hidden;
 }
 #leg-ind{font-size:.8rem;font-weight:600;margin-bottom:2px;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -362,9 +367,11 @@ let IND='Índice de Progresso Social';
 let rankInd='Índice de Progresso Social';
 let rankDir='top';
 let munIdx={};
-let munSel=null;        // município selecionado atualmente
-let featureSel=null;    // layer do feature selecionado
-let markerSel=null;     // marcador no mapa
+let munSel=null;        // dados do município selecionado
+let featureSel=null;    // layer leaflet selecionado
+let chaveSel=null;      // chave normalizada do selecionado
+let markerSel=null;     // marcador com nome no mapa
+let modoIsolado=false;  // quando true, outros municípios ficam acinzentados
 let catMapa='Geral',catRank='Geral';
 
 const CORES={
@@ -485,15 +492,24 @@ function initMapa(){
   leaf.setView([-14,-52],4);
 }
 
+function getEstiloNormal(f){
+  const d=f.properties._d, ind=IND, v=d?d.i[ind]:null, esc=getEsc(ind);
+  if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
+  return{fillColor:getCor(v,esc),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.88};
+}
+
 function atualizarMapa(){
   if(geoLayer){leaf.removeLayer(geoLayer);geoLayer=null;}
+  featureSel=null; // layers recriados, resetar referência
   const ind=IND,meta=D.meta[ind],esc=getEsc(ind);
 
   geoLayer=L.geoJSON(GEO,{
     style:f=>{
-      const d=f.properties._d,v=d?d.i[ind]:null;
-      if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
-      return{fillColor:getCor(v,esc),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.88};
+      // Se há município isolado e este não é ele, acinzentar
+      if(modoIsolado && chaveSel && f.properties._k!==chaveSel){
+        return{fillColor:'#ddd',weight:.2,color:'#ccc',fillOpacity:.35};
+      }
+      return getEstiloNormal(f);
     },
     onEachFeature:(f,layer)=>{
       const d=f.properties._d,v=d?d.i[ind]:null;
@@ -505,38 +521,55 @@ function atualizarMapa(){
         <div class="mtt-ind">${meta?meta.nome:ind}</div>
       `,{className:'mtt',sticky:true,opacity:1});
 
-      layer.on('click',()=>{
-        if(d) selecionarMun(d,layer);
-      });
+      layer.on('click',()=>{if(d) selecionarMun(d,layer,f.properties._k);});
       layer.on('mouseover',e=>{
-        if(e.target!==featureSel) e.target.setStyle({weight:1.5,color:'#333'});
+        if(f.properties._k!==chaveSel) e.target.setStyle({weight:1.5,color:'#333'});
       });
       layer.on('mouseout',e=>{
-        if(e.target!==featureSel) geoLayer.resetStyle(e.target);
+        if(f.properties._k!==chaveSel){
+          // Reaplica estilo correto (normal ou acinzentado)
+          if(modoIsolado&&chaveSel){
+            e.target.setStyle({fillColor:'#ddd',weight:.2,color:'#ccc',fillOpacity:.35});
+          } else {
+            geoLayer.resetStyle(e.target);
+          }
+        }
       });
+
+      // Guardar referência ao layer selecionado quando recriado
+      if(chaveSel && f.properties._k===chaveSel){
+        featureSel=layer;
+        destacarFeature(layer);
+      }
     }
   }).addTo(leaf);
-
-  // Reaplica destaque se tinha município selecionado
-  if(munSel&&featureSel){
-    destacarFeature(featureSel);
-  }
 
   atualizarLegenda(ind,esc,meta);
 }
 
-function selecionarMun(m,layer){
-  // Remove destaque anterior
-  if(featureSel&&geoLayer){
-    geoLayer.resetStyle(featureSel);
+function selecionarMun(m,layer,chave){
+  // Limpa seleção anterior sem recriar o mapa inteiro
+  if(featureSel&&geoLayer&&chaveSel){
+    // Restaura estilo do anterior
+    featureSel.setStyle({fillColor:'#ddd',weight:.2,color:'#ccc',fillOpacity:.35});
   }
   if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
 
   munSel=m;
-  featureSel=layer;
-  destacarFeature(layer);
+  chaveSel=chave||nrm(m.m)+'_'+nrm(m.u);
 
-  // Marcador com nome no mapa
+  // Se estava sem modo isolado, precisa recriar o mapa para acinzentar os outros
+  if(!modoIsolado){
+    modoIsolado=true;
+    featureSel=layer; // guarda antes de recriar
+    atualizarMapa();  // recria com modo isolado ativo
+  } else {
+    // Já estava isolado, só troca o destaque
+    featureSel=layer;
+    destacarFeature(layer);
+  }
+
+  // Marcador com nome
   if(m.lat&&m.lon){
     const icon=L.divIcon({
       className:'',
@@ -550,9 +583,17 @@ function selecionarMun(m,layer){
 }
 
 function destacarFeature(layer){
-  // Borda preta espessa, sem alterar a cor de preenchimento do indicador
-  layer.setStyle({weight:3,color:'#1a1814',fillOpacity:.88});
-  layer.bringToFront();
+  // Cor normal do indicador + borda preta destacada
+  if(layer&&chaveSel){
+    const f=layer.feature;
+    if(f){
+      const est=getEstiloNormal(f);
+      layer.setStyle({...est,weight:3,color:'#1a1814',fillOpacity:.95});
+    } else {
+      layer.setStyle({weight:3,color:'#1a1814',fillOpacity:.95});
+    }
+    layer.bringToFront();
+  }
 }
 
 function atualizarLegenda(ind,esc,meta){
@@ -658,10 +699,10 @@ function backSearch(){
   document.getElementById('ficha-back').style.display='none';
   document.getElementById('srch').value='';
   document.getElementById('srch-res').innerHTML='';
-  // Remove seleção do mapa
-  if(featureSel&&geoLayer){geoLayer.resetStyle(featureSel);featureSel=null;}
+  // Remove seleção e modo isolado — recria mapa normal
   if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
-  munSel=null;
+  munSel=null; featureSel=null; chaveSel=null; modoIsolado=false;
+  atualizarMapa(); // recria sem isolamento
 }
 
 // ─── BUSCA ────────────────────────────────────────────────────────────────────
@@ -679,17 +720,24 @@ function searchMun(q){
 function selecionarPorChave(chave){
   const m=munIdx[chave];
   if(!m) return;
-  // Procura o layer correspondente
-  let layerAlvo=null;
-  if(geoLayer){
-    geoLayer.eachLayer(layer=>{
-      if(layer.feature&&layer.feature.properties._k===chave) layerAlvo=layer;
+  chaveSel=chave; // seta antes de recriar o mapa
+  modoIsolado=true;
+  munSel=m;
+  featureSel=null;
+  atualizarMapa(); // recria com isolamento, encontra o layer pelo chaveSel
+  // Marcador
+  if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
+  if(m.lat&&m.lon){
+    const icon=L.divIcon({
+      className:'',
+      html:`<div class="marcador-sel">${m.m}</div>`,
+      iconAnchor:[0,0]
     });
+    markerSel=L.marker([m.lat,m.lon],{icon,zIndexOffset:1000}).addTo(leaf);
   }
-  if(layerAlvo) selecionarMun(m,layerAlvo);
-  else abrirFicha(m);
+  abrirFicha(m);
+  if(m.lat&&m.lon) leaf.setView([m.lat,m.lon],9,{animate:true});
 }
-
 // ─── RANKINGS ─────────────────────────────────────────────────────────────────
 function setDir(d){
   rankDir=d;
