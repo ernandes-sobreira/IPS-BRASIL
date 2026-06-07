@@ -184,6 +184,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .find-s{font-size:.62rem;color:var(--muted);margin-top:1px;}
 .find-bar-wrap{height:3px;background:#ede9e2;border-radius:2px;margin-top:3px;}
 .find-bar{height:100%;border-radius:2px;}
+.find-ativo{background:#f0f8ff;border-radius:6px;padding:2px 4px;margin:0 -4px;cursor:pointer;}
+.find:not(.find-ativo){cursor:pointer;}
+.find:hover{background:#f7f5f0;border-radius:6px;}
+.find-ver-mapa{font-size:.58rem;color:var(--muted);font-family:'Syne',sans-serif;
+  font-weight:700;opacity:0;transition:opacity .15s;margin-left:4px;}
+.find:hover .find-ver-mapa{opacity:1;}
+.find-no-mapa{font-size:.58rem;color:var(--accent);font-family:'Syne',sans-serif;
+  font-weight:700;margin-left:4px;}
 .find-v{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;
   text-align:right;flex-shrink:0;}
 .find-u{font-size:.58rem;color:var(--muted);display:block;}
@@ -672,9 +680,10 @@ function abrirFicha(m){
       const esc=getEsc(ind);
       const pct=Math.max(0,Math.min(100,((v-esc.p5)/(esc.p95-esc.p5+.001))*100));
       const barCor=getCor(v,esc);
-      return`<div class="find">
+      const isAtivo=ind===IND;
+      return`<div class="find${isAtivo?' find-ativo':''}" onclick="mudarIndicador('${ind.replace(/'/g,"\\'")}',this)" title="Ver no mapa">
         <div class="find-info">
-          <div class="find-n">${meta.nome}</div>
+          <div class="find-n">${meta.nome}${isAtivo?' <span class="find-no-mapa">no mapa ↗</span>':' <span class="find-ver-mapa">ver no mapa</span>'}</div>
           <div class="find-s">${meta.simples}</div>
           <div class="find-bar-wrap"><div class="find-bar" style="width:${pct}%;background:${barCor}"></div></div>
         </div>
@@ -738,6 +747,36 @@ function selecionarPorChave(chave){
   abrirFicha(m);
   if(m.lat&&m.lon) leaf.setView([m.lat,m.lon],9,{animate:true});
 }
+// ─── MUDAR INDICADOR pela ficha (mantém município isolado, muda cor do mapa) ──
+function mudarIndicador(ind, el){
+  IND=ind;
+  // Atualiza destaque na ficha
+  document.querySelectorAll('.find').forEach(f=>{
+    f.classList.remove('find-ativo');
+    const nm=f.querySelector('.find-n');
+    if(nm){
+      nm.querySelectorAll('.find-no-mapa').forEach(e=>e.remove());
+      const old=nm.querySelector('.find-ver-mapa');
+      if(old) old.style.opacity='0';
+    }
+  });
+  if(el){
+    el.classList.add('find-ativo');
+    const nm=el.querySelector('.find-n');
+    if(nm){
+      const span=nm.querySelector('.find-ver-mapa');
+      if(span){span.className='find-no-mapa';span.textContent='no mapa ↗';}
+    }
+  }
+  // Muda o mapa mantendo isolamento ativo
+  atualizarMapa();
+  // Sincroniza lista de indicadores no painel Mapa
+  buildIndList();
+  // Atualiza legenda
+  const meta=D.meta[ind],esc=getEsc(ind);
+  if(meta&&esc) atualizarLegenda(ind,esc,meta);
+}
+
 // ─── RANKINGS ─────────────────────────────────────────────────────────────────
 function setDir(d){
   rankDir=d;
@@ -752,6 +791,7 @@ function buildRank(){
   const sel=document.getElementById('rk-sel');
   sel.innerHTML=inds.map(i=>`<option value="${i}" ${i===rankInd?'selected':''}>${D.meta[i]?D.meta[i].nome:i}</option>`).join('');
 
+  // Top 10 municípios
   let vs=D.municipios.map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
   vs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
   document.getElementById('rk-mun').innerHTML=vs.slice(0,10).map((x,i)=>`
@@ -761,14 +801,36 @@ function buildRank(){
       <span class="rk-v">${fmt(x.v)}</span>
     </div>`).join('');
 
-  const uf={};
-  for(const m of D.municipios){const v=m.i[rankInd];if(v!=null){if(!uf[m.u])uf[m.u]=[];uf[m.u].push(v);}}
-  let estVs=Object.entries(uf).map(([u,arr])=>({u,v:arr.reduce((a,b)=>a+b,0)/arr.length}));
+  // Todos os estados — média ponderada por população
+  // Ponderação: soma(valor * pop) / soma(pop) por UF
+  // Mais correto que média simples, que trata municípios pequenos igual aos grandes
+  const ufSoma={}, ufPop={}, ufN={};
+  for(const m of D.municipios){
+    const v=m.i[rankInd];
+    const pop=m.i['POPULAÇÃO 2025']||0;
+    if(v==null) continue;
+    if(!ufSoma[m.u]){ufSoma[m.u]=0;ufPop[m.u]=0;ufN[m.u]=0;}
+    ufSoma[m.u]+=v*pop;
+    ufPop[m.u]+=pop;
+    ufN[m.u]++;
+  }
+  let estVs=Object.keys(ufSoma).map(u=>({
+    u, v:ufPop[u]>0?ufSoma[u]/ufPop[u]:0, n:ufN[u]
+  }));
   estVs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
-  document.getElementById('rk-est').innerHTML=estVs.slice(0,10).map((x,i)=>`
+
+  // Nota sobre o método
+  const metaNote=`<div style="font-size:.62rem;color:var(--muted);padding:5px 7px;
+    background:var(--bg);border-radius:5px;margin-bottom:8px;line-height:1.4">
+    Média ponderada pela população de cada município.<br>
+    Municípios maiores têm mais peso no resultado do estado.
+  </div>`;
+
+  document.getElementById('rk-est').innerHTML = metaNote +
+    estVs.map((x,i)=>`
     <div class="rk-item">
       <span class="rk-pos">${i+1}</span>
-      <span class="rk-nm">${x.u}</span>
+      <span class="rk-nm">${x.u} <span class="rk-uf">${x.n} mun.</span></span>
       <span class="rk-v">${fmt(x.v)}</span>
     </div>`).join('');
 }
