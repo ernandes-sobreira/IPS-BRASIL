@@ -508,17 +508,11 @@ function getEstiloNormal(f){
 
 function atualizarMapa(){
   if(geoLayer){leaf.removeLayer(geoLayer);geoLayer=null;}
-  featureSel=null; // layers recriados, resetar referência
+  featureSel=null;
   const ind=IND,meta=D.meta[ind],esc=getEsc(ind);
 
   geoLayer=L.geoJSON(GEO,{
-    style:f=>{
-      // Se há município isolado e este não é ele, acinzentar
-      if(modoIsolado && chaveSel && f.properties._k!==chaveSel){
-        return{fillColor:'#ddd',weight:.2,color:'#ccc',fillOpacity:.35};
-      }
-      return getEstiloNormal(f);
-    },
+    style:f=> getEstiloNormal(f), // todos com cor normal, sempre
     onEachFeature:(f,layer)=>{
       const d=f.properties._d,v=d?d.i[ind]:null;
       const nm=f.properties.NM_MUN||'',uf=f.properties.SIGLA_UF||'';
@@ -534,17 +528,10 @@ function atualizarMapa(){
         if(f.properties._k!==chaveSel) e.target.setStyle({weight:1.5,color:'#333'});
       });
       layer.on('mouseout',e=>{
-        if(f.properties._k!==chaveSel){
-          // Reaplica estilo correto (normal ou acinzentado)
-          if(modoIsolado&&chaveSel){
-            e.target.setStyle({fillColor:'#ddd',weight:.2,color:'#ccc',fillOpacity:.35});
-          } else {
-            geoLayer.resetStyle(e.target);
-          }
-        }
+        if(f.properties._k!==chaveSel) geoLayer.resetStyle(e.target);
       });
 
-      // Guardar referência ao layer selecionado quando recriado
+      // Restaura borda do município selecionado ao recriar o mapa
       if(chaveSel && f.properties._k===chaveSel){
         featureSel=layer;
         destacarFeature(layer);
@@ -556,26 +543,16 @@ function atualizarMapa(){
 }
 
 function selecionarMun(m,layer,chave){
-  // Limpa seleção anterior sem recriar o mapa inteiro
-  if(featureSel&&geoLayer&&chaveSel){
-    // Restaura estilo do anterior
-    featureSel.setStyle({fillColor:'#ddd',weight:.2,color:'#ccc',fillOpacity:.35});
+  // Remove borda anterior sem recriar o mapa
+  if(featureSel&&chaveSel){
+    geoLayer.resetStyle(featureSel);
   }
   if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
 
   munSel=m;
   chaveSel=chave||nrm(m.m)+'_'+nrm(m.u);
-
-  // Se estava sem modo isolado, precisa recriar o mapa para acinzentar os outros
-  if(!modoIsolado){
-    modoIsolado=true;
-    featureSel=layer; // guarda antes de recriar
-    atualizarMapa();  // recria com modo isolado ativo
-  } else {
-    // Já estava isolado, só troca o destaque
-    featureSel=layer;
-    destacarFeature(layer);
-  }
+  featureSel=layer;
+  destacarFeature(layer);
 
   // Marcador com nome
   if(m.lat&&m.lon){
@@ -591,17 +568,16 @@ function selecionarMun(m,layer,chave){
 }
 
 function destacarFeature(layer){
-  // Cor normal do indicador + borda preta destacada
-  if(layer&&chaveSel){
-    const f=layer.feature;
-    if(f){
-      const est=getEstiloNormal(f);
-      layer.setStyle({...est,weight:3,color:'#1a1814',fillOpacity:.95});
-    } else {
-      layer.setStyle({weight:3,color:'#1a1814',fillOpacity:.95});
-    }
-    layer.bringToFront();
+  // Mantém a cor do indicador, adiciona só a borda forte
+  if(!layer) return;
+  const f=layer.feature;
+  if(f){
+    const est=getEstiloNormal(f);
+    layer.setStyle({...est, weight:3.5, color:'#1a1814', fillOpacity:.95});
+  } else {
+    layer.setStyle({weight:3.5, color:'#1a1814', fillOpacity:.95});
   }
+  layer.bringToFront();
 }
 
 function atualizarLegenda(ind,esc,meta){
@@ -708,10 +684,10 @@ function backSearch(){
   document.getElementById('ficha-back').style.display='none';
   document.getElementById('srch').value='';
   document.getElementById('srch-res').innerHTML='';
-  // Remove seleção e modo isolado — recria mapa normal
   if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
-  munSel=null; featureSel=null; chaveSel=null; modoIsolado=false;
-  atualizarMapa(); // recria sem isolamento
+  // Remove borda do município anterior sem recriar o mapa inteiro
+  if(featureSel&&geoLayer) geoLayer.resetStyle(featureSel);
+  munSel=null; featureSel=null; chaveSel=null;
 }
 
 // ─── BUSCA ────────────────────────────────────────────────────────────────────
@@ -729,12 +705,10 @@ function searchMun(q){
 function selecionarPorChave(chave){
   const m=munIdx[chave];
   if(!m) return;
-  chaveSel=chave; // seta antes de recriar o mapa
-  modoIsolado=true;
+  chaveSel=chave;
   munSel=m;
-  featureSel=null;
-  atualizarMapa(); // recria com isolamento, encontra o layer pelo chaveSel
-  // Marcador
+  // Recriar mapa para garantir que o layer correto é encontrado e destacado
+  atualizarMapa();
   if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
   if(m.lat&&m.lon){
     const icon=L.divIcon({
