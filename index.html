@@ -6,17 +6,21 @@
 <title>IPS Brasil 2026 — Mapa de Indicadores</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/topojson-client@3"></script>
+<script src="https://unpkg.com/fuse.js@7.0.0/dist/fuse.min.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f4f1eb; --surface:#fff; --border:#e2ddd4;
   --text:#181614; --muted:#7a7268; --accent:#c93a0e;
   --yellow:#f0c000;
-  --panel:340px; --hdr:52px; --r:10px;
+  --panel:352px; --hdr:52px; --r:10px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;background:var(--bg);
-  font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px;}
+  font-family:'DM Sans',sans-serif;color:var(--text);font-size:15px;
+  font-variant-numeric:tabular-nums;}
 
 /* HEADER */
 #hdr{
@@ -32,7 +36,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   color:rgba(255,255,255,.8);border-radius:6px;padding:4px 10px;
   font-size:.72rem;font-family:'Syne',sans-serif;font-weight:700;
   cursor:pointer;letter-spacing:.03em;transition:all .15s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:5px;
 }
+.hdr-btn svg{width:13px;height:13px;}
 .hdr-btn:hover,.hdr-btn.on{background:rgba(255,255,255,.12);color:#fff;}
 #btn-panel{display:none;}
 
@@ -41,6 +47,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 
 /* PAINEL — flex column, altura fixa */
 #panel{
+  position:relative;
   width:var(--panel);min-width:var(--panel);
   background:var(--surface);border-right:1px solid var(--border);
   display:flex;flex-direction:column; /* CRÍTICO: column com height definido */
@@ -55,9 +62,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   flex:1;height:100%;background:none;
   border:none;border-bottom:2.5px solid transparent;
   font-family:'Syne',sans-serif;font-size:.67rem;font-weight:700;
-  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
   color:var(--muted);transition:all .14s;
+  display:flex;align-items:center;justify-content:center;gap:5px;
 }
+.tab svg{width:14px;height:14px;}
 .tab.on{color:var(--accent);border-bottom-color:var(--accent);}
 
 /* CONTEÚDO DA TAB — min-height:0 é o fix para scroll dentro de flex */
@@ -88,26 +97,53 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 /* LEGENDA — altura fixa, nunca some */
 #legenda{
   flex-shrink:0;
-  height:110px; /* altura explícita garante que o scroll acima saiba o espaço */
+  height:166px; /* altura explícita garante que o scroll acima saiba o espaço */
   padding:9px 14px 10px;
   border-top:2px solid var(--border);
   background:var(--surface);
   overflow:hidden;
 }
-#leg-ind{font-size:.8rem;font-weight:600;margin-bottom:2px;color:var(--text);
+#leg-ind{font-size:.8rem;font-weight:600;margin-bottom:1px;color:var(--text);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#leg-desc{font-size:.66rem;color:var(--muted);line-height:1.4;margin-bottom:6px;}
-#leg-bar{height:10px;border-radius:4px;margin-bottom:4px;
-  background:linear-gradient(to right,#2166ac,#f5f5f0,#b2182b);}
-#leg-labs{display:flex;justify-content:space-between;font-size:.64rem;color:var(--muted);gap:4px;}
-#leg-labs span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:33%;}
-#leg-note{margin-top:6px;font-size:.62rem;color:var(--muted);line-height:1.4;
-  padding:5px 7px;background:var(--bg);border-radius:5px;}
+#leg-desc{font-size:.66rem;color:var(--muted);line-height:1.35;margin-bottom:5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* LEGENDA — 7 degraus + mini histograma + mediana */
+.leg-bars{
+  position:relative;display:flex;align-items:flex-end;gap:2px;
+  height:38px;margin-bottom:2px;
+}
+.leg-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;}
+.leg-colbar{width:100%;border-radius:2px 2px 0 0;min-height:3px;
+  transition:height .3s ease,background .3s ease;}
+.leg-count{font-size:.5rem;text-align:center;color:var(--muted);margin-top:1px;line-height:1;}
+.leg-median{
+  position:absolute;top:-3px;bottom:0;width:0;
+  border-left:1.6px dashed var(--text);pointer-events:none;
+}
+.leg-median::after{
+  content:'mediana';position:absolute;top:-11px;left:3px;
+  font-size:.5rem;color:var(--text);white-space:nowrap;
+  font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.02em;
+}
+.leg-swatches{display:flex;gap:2px;margin-bottom:3px;}
+.leg-swatches div{flex:1;height:5px;border-radius:1px;}
+#leg-axis{display:flex;justify-content:space-between;font-size:.6rem;
+  color:var(--muted);gap:4px;}
+#leg-axis span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48%;}
+#leg-note{margin-top:5px;font-size:.6rem;color:var(--muted);line-height:1.35;
+  padding:4px 7px;background:var(--bg);border-radius:5px;
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block;
+  vertical-align:middle;margin-right:2px;}
+.leg-nodata{display:inline-flex;align-items:center;gap:4px;}
+.leg-nodata-sw{width:11px;height:11px;border-radius:3px;background:#d8d4cc;
+  border:1px solid #bbb;flex-shrink:0;}
 
 /* SECTION LABEL */
 .slabel{
   font-family:'Syne',sans-serif;font-size:.6rem;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
   margin:14px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--border);
 }
 .slabel:first-child{margin-top:0;}
@@ -118,7 +154,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   padding:4px 10px;border-radius:20px;font-size:.67rem;font-weight:700;
   font-family:'Syne',sans-serif;cursor:pointer;
   border:1.5px solid;transition:all .13s;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:5px;
 }
+.chip svg{width:12px;height:12px;}
 
 /* INDICADOR LISTA */
 .ind-item{
@@ -135,7 +173,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 /* BUSCA */
 #srch-wrap{position:relative;margin-bottom:10px;}
 #srch-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);
-  opacity:.4;pointer-events:none;}
+  opacity:.4;pointer-events:none;width:14px;height:14px;}
 #srch{
   width:100%;padding:8px 10px 8px 30px;border:1.5px solid var(--border);
   border-radius:7px;font-size:.79rem;font-family:inherit;
@@ -145,10 +183,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .sr{
   padding:7px 9px;border-radius:6px;cursor:pointer;
   font-size:.77rem;display:flex;justify-content:space-between;align-items:center;
-  transition:background .1s;
+  gap:8px;transition:background .1s;
 }
 .sr:hover{background:var(--bg);}
-.sr-uf{font-size:.65rem;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;}
+.sr-nm{min-width:0;}
+.sr-nm b{font-weight:500;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sr-meta{font-size:.62rem;color:var(--muted);margin-top:1px;}
+.sr-uf{font-size:.65rem;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;flex-shrink:0;}
+.sr-empty{font-size:.72rem;color:var(--muted);padding:8px 9px;}
 
 /* FICHA */
 #ficha-back{
@@ -156,16 +198,28 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   font-size:.74rem;color:var(--muted);cursor:pointer;
   background:none;border:none;font-family:inherit;
 }
+#ficha-back svg{width:14px;height:14px;}
 #ficha-back:hover{color:var(--accent);}
 #ficha-hdr{
+  position:relative;
   padding:14px;background:var(--text);color:#fff;
   border-radius:var(--r);margin-bottom:10px;
 }
-.f-nome{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;}
+.f-nome{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;padding-right:24px;}
 .f-sub{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:2px;}
+.f-close{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.1);
+  border:none;color:#fff;cursor:pointer;width:24px;height:24px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;transition:background .14s;}
+.f-close:hover{background:rgba(255,255,255,.25);}
+.f-close svg{width:14px;height:14px;}
 .f-ips{display:flex;align-items:baseline;gap:6px;margin-top:10px;}
 .f-ips-v{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--yellow);}
 .f-ips-l{font-size:.69rem;color:rgba(255,255,255,.5);line-height:1.4;}
+.f-rank{margin-top:8px;font-size:.66rem;color:rgba(255,255,255,.6);}
+.f-rank b{color:var(--yellow);font-weight:700;}
+.f-caption{font-size:.62rem;color:var(--muted);line-height:1.4;
+  padding:6px 8px;background:var(--bg);border-radius:6px;margin-bottom:12px;}
+.f-caption .leg-dot{margin:0 1px;}
 .fgrp{margin-bottom:14px;}
 .fgrp-t{
   font-family:'Syne',sans-serif;font-size:.59rem;font-weight:700;
@@ -176,16 +230,17 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .fgrp-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .find{
   display:flex;align-items:center;padding:5px 0;
-  border-bottom:1px solid #f0ece6;gap:8px;
+  border-bottom:1px solid #f0ece6;gap:8px;cursor:pointer;
 }
 .find:last-child{border:none;}
 .find-info{flex:1;min-width:0;}
 .find-n{font-size:.72rem;font-weight:500;line-height:1.3;}
 .find-s{font-size:.62rem;color:var(--muted);margin-top:1px;}
-.find-bar-wrap{height:3px;background:#ede9e2;border-radius:2px;margin-top:3px;}
-.find-bar{height:100%;border-radius:2px;}
-.find-ativo{background:#f0f8ff;border-radius:6px;padding:2px 4px;margin:0 -4px;cursor:pointer;}
-.find:not(.find-ativo){cursor:pointer;}
+.find-bar-wrap{position:relative;height:5px;background:#ede9e2;border-radius:3px;margin-top:4px;}
+.find-bar{height:100%;border-radius:3px;transition:width .3s ease,background .3s ease;}
+.find-tick{position:absolute;top:-2px;bottom:-2px;width:0;
+  border-left:1.6px solid var(--text);opacity:.5;}
+.find-ativo{background:#fff5f3;border-radius:6px;padding:5px 6px;margin:0 -6px;}
 .find:hover{background:#f7f5f0;border-radius:6px;}
 .find-ver-mapa{font-size:.58rem;color:var(--muted);font-family:'Syne',sans-serif;
   font-weight:700;opacity:0;transition:opacity .15s;margin-left:4px;}
@@ -202,35 +257,58 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   font-size:.75rem;font-family:inherit;background:var(--bg);outline:none;
   margin-bottom:8px;cursor:pointer;
 }
-.toggle-g{display:flex;gap:4px;margin-bottom:10px;}
+.toggle-g{display:flex;gap:4px;margin-bottom:8px;}
 .tog{
   padding:5px 12px;border-radius:6px;font-size:.69rem;font-weight:700;
   font-family:'Syne',sans-serif;cursor:pointer;
   border:1.5px solid var(--border);background:var(--bg);
   color:var(--muted);transition:all .13s;
+  display:inline-flex;align-items:center;gap:4px;
 }
+.tog svg{width:12px;height:12px;}
 .tog.on{background:var(--text);color:#fff;border-color:var(--text);}
+.rk-tools{display:flex;justify-content:flex-end;margin-bottom:4px;}
+#btn-csv{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:6px;font-size:.65rem;font-weight:700;
+  font-family:'Syne',sans-serif;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--text);
+  transition:all .13s;
+}
+#btn-csv svg{width:12px;height:12px;}
+#btn-csv:hover{background:var(--text);color:#fff;border-color:var(--text);}
 .rk-item{
   display:flex;align-items:center;gap:7px;padding:6px 7px;
   border-radius:7px;cursor:pointer;transition:background .1s;font-size:.75rem;
 }
 .rk-item:hover{background:var(--bg);}
 .rk-pos{font-family:'Syne',sans-serif;font-weight:800;font-size:.65rem;
-  color:var(--muted);width:16px;flex-shrink:0;}
-.rk-nm{flex:1;font-weight:500;}
+  color:var(--muted);width:16px;flex-shrink:0;text-align:right;}
+.rk-nm{flex:1;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rk-uf{font-size:.61rem;color:var(--muted);}
-.rk-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.77rem;}
+.rk-bar-wrap{flex-basis:50px;flex-shrink:0;height:6px;background:#ede9e2;
+  border-radius:3px;overflow:hidden;}
+.rk-bar{height:100%;border-radius:3px;transition:width .3s ease;}
+.rk-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.77rem;
+  flex-shrink:0;width:46px;text-align:right;}
 
 /* MAPA */
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{position:absolute;inset:0;}
 
-/* MUNICÍPIO SELECIONADO — destaque neutro, sem cor de indicador */
-.mun-selecionado{
-  fill:none !important;
+/* TRANSIÇÃO SUAVE ao trocar indicador (fill animável via CSS) */
+#map path.leaflet-interactive{
+  transition:fill .3s ease, fill-opacity .3s ease;
+}
+
+/* MUNICÍPIO SELECIONADO — contorno pulsante */
+@keyframes munPulse{
+  0%,100%{stroke-opacity:1;stroke-width:3.2px;}
+  50%{stroke-opacity:.35;stroke-width:6px;}
+}
+#map path.leaflet-interactive.mun-pulse{
   stroke:#1a1814 !important;
-  stroke-width:2.5 !important;
-  stroke-dasharray:none !important;
+  animation:munPulse 1.4s ease-in-out infinite;
 }
 /* Marcador do município selecionado no mapa */
 .marcador-sel{
@@ -247,26 +325,52 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   border:none !important;border-radius:8px !important;
   padding:8px 11px !important;font-family:'DM Sans',sans-serif !important;
   font-size:.74rem !important;box-shadow:0 4px 20px rgba(0,0,0,.25) !important;
-  pointer-events:none !important;min-width:120px;
+  pointer-events:none !important;min-width:140px;
+  font-variant-numeric:tabular-nums;
 }
 .mtt-nm{font-family:'Syne',sans-serif;font-weight:800;font-size:.79rem;}
 .mtt-v{color:var(--yellow);font-weight:600;margin-top:3px;}
 .mtt-ind{color:rgba(255,255,255,.45);font-size:.66rem;margin-top:2px;}
+.mtt-rk{color:rgba(255,255,255,.75);font-size:.66rem;margin-top:4px;
+  border-top:1px solid rgba(255,255,255,.12);padding-top:4px;}
+.mtt-rk b{color:#fff;font-family:'Syne',sans-serif;font-weight:700;}
 
-/* LOADING */
-#loading{
-  position:fixed;inset:0;background:var(--text);z-index:9999;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-}
-.ld-logo{font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;color:var(--yellow);}
-.ld-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:#fff;}
-.ld-msg{font-size:.8rem;color:rgba(255,255,255,.4);}
-.ld-track{width:220px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;}
-.ld-fill{height:100%;background:var(--yellow);border-radius:2px;width:0;transition:width .3s;}
+/* LOADING — barra fina + skeleton */
+#loadbar{position:fixed;top:var(--hdr);left:0;right:0;height:3px;
+  background:rgba(0,0,0,.06);z-index:1500;overflow:hidden;}
+#loadbar-fill{height:100%;width:0;background:var(--yellow);
+  transition:width .3s ease;}
+#loadbar.done{opacity:0;transition:opacity .4s ease .2s;pointer-events:none;}
+
+@keyframes shimmer{0%{background-position:-450px 0;}100%{background-position:450px 0;}}
+.skel{background:#ece8e1;
+  background-image:linear-gradient(90deg,#ece8e1 0,#f6f3ee 220px,#ece8e1 440px);
+  background-size:880px 100%;animation:shimmer 1.3s linear infinite;border-radius:6px;}
+.skel-screen{position:absolute;inset:0;background:var(--surface);z-index:300;
+  padding:18px 14px;transition:opacity .4s ease;}
+.skel-screen.hide{opacity:0;pointer-events:none;}
+.skel-line{height:12px;margin-bottom:10px;}
+.skel-chip{display:inline-block;height:24px;width:72px;border-radius:20px;margin:0 5px 8px 0;}
+.skel-row{height:42px;margin-bottom:8px;border-radius:7px;}
+#skel-map{position:absolute;inset:0;z-index:300;background:#e8e4dc;
+  display:flex;align-items:center;justify-content:center;transition:opacity .4s ease;}
+#skel-map.hide{opacity:0;pointer-events:none;}
+#skel-map .skel-blob{width:46%;height:62%;border-radius:14px;}
+.load-err{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  background:var(--text);color:#fff;padding:14px 18px;border-radius:10px;
+  font-size:.8rem;max-width:80%;text-align:center;z-index:400;}
+
+/* SPLASH inicial de marca (curto) */
+#splash{position:fixed;inset:0;background:var(--text);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  transition:opacity .45s ease;}
+#splash.hide{opacity:0;pointer-events:none;}
+.sp-logo{font-family:'Syne',sans-serif;font-size:2.6rem;font-weight:800;color:var(--yellow);}
+.sp-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;color:#fff;}
 
 /* MOBILE */
 @media(max-width:768px){
-  #btn-panel{display:block;}
+  #btn-panel{display:inline-flex;}
   #panel{
     position:fixed;top:var(--hdr);left:0;bottom:0;
     transform:translateX(-100%);
@@ -281,25 +385,25 @@ body.desktop #btn-panel{display:none;}
 </head>
 <body>
 
-<div id="loading">
-  <div class="ld-logo">IPS</div>
-  <div class="ld-title">Brasil 2026</div>
-  <div class="ld-msg" id="ld-msg">Carregando dados…</div>
-  <div class="ld-track"><div class="ld-fill" id="ld-fill"></div></div>
+<div id="splash">
+  <div class="sp-logo">IPS</div>
+  <div class="sp-title">Brasil 2026</div>
 </div>
 
 <div id="hdr">
   <div id="hdr-logo">IPS <span>Brasil</span> 2026</div>
-  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()">☰ Painel</button>
-  <button class="hdr-btn" id="btn-desktop" onclick="toggleDesktop()">🖥 Desktop</button>
+  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()"><i data-lucide="panel-left"></i> Painel</button>
+  <button class="hdr-btn" id="btn-desktop" onclick="toggleDesktop()"><i data-lucide="monitor"></i> Desktop</button>
 </div>
+
+<div id="loadbar"><div id="loadbar-fill"></div></div>
 
 <div id="app">
   <div id="panel">
     <div id="tabs">
-      <button class="tab on" onclick="showTab('mapa',this)">🗺 Mapa</button>
-      <button class="tab"    onclick="showTab('explorar',this)">🔍 Explorar</button>
-      <button class="tab"    onclick="showTab('rankings',this)">🏆 Rankings</button>
+      <button class="tab on" onclick="showTab('mapa',this)"><i data-lucide="map"></i><span>Mapa</span></button>
+      <button class="tab"    onclick="showTab('explorar',this)"><i data-lucide="search"></i><span>Explorar</span></button>
+      <button class="tab"    onclick="showTab('rankings',this)"><i data-lucide="trophy"></i><span>Rankings</span></button>
     </div>
 
     <!-- TAB MAPA -->
@@ -315,15 +419,11 @@ body.desktop #btn-panel{display:none;}
     <!-- TAB EXPLORAR -->
     <div id="tab-explorar" class="tab-body" style="display:none;">
       <div class="scroll-area">
-        <button id="ficha-back" onclick="backSearch()">← voltar à busca</button>
+        <button id="ficha-back" onclick="backSearch()"><i data-lucide="arrow-left"></i> voltar à busca</button>
         <div id="srch-sec">
           <div class="slabel">Buscar município</div>
           <div id="srch-wrap">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
+            <i data-lucide="search"></i>
             <input type="text" id="srch" placeholder="Nome do município…"
               oninput="searchMun(this.value)" autocomplete="off"/>
           </div>
@@ -339,10 +439,13 @@ body.desktop #btn-panel{display:none;}
         <div class="slabel">Categoria</div>
         <div class="chips" id="rank-chips"></div>
         <div class="toggle-g">
-          <button class="tog on" id="tog-top" onclick="setDir('top')">↑ Maiores</button>
-          <button class="tog"    id="tog-bot" onclick="setDir('bot')">↓ Menores</button>
+          <button class="tog on" id="tog-top" onclick="setDir('top')"><i data-lucide="arrow-up"></i> Maiores</button>
+          <button class="tog"    id="tog-bot" onclick="setDir('bot')"><i data-lucide="arrow-down"></i> Menores</button>
         </div>
         <select class="rk-sel" id="rk-sel" onchange="rankInd=this.value;buildRank()"></select>
+        <div class="rk-tools">
+          <button id="btn-csv" onclick="exportCSV()"><i data-lucide="download"></i> Exportar CSV</button>
+        </div>
         <div class="slabel">Top 10 municípios</div>
         <div id="rk-mun"></div>
         <div class="slabel" style="margin-top:14px;">Por estado (média)</div>
@@ -354,17 +457,33 @@ body.desktop #btn-panel{display:none;}
     <div id="legenda">
       <div id="leg-ind">—</div>
       <div id="leg-desc"></div>
-      <div id="leg-bar"></div>
-      <div id="leg-labs">
+      <div class="leg-bars" id="leg-bars"></div>
+      <div class="leg-swatches" id="leg-swatches"></div>
+      <div id="leg-axis">
         <span id="leg-lo"></span>
-        <span id="leg-md"></span>
         <span id="leg-hi"></span>
       </div>
       <div id="leg-note"></div>
     </div>
+
+    <!-- SKELETON do painel -->
+    <div id="skel-panel" class="skel-screen">
+      <div class="skel skel-line" style="width:38%"></div>
+      <div style="margin-bottom:14px">
+        <span class="skel skel-chip"></span><span class="skel skel-chip" style="width:58px"></span>
+        <span class="skel skel-chip" style="width:84px"></span><span class="skel skel-chip" style="width:64px"></span>
+      </div>
+      <div class="skel skel-line" style="width:46%"></div>
+      <div class="skel skel-row"></div><div class="skel skel-row"></div>
+      <div class="skel skel-row"></div><div class="skel skel-row"></div>
+      <div class="skel skel-row"></div>
+    </div>
   </div>
 
-  <div id="map-wrap"><div id="map"></div></div>
+  <div id="map-wrap">
+    <div id="map"></div>
+    <div id="skel-map"><div class="skel skel-blob"></div></div>
+  </div>
 </div>
 
 <script>
@@ -375,17 +494,26 @@ let IND='Índice de Progresso Social';
 let rankInd='Índice de Progresso Social';
 let rankDir='top';
 let munIdx={};
+let layerByChave={};    // chave normalizada -> layer leaflet
+let chaveToCd={}, cdToChave={};  // mapeamento código IBGE <-> chave
 let munSel=null;        // dados do município selecionado
 let featureSel=null;    // layer leaflet selecionado
 let chaveSel=null;      // chave normalizada do selecionado
 let markerSel=null;     // marcador com nome no mapa
-let modoIsolado=false;  // quando true, outros municípios ficam acinzentados
 let catMapa='Geral',catRank='Geral';
+let FUSE=null;          // índice de busca fuzzy
+let escCache={}, rankCache={}; // caches de escala e ranking por indicador
+let selfHash='';        // hash que a própria app definiu (evita loop)
 
 const CORES={
   'Geral':'#1644a8','Saúde':'#c93a0e','Segurança':'#7a1515',
   'Educação':'#1a6b3c','Infraestrutura':'#6b3fa0',
   'Meio Ambiente':'#0f7a3c','Social':'#b86b00','Justiça':'#4a4040'
+};
+// Ícones Lucide por categoria (item 7)
+const CAT_ICON={
+  'Geral':'gauge','Saúde':'heart','Segurança':'shield','Educação':'book-open',
+  'Infraestrutura':'construction','Meio Ambiente':'leaf','Social':'users','Justiça':'scale'
 };
 const GRUPOS={
   'Geral':['Índice de Progresso Social','Necessidades Humanas Básicas',
@@ -427,185 +555,287 @@ const GRUPOS={
     'Taxa de Congestionamento Líquida de Processos']
 };
 
+// slug <-> indicador (permalink)
+let slugToInd={}, indToSlug={};
+
 // ─── CORES: azul=menor, vermelho=maior, SEMPRE ────────────────────────────────
 function getEsc(ind){
+  if(escCache[ind]) return escCache[ind];
   const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
-  if(!vs.length) return {p5:0,p95:1,mid:.5};
-  return{
+  let e;
+  if(!vs.length) e={p5:0,p95:1,mid:.5,min:0,max:1};
+  else e={
     p5:vs[Math.floor(vs.length*.05)],
     p95:vs[Math.floor(vs.length*.95)],
-    mid:vs[Math.floor(vs.length*.5)]
+    mid:vs[Math.floor(vs.length*.5)],
+    min:vs[0], max:vs[vs.length-1]
   };
+  escCache[ind]=e; return e;
 }
-function getCor(v,esc){
-  const t=Math.max(0,Math.min(1,(v-esc.p5)/(esc.p95-esc.p5+.001)));
+function getCorT(t){
+  t=Math.max(0,Math.min(1,t));
   if(t<.5){const f=t*2; return`rgb(${lp(33,245,f)},${lp(102,245,f)},${lp(172,245,f)})`;}
   const f=(t-.5)*2; return`rgb(${lp(245,178,f)},${lp(245,24,f)},${lp(245,43,f)})`;
 }
+function getCor(v,esc){return getCorT((v-esc.p5)/(esc.p95-esc.p5+.001));}
 function lp(a,b,t){return Math.round(a+(b-a)*t);}
+
+// Ranking nacional (1º = melhor; direção depende de maior=melhor/pior)
+function getRank(ind){
+  if(rankCache[ind]) return rankCache[ind];
+  const meta=D.meta[ind];
+  const asc = meta && meta.maior==='pior';   // pior: menor valor é melhor -> 1º
+  const arr=D.municipios.filter(m=>m.i[ind]!=null)
+    .map(m=>({k:chaveOf(m),v:m.i[ind]}));
+  arr.sort((a,b)=> asc ? a.v-b.v : b.v-a.v);
+  const pos={};
+  arr.forEach((x,i)=>{pos[x.k]=i+1;});
+  const r={pos,total:arr.length};
+  rankCache[ind]=r; return r;
+}
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
 async function boot(){
-  prog('Carregando dados IPS…',15);
+  setBar(8);
+  // Mostra a marca por um instante, depois revela o skeleton durante o carregamento
+  setTimeout(()=>{const s=document.getElementById('splash');if(s)s.classList.add('hide');},650);
   try{const r=await fetch('conhece_brasil_v1.json');D=await r.json();}
-  catch(e){setMsg('Erro: conhece_brasil_v1.json não encontrado.');return;}
+  catch(e){return erro('Erro ao carregar dados IPS (conhece_brasil_v1.json).');}
+  setBar(42);
 
-  prog('Carregando geometrias…',50);
-  try{const r=await fetch('municipios_geo.geojson');GEO=await r.json();}
-  catch(e){setMsg('Erro: municipios_geo.geojson não encontrado.');return;}
+  // Geometrias: TopoJSON (leve) com fallback para GeoJSON
+  try{
+    const r=await fetch('municipios_topo.json');
+    const topo=await r.json();
+    GEO=topojson.feature(topo,topo.objects.municipios);
+  }catch(e){
+    try{const r=await fetch('municipios_geo.geojson');GEO=await r.json();}
+    catch(e2){return erro('Erro ao carregar geometrias dos municípios.');}
+  }
+  setBar(68);
 
-  prog('Indexando…',80);
-  for(const m of D.municipios) munIdx[nrm(m.m)+'_'+nrm(m.u)]=m;
+  // Indexação
+  for(const m of D.municipios) munIdx[chaveOf(m)]=m;
   for(const f of GEO.features){
     const p=f.properties;
     p._k=nrm(p.NM_MUN||'')+'_'+nrm(p.SIGLA_UF||'');
     p._d=munIdx[p._k]||null;
+    if(p.CD_MUN){chaveToCd[p._k]=String(p.CD_MUN);cdToChave[String(p.CD_MUN)]=p._k;}
   }
-  prog('Iniciando…',95);
-  await sleep(80);
+  buildSlugs();
+  buildSearchIndex();
+  setBar(86);
+
+  await sleep(60);
   initUI();
-  prog('',100);
-  await sleep(250);
-  document.getElementById('loading').style.display='none';
+  aplicarHash();
+  window.addEventListener('hashchange',onHashChange);
+
+  setBar(100);
+  pronto();
 }
-function prog(msg,pct){
-  document.getElementById('ld-msg').textContent=msg;
-  document.getElementById('ld-fill').style.width=pct+'%';
+
+function setBar(pct){document.getElementById('loadbar-fill').style.width=pct+'%';}
+function erro(msg){
+  document.getElementById('splash').classList.add('hide');
+  const sm=document.getElementById('skel-map');
+  sm.innerHTML='<div class="load-err">'+msg+'</div>';
+  sm.style.background='var(--bg)';
 }
-function setMsg(m){document.getElementById('ld-msg').textContent=m;}
+function pronto(){
+  document.getElementById('skel-panel').classList.add('hide');
+  document.getElementById('skel-map').classList.add('hide');
+  document.getElementById('loadbar').classList.add('done');
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(()=>{
+    document.getElementById('skel-panel').remove();
+    document.getElementById('skel-map').remove();
+    document.getElementById('splash').remove();
+    leaf&&leaf.invalidateSize();
+  },500);
+}
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function nrm(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();}
+function chaveOf(m){return nrm(m.m)+'_'+nrm(m.u);}
+function icons(){if(window.lucide) lucide.createIcons();}
+
+// slugs para permalink de indicadores
+function buildSlugs(){
+  for(const ind of Object.keys(D.meta)){
+    let s=nrm(ind).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    // evita colisão
+    let base=s,i=2; while(slugToInd[s]){s=base+'-'+(i++);}
+    slugToInd[s]=ind; indToSlug[ind]=s;
+  }
+}
+function catDeInd(ind){
+  for(const[cat,inds]of Object.entries(GRUPOS)) if(inds.includes(ind)) return cat;
+  return null;
+}
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initUI(){
   initMapa();
-  buildChips('mapa-chips',catMapa,cat=>{catMapa=cat;buildChips('mapa-chips',catMapa,arguments.callee);buildIndList();});
-  buildIndList();
-  buildChips('rank-chips',catRank,cat=>{
-    catRank=cat;
-    const inds=GRUPOS[cat]||[];
-    rankInd=inds[0]||rankInd;
-    buildChips('rank-chips',catRank,arguments.callee);
-    buildRank();
-  });
+  criarCamadaMapa();
+  buildChips('rank-chips',catRank,onCatRank);
   buildRank();
-  atualizarMapa();
+  setIndicador(IND,true);   // monta chips/lista/estilos/legenda do mapa
+  icons();
 }
 
 // ─── MAPA ─────────────────────────────────────────────────────────────────────
 function initMapa(){
-  leaf=L.map('map',{zoomControl:false,attributionControl:false});
+  leaf=L.map('map',{zoomControl:false,attributionControl:false,preferCanvas:false});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(leaf);
   L.control.zoom({position:'bottomright'}).addTo(leaf);
   leaf.setView([-14,-52],4);
 }
 
 function getEstiloNormal(f){
-  const d=f.properties._d, ind=IND, v=d?d.i[ind]:null, esc=getEsc(ind);
+  const d=f.properties._d, v=d?d.i[IND]:null, esc=getEsc(IND);
   if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
   return{fillColor:getCor(v,esc),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.88};
 }
 
-function atualizarMapa(){
-  if(geoLayer){leaf.removeLayer(geoLayer);geoLayer=null;}
-  featureSel=null;
-  const ind=IND,meta=D.meta[ind],esc=getEsc(ind);
-
+// Cria a camada UMA vez. Trocar indicador apenas re-estiliza (transição suave).
+function criarCamadaMapa(){
   geoLayer=L.geoJSON(GEO,{
-    style:f=> getEstiloNormal(f), // todos com cor normal, sempre
+    style:f=>getEstiloNormal(f),
     onEachFeature:(f,layer)=>{
-      const d=f.properties._d,v=d?d.i[ind]:null;
-      const nm=f.properties.NM_MUN||'',uf=f.properties.SIGLA_UF||'';
-      const un=meta?meta.unidade:'';
-      layer.bindTooltip(()=>`
-        <div class="mtt-nm">${nm} — ${uf}</div>
-        <div class="mtt-v">${v!=null?fmt(v)+' <span style="opacity:.6;font-size:.68em">'+un+'</span>':'sem dado'}</div>
-        <div class="mtt-ind">${meta?meta.nome:ind}</div>
-      `,{className:'mtt',sticky:true,opacity:1});
-
-      layer.on('click',()=>{if(d) selecionarMun(d,layer,f.properties._k);});
-      layer.on('mouseover',e=>{
-        if(f.properties._k!==chaveSel) e.target.setStyle({weight:1.5,color:'#333'});
-      });
-      layer.on('mouseout',e=>{
-        if(f.properties._k!==chaveSel) geoLayer.resetStyle(e.target);
-      });
-
-      // Restaura borda do município selecionado ao recriar o mapa
-      if(chaveSel && f.properties._k===chaveSel){
-        featureSel=layer;
-        destacarFeature(layer);
-      }
+      const p=f.properties;
+      layerByChave[p._k]=layer;
+      // Tooltip dinâmico: lê o indicador atual a cada abertura
+      layer.bindTooltip(()=>tooltipHTML(p),{className:'mtt',sticky:true,opacity:1});
+      layer.on('click',()=>{if(p._d) selecionarMun(p._d,layer,p._k,false);});
+      layer.on('mouseover',e=>{if(p._k!==chaveSel) e.target.setStyle({weight:1.5,color:'#333'});});
+      layer.on('mouseout',e=>{if(p._k!==chaveSel) geoLayer.resetStyle(e.target);});
     }
   }).addTo(leaf);
-
-  atualizarLegenda(ind,esc,meta);
 }
 
-function selecionarMun(m,layer,chave){
-  // Remove borda anterior sem recriar o mapa
-  if(featureSel&&chaveSel){
-    geoLayer.resetStyle(featureSel);
+function tooltipHTML(p){
+  const d=p._d, meta=D.meta[IND];
+  const nm=p.NM_MUN||'', uf=p.SIGLA_UF||'';
+  const un=meta?meta.unidade:'';
+  const v=d?d.i[IND]:null;
+  let rk='';
+  if(d&&v!=null){
+    const r=getRank(IND), pos=r.pos[p._k];
+    if(pos) rk=`<div class="mtt-rk"><b>${pos}º</b> de ${r.total.toLocaleString('pt-BR')}</div>`;
+  }
+  return `<div class="mtt-nm">${nm} — ${uf}</div>
+    <div class="mtt-v">${v!=null?fmt(v)+' <span style="opacity:.6;font-size:.68em">'+un+'</span>':'sem dado'}</div>
+    <div class="mtt-ind">${meta?meta.nome:IND}</div>${rk}`;
+}
+
+// Re-estiliza todos os polígonos para o indicador atual (sem recriar a camada)
+function aplicarEstilos(){
+  if(!geoLayer) return;
+  geoLayer.eachLayer(layer=>layer.setStyle(getEstiloNormal(layer.feature)));
+  if(chaveSel&&featureSel) destacarFeature(featureSel);
+}
+
+function selecionarMun(m,layer,chave,fromHash){
+  limparSelecao();
+  munSel=m;
+  chaveSel=chave||chaveOf(m);
+  featureSel=layer;
+  if(layer) destacarFeature(layer);
+
+  if(m.lat&&m.lon){
+    const icon=L.divIcon({className:'',html:`<div class="marcador-sel">${m.m}</div>`,iconAnchor:[0,0]});
+    markerSel=L.marker([m.lat,m.lon],{icon,zIndexOffset:1000}).addTo(leaf);
+    leaf.setView([m.lat,m.lon],9,{animate:true});
+  }
+  abrirFicha(m);
+  if(!fromHash){const cd=chaveToCd[chaveSel]; if(cd) setHash('mun/'+cd);}
+}
+
+function limparSelecao(){
+  if(featureSel){
+    if(featureSel._path) featureSel._path.classList.remove('mun-pulse');
+    if(geoLayer) geoLayer.resetStyle(featureSel);
   }
   if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
-
-  munSel=m;
-  chaveSel=chave||nrm(m.m)+'_'+nrm(m.u);
-  featureSel=layer;
-  destacarFeature(layer);
-
-  // Marcador com nome
-  if(m.lat&&m.lon){
-    const icon=L.divIcon({
-      className:'',
-      html:`<div class="marcador-sel">${m.m}</div>`,
-      iconAnchor:[0,0]
-    });
-    markerSel=L.marker([m.lat,m.lon],{icon,zIndexOffset:1000}).addTo(leaf);
-  }
-
-  abrirFicha(m);
 }
 
 function destacarFeature(layer){
-  // Mantém a cor do indicador, adiciona só a borda forte
   if(!layer) return;
-  const f=layer.feature;
-  if(f){
-    const est=getEstiloNormal(f);
-    layer.setStyle({...est, weight:3.5, color:'#1a1814', fillOpacity:.95});
-  } else {
-    layer.setStyle({weight:3.5, color:'#1a1814', fillOpacity:.95});
-  }
+  const est=getEstiloNormal(layer.feature);
+  layer.setStyle({...est,weight:3.2,color:'#1a1814',fillOpacity:.95});
   layer.bringToFront();
+  if(layer._path) layer._path.classList.add('mun-pulse'); // contorno pulsante
 }
 
+// ─── LEGENDA — 7 degraus + mini histograma + mediana ──────────────────────────
 function atualizarLegenda(ind,esc,meta){
   const un=meta?meta.unidade:'';
   const maior=meta?meta.maior:'';
   document.getElementById('leg-ind').textContent=meta?meta.nome:ind;
   document.getElementById('leg-desc').textContent=meta?meta.simples:'';
-  document.getElementById('leg-bar').style.background=
-    'linear-gradient(to right,#2166ac,#f5f5f0,#b2182b)';
-  document.getElementById('leg-lo').textContent='← '+fmt(esc.p5)+' '+un;
-  document.getElementById('leg-md').textContent=fmt(esc.mid);
-  document.getElementById('leg-hi').textContent=fmt(esc.p95)+' '+un+' →';
-  const nota=maior==='melhor'
-    ?'🔵 Azul = menor valor  ·  🔴 Vermelho = maior valor  ·  Para este indicador MAIOR É MELHOR'
-    :maior==='pior'
-    ?'🔵 Azul = menor valor  ·  🔴 Vermelho = maior valor  ·  Para este indicador MAIOR É PIOR'
-    :'🔵 Azul = menor valor  ·  🔴 Vermelho = maior valor';
-  document.getElementById('leg-note').textContent=nota;
+
+  const N=7, lo=esc.p5, hi=esc.p95, span=(hi-lo)||1;
+  const counts=new Array(N).fill(0);
+  let semDado=0;
+  for(const m of D.municipios){
+    const v=m.i[ind];
+    if(v==null){semDado++;continue;}
+    let idx=Math.floor((v-lo)/span*N);
+    idx=Math.max(0,Math.min(N-1,idx));
+    counts[idx]++;
+  }
+  const maxC=Math.max(...counts,1);
+
+  // Histograma + barras de cor
+  const bars=document.getElementById('leg-bars');
+  const sws=document.getElementById('leg-swatches');
+  let bh='',sh='';
+  for(let i=0;i<N;i++){
+    const t=(i+.5)/N, cor=getCorT(t);
+    const a=lo+span*i/N, b=lo+span*(i+1)/N;
+    const h=Math.round(counts[i]/maxC*100);
+    bh+=`<div class="leg-col" title="${fmt(a)} – ${fmt(b)} ${un}\n${counts[i].toLocaleString('pt-BR')} municípios">
+      <div class="leg-colbar" style="height:${h}%;background:${cor}"></div>
+      <div class="leg-count">${counts[i]>0?abbr(counts[i]):''}</div></div>`;
+    sh+=`<div style="background:${cor}"></div>`;
+  }
+  const medFrac=Math.max(0,Math.min(1,(esc.mid-lo)/span));
+  bh+=`<div class="leg-median" style="left:${(medFrac*100).toFixed(1)}%" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
+  bars.innerHTML=bh;
+  sws.innerHTML=sh;
+
+  document.getElementById('leg-lo').textContent=fmt(lo)+' '+un;
+  document.getElementById('leg-hi').textContent=fmt(hi)+' '+un;
+
+  const dirTxt = maior==='melhor' ? 'maior = melhor'
+    : maior==='pior' ? 'maior = pior' : 'escala neutra';
+  document.getElementById('leg-note').innerHTML=
+    `<span><span class="leg-dot" style="background:#2166ac"></span>menor`+
+    `<span class="leg-dot" style="background:#b2182b;margin-left:6px"></span>maior · ${dirTxt}</span>`+
+    `<span class="leg-nodata"><span class="leg-nodata-sw"></span>`+
+    `${semDado.toLocaleString('pt-BR')} sem dado</span>`;
 }
 
 // ─── CHIPS ────────────────────────────────────────────────────────────────────
+function onCatMapa(cat){
+  catMapa=cat;
+  buildChips('mapa-chips',catMapa,onCatMapa);
+  buildIndList(); icons();
+}
+function onCatRank(cat){
+  catRank=cat;
+  const inds=GRUPOS[cat]||[];
+  rankInd=inds[0]||rankInd;
+  buildChips('rank-chips',catRank,onCatRank);
+  buildRank(); icons();
+}
 function buildChips(id,ativa,cb){
   const wrap=document.getElementById(id);
   wrap.innerHTML='';
   for(const[cat,cor]of Object.entries(CORES)){
     const el=document.createElement('button');
     el.className='chip';
-    el.textContent=cat;
+    el.innerHTML=`<i data-lucide="${CAT_ICON[cat]||'circle'}"></i><span>${cat}</span>`;
     el.style.borderColor=cor;
     if(cat===ativa){el.style.color='#fff';el.style.background=cor;}
     else{el.style.color=cor;el.style.background='transparent';}
@@ -624,9 +854,22 @@ function buildIndList(){
     el.className='ind-item'+(ind===IND?' on':'');
     el.innerHTML=`<div class="ind-name">${meta.nome}
       <div class="ind-unit">${meta.unidade} <span class="ind-dir">${dir}</span></div></div>`;
-    el.onclick=()=>{IND=ind;buildIndList();atualizarMapa();};
+    el.onclick=()=>setIndicador(ind);
     wrap.appendChild(el);
   }
+}
+
+// Ponto único de troca de indicador (mapa + legenda + lista + permalink)
+function setIndicador(ind,fromHash){
+  IND=ind;
+  const cat=catDeInd(ind); if(cat) catMapa=cat;
+  buildChips('mapa-chips',catMapa,onCatMapa);
+  buildIndList();
+  aplicarEstilos();
+  atualizarLegenda(ind,getEsc(ind),D.meta[ind]);
+  if(munSel) refreshFichaAtivo();
+  icons();
+  if(!fromHash) setHash('ind/'+indToSlug[ind]);
 }
 
 // ─── FICHA ────────────────────────────────────────────────────────────────────
@@ -638,15 +881,22 @@ function abrirFicha(m){
   const ips=m.i['Índice de Progresso Social'];
   const pop=m.i['POPULAÇÃO 2025'];
   const pib=m.i['PIB PER CAPITA'];
+  const rIps=getRank('Índice de Progresso Social');
+  const posIps=rIps.pos[chaveOf(m)];
 
   let html=`<div id="ficha-hdr">
+    <button class="f-close" onclick="backSearch()" title="Fechar ficha"><i data-lucide="x"></i></button>
     <div class="f-nome">${m.m}</div>
     <div class="f-sub">${m.u} · ${m.r}${pop?' · '+fmtPop(pop)+' hab.':''}${pib?' · PIB pc R$'+fmt(pib):''}</div>
     <div class="f-ips">
       <span class="f-ips-v">${ips!=null?ips.toFixed(1):'—'}</span>
       <span class="f-ips-l">IPS Brasil 2026<br>escala 0–100, maior = melhor</span>
     </div>
-  </div>`;
+    ${posIps?`<div class="f-rank">Ranking IPS nacional: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
+  </div>
+  <div class="f-caption">Barras: posição nacional na faixa 5–95% (<span class="leg-dot" style="background:#2166ac"></span>menor →<span class="leg-dot" style="background:#b2182b"></span>maior). Traço vertical = média do estado (${m.u}).</div>`;
+
+  const medUF=D.medias_por_uf[m.u]||{};
 
   for(const[grp,inds]of Object.entries(GRUPOS)){
     const corGrp=CORES[grp];
@@ -656,12 +906,16 @@ function abrirFicha(m){
       const esc=getEsc(ind);
       const pct=Math.max(0,Math.min(100,((v-esc.p5)/(esc.p95-esc.p5+.001))*100));
       const barCor=getCor(v,esc);
+      const med=medUF[ind];
+      const medPct=med!=null?Math.max(0,Math.min(100,((med-esc.p5)/(esc.p95-esc.p5+.001))*100)):null;
       const isAtivo=ind===IND;
-      return`<div class="find${isAtivo?' find-ativo':''}" onclick="mudarIndicador('${ind.replace(/'/g,"\\'")}',this)" title="Ver no mapa">
+      const slug=indToSlug[ind];
+      const tick=medPct!=null?`<div class="find-tick" style="left:${medPct.toFixed(1)}%" title="média ${m.u}: ${fmt(med)}"></div>`:'';
+      return`<div class="find${isAtivo?' find-ativo':''}" data-ind="${slug}" onclick="mudarIndicador('${slug}')" title="Ver no mapa">
         <div class="find-info">
-          <div class="find-n">${meta.nome}${isAtivo?' <span class="find-no-mapa">no mapa ↗</span>':' <span class="find-ver-mapa">ver no mapa</span>'}</div>
+          <div class="find-n">${meta.nome} <span class="find-badge ${isAtivo?'find-no-mapa':'find-ver-mapa'}">${isAtivo?'no mapa ↗':'ver no mapa'}</span></div>
           <div class="find-s">${meta.simples}</div>
-          <div class="find-bar-wrap"><div class="find-bar" style="width:${pct}%;background:${barCor}"></div></div>
+          <div class="find-bar-wrap"><div class="find-bar" style="width:${pct}%;background:${barCor}"></div>${tick}</div>
         </div>
         <div class="find-v">${fmt(v)}<span class="find-u">${meta.unidade}</span></div>
       </div>`;
@@ -674,8 +928,23 @@ function abrirFicha(m){
   }
 
   document.getElementById('ficha').innerHTML=html;
-  if(m.lat&&m.lon) leaf.setView([m.lat,m.lon],9,{animate:true});
+  icons();
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) closePanel();
+}
+
+// Atualiza só o destaque "no mapa" da ficha quando o indicador muda
+function refreshFichaAtivo(){
+  document.querySelectorAll('#ficha .find').forEach(f=>{
+    const on=f.dataset.ind===indToSlug[IND];
+    f.classList.toggle('find-ativo',on);
+    const b=f.querySelector('.find-badge');
+    if(b){b.className='find-badge '+(on?'find-no-mapa':'find-ver-mapa');b.textContent=on?'no mapa ↗':'ver no mapa';}
+  });
+}
+
+function mudarIndicador(slug){
+  const ind=slugToInd[slug]; if(!ind) return;
+  setIndicador(ind);
 }
 
 function backSearch(){
@@ -684,71 +953,50 @@ function backSearch(){
   document.getElementById('ficha-back').style.display='none';
   document.getElementById('srch').value='';
   document.getElementById('srch-res').innerHTML='';
-  if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
-  // Remove borda do município anterior sem recriar o mapa inteiro
-  if(featureSel&&geoLayer) geoLayer.resetStyle(featureSel);
+  limparSelecao();
   munSel=null; featureSel=null; chaveSel=null;
+  setHash('ind/'+indToSlug[IND]);
 }
 
-// ─── BUSCA ────────────────────────────────────────────────────────────────────
+// ─── BUSCA (fuzzy via Fuse.js) ────────────────────────────────────────────────
+function buildSearchIndex(){
+  const list=D.municipios.map(m=>({m,n:nrm(m.m),u:m.u}));
+  if(window.Fuse){
+    FUSE=new Fuse(list,{
+      keys:[{name:'n',weight:.85},{name:'u',weight:.15}],
+      threshold:.4,ignoreLocation:true,minMatchCharLength:2,includeScore:true
+    });
+  }
+}
 function searchMun(q){
   const res=document.getElementById('srch-res');
   if(!q||q.length<2){res.innerHTML='';return;}
   const qn=nrm(q);
-  const found=D.municipios.filter(m=>nrm(m.m).includes(qn)||nrm(m.u).includes(qn)).slice(0,12);
-  res.innerHTML=found.map(m=>`
-    <div class="sr" onclick="selecionarPorChave('${nrm(m.m)}_${nrm(m.u)}')">
-      <span>${m.m}</span><span class="sr-uf">${m.u}</span>
-    </div>`).join('');
+  let found;
+  if(FUSE){
+    found=FUSE.search(qn).slice(0,12).map(r=>r.item.m);
+  }else{
+    found=D.municipios.filter(m=>nrm(m.m).includes(qn)||nrm(m.u).includes(qn)).slice(0,12);
+  }
+  if(!found.length){res.innerHTML='<div class="sr-empty">Nenhum município encontrado.</div>';return;}
+  res.innerHTML='';
+  for(const m of found){
+    const pop=m.i['POPULAÇÃO 2025'];
+    const el=document.createElement('div');
+    el.className='sr';
+    el.innerHTML=`<div class="sr-nm"><b>${m.m}</b>
+      <div class="sr-meta">${m.r}${pop?' · '+fmtPop(pop)+' hab.':''}</div></div>
+      <span class="sr-uf">${m.u}</span>`;
+    el.onclick=()=>selecionarPorChave(chaveOf(m),false);
+    res.appendChild(el);
+  }
 }
 
-function selecionarPorChave(chave){
+function selecionarPorChave(chave,fromHash){
   const m=munIdx[chave];
   if(!m) return;
-  chaveSel=chave;
-  munSel=m;
-  // Recriar mapa para garantir que o layer correto é encontrado e destacado
-  atualizarMapa();
-  if(markerSel){leaf.removeLayer(markerSel);markerSel=null;}
-  if(m.lat&&m.lon){
-    const icon=L.divIcon({
-      className:'',
-      html:`<div class="marcador-sel">${m.m}</div>`,
-      iconAnchor:[0,0]
-    });
-    markerSel=L.marker([m.lat,m.lon],{icon,zIndexOffset:1000}).addTo(leaf);
-  }
-  abrirFicha(m);
-  if(m.lat&&m.lon) leaf.setView([m.lat,m.lon],9,{animate:true});
-}
-// ─── MUDAR INDICADOR pela ficha (mantém município isolado, muda cor do mapa) ──
-function mudarIndicador(ind, el){
-  IND=ind;
-  // Atualiza destaque na ficha
-  document.querySelectorAll('.find').forEach(f=>{
-    f.classList.remove('find-ativo');
-    const nm=f.querySelector('.find-n');
-    if(nm){
-      nm.querySelectorAll('.find-no-mapa').forEach(e=>e.remove());
-      const old=nm.querySelector('.find-ver-mapa');
-      if(old) old.style.opacity='0';
-    }
-  });
-  if(el){
-    el.classList.add('find-ativo');
-    const nm=el.querySelector('.find-n');
-    if(nm){
-      const span=nm.querySelector('.find-ver-mapa');
-      if(span){span.className='find-no-mapa';span.textContent='no mapa ↗';}
-    }
-  }
-  // Muda o mapa mantendo isolamento ativo
-  atualizarMapa();
-  // Sincroniza lista de indicadores no painel Mapa
-  buildIndList();
-  // Atualiza legenda
-  const meta=D.meta[ind],esc=getEsc(ind);
-  if(meta&&esc) atualizarLegenda(ind,esc,meta);
+  const layer=layerByChave[chave]||null;
+  selecionarMun(m,layer,chave,fromHash);
 }
 
 // ─── RANKINGS ─────────────────────────────────────────────────────────────────
@@ -764,49 +1012,99 @@ function buildRank(){
   if(!inds.includes(rankInd)) rankInd=inds[0];
   const sel=document.getElementById('rk-sel');
   sel.innerHTML=inds.map(i=>`<option value="${i}" ${i===rankInd?'selected':''}>${D.meta[i]?D.meta[i].nome:i}</option>`).join('');
+  const esc=getEsc(rankInd);
 
-  // Top 10 municípios
+  // Top 10 municípios + mini barras
   let vs=D.municipios.map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
   vs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
-  document.getElementById('rk-mun').innerHTML=vs.slice(0,10).map((x,i)=>`
-    <div class="rk-item" onclick="selecionarPorChave('${nrm(x.m.m)}_${nrm(x.m.u)}')">
-      <span class="rk-pos">${i+1}</span>
+  const top=vs.slice(0,10);
+  const maxMun=Math.max(...top.map(x=>Math.abs(x.v)),1);
+  const munWrap=document.getElementById('rk-mun');
+  munWrap.innerHTML='';
+  top.forEach((x,i)=>{
+    const el=document.createElement('div');
+    el.className='rk-item';
+    el.innerHTML=`<span class="rk-pos">${i+1}</span>
       <span class="rk-nm">${x.m.m} <span class="rk-uf">${x.m.u}</span></span>
-      <span class="rk-v">${fmt(x.v)}</span>
-    </div>`).join('');
+      <span class="rk-bar-wrap"><span class="rk-bar" style="width:${(Math.abs(x.v)/maxMun*100).toFixed(0)}%;background:${getCor(x.v,esc)}"></span></span>
+      <span class="rk-v">${fmt(x.v)}</span>`;
+    el.onclick=()=>selecionarPorChave(chaveOf(x.m),false);
+    munWrap.appendChild(el);
+  });
 
-  // Todos os estados — média ponderada por população
-  // Ponderação: soma(valor * pop) / soma(pop) por UF
-  // Mais correto que média simples, que trata municípios pequenos igual aos grandes
-  const ufSoma={}, ufPop={}, ufN={};
+  // Estados — média ponderada por população
+  const ufSoma={},ufPop={},ufN={};
   for(const m of D.municipios){
-    const v=m.i[rankInd];
-    const pop=m.i['POPULAÇÃO 2025']||0;
+    const v=m.i[rankInd]; const pop=m.i['POPULAÇÃO 2025']||0;
     if(v==null) continue;
     if(!ufSoma[m.u]){ufSoma[m.u]=0;ufPop[m.u]=0;ufN[m.u]=0;}
-    ufSoma[m.u]+=v*pop;
-    ufPop[m.u]+=pop;
-    ufN[m.u]++;
+    ufSoma[m.u]+=v*pop; ufPop[m.u]+=pop; ufN[m.u]++;
   }
-  let estVs=Object.keys(ufSoma).map(u=>({
-    u, v:ufPop[u]>0?ufSoma[u]/ufPop[u]:0, n:ufN[u]
-  }));
+  let estVs=Object.keys(ufSoma).map(u=>({u,v:ufPop[u]>0?ufSoma[u]/ufPop[u]:0,n:ufN[u]}));
   estVs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
+  const maxEst=Math.max(...estVs.map(x=>Math.abs(x.v)),1);
 
-  // Nota sobre o método
   const metaNote=`<div style="font-size:.62rem;color:var(--muted);padding:5px 7px;
     background:var(--bg);border-radius:5px;margin-bottom:8px;line-height:1.4">
     Média ponderada pela população de cada município.<br>
     Municípios maiores têm mais peso no resultado do estado.
   </div>`;
-
-  document.getElementById('rk-est').innerHTML = metaNote +
-    estVs.map((x,i)=>`
-    <div class="rk-item">
-      <span class="rk-pos">${i+1}</span>
+  const estWrap=document.getElementById('rk-est');
+  estWrap.innerHTML=metaNote;
+  estVs.forEach((x,i)=>{
+    const el=document.createElement('div');
+    el.className='rk-item';
+    el.innerHTML=`<span class="rk-pos">${i+1}</span>
       <span class="rk-nm">${x.u} <span class="rk-uf">${x.n} mun.</span></span>
-      <span class="rk-v">${fmt(x.v)}</span>
-    </div>`).join('');
+      <span class="rk-bar-wrap"><span class="rk-bar" style="width:${(Math.abs(x.v)/maxEst*100).toFixed(0)}%;background:${getCor(x.v,esc)}"></span></span>
+      <span class="rk-v">${fmt(x.v)}</span>`;
+    estWrap.appendChild(el);
+  });
+}
+
+// ─── EXPORTAR CSV ─────────────────────────────────────────────────────────────
+function exportCSV(){
+  const ind=rankInd, meta=D.meta[ind];
+  let rows=D.municipios.map(m=>({m,v:m.i[ind]})).filter(x=>x.v!=null);
+  rows.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
+  const sep=';';
+  const head=['Posicao','Municipio','UF','Regiao','Indicador','Valor','Unidade'];
+  const lines=[head.join(sep)];
+  rows.forEach((x,i)=>{
+    lines.push([
+      i+1, csvq(x.m.m), x.m.u, csvq(x.m.r), csvq(meta?meta.nome:ind),
+      String(x.v).replace('.',','), csvq(meta?meta.unidade:'')
+    ].join(sep));
+  });
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='ips_ranking_'+indToSlug[ind]+'_'+(rankDir==='top'?'maiores':'menores')+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function csvq(s){s=String(s); return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
+
+// ─── PERMALINK (hash da URL) ──────────────────────────────────────────────────
+function setHash(h){selfHash=h; if(location.hash.slice(1)!==h) location.hash=h;}
+function aplicarHash(){
+  const h=location.hash.replace(/^#/,'');
+  if(!h){setIndicador(IND,true);return;}
+  const sl=h.indexOf('/');
+  const tipo=sl<0?h:h.slice(0,sl), val=sl<0?'':h.slice(sl+1);
+  if(tipo==='mun'){
+    const k=cdToChave[val];
+    if(k&&munIdx[k]){selecionarPorChave(k,true);return;}
+  }else if(tipo==='ind'){
+    const ind=slugToInd[val];
+    if(ind){setIndicador(ind,true);return;}
+  }
+}
+function onHashChange(){
+  const h=location.hash.slice(1);
+  if(h===selfHash) return;   // mudança feita pela própria app
+  aplicarHash();
 }
 
 // ─── TABS & UI ────────────────────────────────────────────────────────────────
@@ -816,9 +1114,7 @@ function showTab(tab,btn){
   ['mapa','explorar','rankings'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'flex':'none';
   });
-  if(tab==='mapa'){
-    document.getElementById('tab-mapa').style.flexDirection='column';
-  }
+  if(tab==='mapa') document.getElementById('tab-mapa').style.flexDirection='column';
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
 }
 
@@ -829,8 +1125,10 @@ function closePanel(){panelOpen=false;document.getElementById('panel').classList
 function toggleDesktop(){
   document.body.classList.toggle('desktop');
   const on=document.body.classList.contains('desktop');
-  document.getElementById('btn-desktop').classList.toggle('on',on);
-  document.getElementById('btn-desktop').textContent=on?'📱 Mobile':'🖥 Desktop';
+  const btn=document.getElementById('btn-desktop');
+  btn.classList.toggle('on',on);
+  btn.innerHTML=on?'<i data-lucide="smartphone"></i> Mobile':'<i data-lucide="monitor"></i> Desktop';
+  icons();
   setTimeout(()=>leaf&&leaf.invalidateSize(),350);
 }
 
@@ -842,6 +1140,10 @@ function fmt(v){
   if(Math.abs(v)>=100) return Math.round(v).toLocaleString('pt-BR');
   return parseFloat(v.toFixed(2)).toString();
 }
+function abbr(n){
+  if(n>=1e3) return(n/1e3).toFixed(n>=1e4?0:1)+'k';
+  return String(n);
+}
 function fmtPop(v){
   if(v>=1e6) return(v/1e6).toFixed(1)+'M';
   if(v>=1e3) return(v/1e3).toFixed(0)+'k';
@@ -849,6 +1151,7 @@ function fmtPop(v){
 }
 
 // ─── START ────────────────────────────────────────────────────────────────────
+icons();   // ícones estáticos do header/tabs
 boot();
 </script>
 </body>
