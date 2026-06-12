@@ -97,7 +97,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 /* LEGENDA — altura fixa, nunca some */
 #legenda{
   flex-shrink:0;
-  height:166px; /* altura explícita garante que o scroll acima saiba o espaço */
+  height:180px; /* altura explícita garante que o scroll acima saiba o espaço */
   padding:9px 14px 10px;
   border-top:2px solid var(--border);
   background:var(--surface);
@@ -108,37 +108,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 #leg-desc{font-size:.66rem;color:var(--muted);line-height:1.35;margin-bottom:5px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* LEGENDA — 7 degraus + mini histograma + mediana */
-.leg-bars{
-  position:relative;display:flex;align-items:flex-end;gap:2px;
-  height:38px;margin-bottom:2px;
-}
-.leg-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;}
-.leg-colbar{width:100%;border-radius:2px 2px 0 0;min-height:3px;
-  transition:height .3s ease,background .3s ease;}
-.leg-count{font-size:.5rem;text-align:center;color:var(--muted);margin-top:1px;line-height:1;}
-.leg-median{
-  position:absolute;top:-3px;bottom:0;width:0;
-  border-left:1.6px dashed var(--text);pointer-events:none;
-}
-.leg-median::after{
-  content:'mediana';position:absolute;top:-11px;left:3px;
-  font-size:.5rem;color:var(--text);white-space:nowrap;
-  font-family:'Syne',sans-serif;font-weight:700;letter-spacing:.02em;
-}
-.leg-swatches{display:flex;gap:2px;margin-bottom:3px;}
-.leg-swatches div{flex:1;height:5px;border-radius:1px;}
-#leg-axis{display:flex;justify-content:space-between;font-size:.6rem;
-  color:var(--muted);gap:4px;}
-#leg-axis span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48%;}
-#leg-note{margin-top:5px;font-size:.6rem;color:var(--muted);line-height:1.35;
-  padding:4px 7px;background:var(--bg);border-radius:5px;
-  display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block;
-  vertical-align:middle;margin-right:2px;}
-.leg-nodata{display:inline-flex;align-items:center;gap:4px;}
+/* LEGENDA — escala semântica em degraus, limpa e legível */
+#leg-ends{display:flex;justify-content:space-between;margin-bottom:3px;
+  font-family:'Syne',sans-serif;font-size:.56rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.leg-scale{display:flex;gap:2px;height:16px;margin-bottom:4px;}
+.leg-scale div{flex:1;border-radius:2px;transition:background .3s ease;}
+#leg-axis{display:flex;justify-content:space-between;font-size:.62rem;
+  color:var(--muted);gap:4px;margin-bottom:5px;}
+#leg-axis span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48%;
+  font-variant-numeric:tabular-nums;}
+#leg-note{font-size:.62rem;color:var(--muted);line-height:1.35;
+  padding:4px 8px;background:var(--bg);border-radius:5px;
+  display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;
+  vertical-align:middle;}
 .leg-nodata-sw{width:11px;height:11px;border-radius:3px;background:#d8d4cc;
-  border:1px solid #bbb;flex-shrink:0;}
+  border:1px solid #bbb;flex-shrink:0;display:inline-block;vertical-align:middle;}
+#leg-dist{margin-top:5px;font-size:.62rem;color:var(--muted);line-height:1.35;
+  font-variant-numeric:tabular-nums;}
+#leg-dist b{color:var(--text);font-weight:600;}
 
 /* SECTION LABEL */
 .slabel{
@@ -457,13 +446,14 @@ body.desktop #btn-panel{display:none;}
     <div id="legenda">
       <div id="leg-ind">—</div>
       <div id="leg-desc"></div>
-      <div class="leg-bars" id="leg-bars"></div>
-      <div class="leg-swatches" id="leg-swatches"></div>
+      <div id="leg-ends"><span id="leg-end-lo">PIOR</span><span id="leg-end-hi">MELHOR</span></div>
+      <div class="leg-scale" id="leg-scale"></div>
       <div id="leg-axis">
         <span id="leg-lo"></span>
         <span id="leg-hi"></span>
       </div>
       <div id="leg-note"></div>
+      <div id="leg-dist"></div>
     </div>
 
     <!-- SKELETON do painel -->
@@ -563,22 +553,54 @@ function getEsc(ind){
   if(escCache[ind]) return escCache[ind];
   const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
   let e;
-  if(!vs.length) e={p5:0,p95:1,mid:.5,min:0,max:1};
+  if(!vs.length) e={p5:0,p95:1,mid:.5,min:0,max:1,p25:0,p75:1};
   else e={
     p5:vs[Math.floor(vs.length*.05)],
     p95:vs[Math.floor(vs.length*.95)],
     mid:vs[Math.floor(vs.length*.5)],
+    p25:vs[Math.floor(vs.length*.25)],
+    p75:vs[Math.floor(vs.length*.75)],
     min:vs[0], max:vs[vs.length-1]
   };
   escCache[ind]=e; return e;
 }
-function getCorT(t){
-  t=Math.max(0,Math.min(1,t));
-  if(t<.5){const f=t*2; return`rgb(${lp(33,245,f)},${lp(102,245,f)},${lp(172,245,f)})`;}
-  const f=(t-.5)*2; return`rgb(${lp(245,178,f)},${lp(245,24,f)},${lp(245,43,f)})`;
-}
-function getCor(v,esc){return getCorT((v-esc.p5)/(esc.p95-esc.p5+.001));}
+// Paleta DIVERGENTE semântica: 0 = pior, 1 = melhor (roxo → laranja → verde)
+const PAL_QUAL=[
+  [0.00,[106, 27,154]], // roxo  — pior
+  [0.25,[194, 65,143]], // magenta
+  [0.50,[245,158, 44]], // laranja — médio
+  [0.75,[155,191, 60]], // verde-limão
+  [1.00,[ 30,138, 77]]  // verde — melhor
+];
+// Paleta SEQUENCIAL neutra (apenas magnitude, sem juízo de bom/ruim)
+const PAL_NEUTRA=[
+  [0.00,[223,231,239]], // claro
+  [0.50,[111,159,196]],
+  [1.00,[ 31, 59, 99]]  // escuro
+];
 function lp(a,b,t){return Math.round(a+(b-a)*t);}
+function clamp01(t){return Math.max(0,Math.min(1,t));}
+function rampColor(stops,t){
+  t=clamp01(t);
+  for(let i=1;i<stops.length;i++){
+    if(t<=stops[i][0]){
+      const a=stops[i-1],b=stops[i],f=(t-a[0])/(b[0]-a[0]+1e-9);
+      return`rgb(${lp(a[1][0],b[1][0],f)},${lp(a[1][1],b[1][1],f)},${lp(a[1][2],b[1][2],f)})`;
+    }
+  }
+  const c=stops[stops.length-1][1]; return`rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function isNeutro(ind){return !!(D.meta[ind]&&D.meta[ind].maior==='neutro');}
+// posição 0..1 do valor na faixa nacional (p5..p95)
+function posVal(v,ind){const e=getEsc(ind);return clamp01((v-e.p5)/(e.p95-e.p5+.001));}
+// "qualidade" 0..1: 0=pior, 1=melhor — inverte quando maior=pior
+function goodness(v,ind){const t=posVal(v,ind);return D.meta[ind]&&D.meta[ind].maior==='pior'?1-t:t;}
+// cor semântica final de um valor para um indicador
+function corInd(v,ind){
+  return isNeutro(ind)?rampColor(PAL_NEUTRA,posVal(v,ind)):rampColor(PAL_QUAL,goodness(v,ind));
+}
+// cor de um passo t (0..1) da escala atual — usada na legenda
+function corEscalaT(t,ind){return isNeutro(ind)?rampColor(PAL_NEUTRA,t):rampColor(PAL_QUAL,t);}
 
 // Ranking nacional (1º = melhor; direção depende de maior=melhor/pior)
 function getRank(ind){
@@ -692,9 +714,9 @@ function initMapa(){
 }
 
 function getEstiloNormal(f){
-  const d=f.properties._d, v=d?d.i[IND]:null, esc=getEsc(IND);
+  const d=f.properties._d, v=d?d.i[IND]:null;
   if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
-  return{fillColor:getCor(v,esc),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.88};
+  return{fillColor:corInd(v,IND),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.9};
 }
 
 // Cria a camada UMA vez. Trocar indicador apenas re-estiliza (transição suave).
@@ -770,50 +792,37 @@ function destacarFeature(layer){
 // ─── LEGENDA — 7 degraus + mini histograma + mediana ──────────────────────────
 function atualizarLegenda(ind,esc,meta){
   const un=meta?meta.unidade:'';
-  const maior=meta?meta.maior:'';
+  const neutro=isNeutro(ind);
   document.getElementById('leg-ind').textContent=meta?meta.nome:ind;
   document.getElementById('leg-desc').textContent=meta?meta.simples:'';
 
-  const N=7, lo=esc.p5, hi=esc.p95, span=(hi-lo)||1;
-  const counts=new Array(N).fill(0);
-  let semDado=0;
-  for(const m of D.municipios){
-    const v=m.i[ind];
-    if(v==null){semDado++;continue;}
-    let idx=Math.floor((v-lo)/span*N);
-    idx=Math.max(0,Math.min(N-1,idx));
-    counts[idx]++;
-  }
-  const maxC=Math.max(...counts,1);
+  // Rótulos das pontas: pior→melhor (semântico) ou menor→maior (neutro)
+  document.getElementById('leg-end-lo').textContent=neutro?'MENOR':'PIOR';
+  document.getElementById('leg-end-hi').textContent=neutro?'MAIOR':'MELHOR';
 
-  // Histograma + barras de cor
-  const bars=document.getElementById('leg-bars');
-  const sws=document.getElementById('leg-swatches');
-  let bh='',sh='';
-  for(let i=0;i<N;i++){
-    const t=(i+.5)/N, cor=getCorT(t);
-    const a=lo+span*i/N, b=lo+span*(i+1)/N;
-    const h=Math.round(counts[i]/maxC*100);
-    bh+=`<div class="leg-col" title="${fmt(a)} – ${fmt(b)} ${un}\n${counts[i].toLocaleString('pt-BR')} municípios">
-      <div class="leg-colbar" style="height:${h}%;background:${cor}"></div>
-      <div class="leg-count">${counts[i]>0?abbr(counts[i]):''}</div></div>`;
-    sh+=`<div style="background:${cor}"></div>`;
-  }
-  const medFrac=Math.max(0,Math.min(1,(esc.mid-lo)/span));
-  bh+=`<div class="leg-median" style="left:${(medFrac*100).toFixed(1)}%" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
-  bars.innerHTML=bh;
-  sws.innerHTML=sh;
+  // Escala em 7 degraus — esquerda = pior/menor, direita = melhor/maior
+  const N=7; let sc='';
+  for(let i=0;i<N;i++) sc+=`<div style="background:${corEscalaT((i+.5)/N,ind)}"></div>`;
+  document.getElementById('leg-scale').innerHTML=sc;
 
-  document.getElementById('leg-lo').textContent=fmt(lo)+' '+un;
-  document.getElementById('leg-hi').textContent=fmt(hi)+' '+un;
+  // Valores nas pontas — em "maior = pior" a ponta esquerda (pior) é o valor ALTO
+  let loTxt,hiTxt;
+  if(neutro || meta.maior==='melhor'){loTxt=fmt(esc.p5)+' '+un; hiTxt=fmt(esc.p95)+' '+un;}
+  else{loTxt=fmt(esc.p95)+' '+un; hiTxt=fmt(esc.p5)+' '+un;}
+  document.getElementById('leg-lo').textContent=loTxt;
+  document.getElementById('leg-hi').textContent=hiTxt;
 
-  const dirTxt = maior==='melhor' ? 'maior = melhor'
-    : maior==='pior' ? 'maior = pior' : 'escala neutra';
-  document.getElementById('leg-note').innerHTML=
-    `<span><span class="leg-dot" style="background:#2166ac"></span>menor`+
-    `<span class="leg-dot" style="background:#b2182b;margin-left:6px"></span>maior · ${dirTxt}</span>`+
-    `<span class="leg-nodata"><span class="leg-nodata-sw"></span>`+
-    `${semDado.toLocaleString('pt-BR')} sem dado</span>`;
+  let semDado=0; for(const m of D.municipios) if(m.i[ind]==null) semDado++;
+  const semTxt=`<span><span class="leg-nodata-sw"></span> ${semDado.toLocaleString('pt-BR')} sem dado</span>`;
+  const note=document.getElementById('leg-note');
+  note.innerHTML = neutro
+    ? `<span>Escala neutra — apenas magnitude, sem bom/ruim.</span>${semTxt}`
+    : `<span><span class="leg-dot" style="background:rgb(106,27,154)"></span> pior`+
+      ` &nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor</span>${semTxt}`;
+
+  // Distribuição em linguagem simples
+  document.getElementById('leg-dist').innerHTML=
+    `Mediana: <b>${fmt(esc.mid)} ${un}</b> · metade das cidades entre <b>${fmt(esc.p25)}</b> e <b>${fmt(esc.p75)} ${un}</b>`;
 }
 
 // ─── CHIPS ────────────────────────────────────────────────────────────────────
@@ -894,7 +903,7 @@ function abrirFicha(m){
     </div>
     ${posIps?`<div class="f-rank">Ranking IPS nacional: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
   </div>
-  <div class="f-caption">Barras: posição nacional na faixa 5–95% (<span class="leg-dot" style="background:#2166ac"></span>menor →<span class="leg-dot" style="background:#b2182b"></span>maior). Traço vertical = média do estado (${m.u}).</div>`;
+  <div class="f-caption">Barras = desempenho nacional: <span class="leg-dot" style="background:rgb(106,27,154)"></span>curto/roxo = pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span>longo/verde = melhor. Traço vertical = média do estado (${m.u}).</div>`;
 
   const medUF=D.medias_por_uf[m.u]||{};
 
@@ -903,14 +912,15 @@ function abrirFicha(m){
     const linhas=inds.map(ind=>{
       const meta=D.meta[ind],v=m.i[ind];
       if(!meta||v==null) return'';
-      const esc=getEsc(ind);
-      const pct=Math.max(0,Math.min(100,((v-esc.p5)/(esc.p95-esc.p5+.001))*100));
-      const barCor=getCor(v,esc);
+      // comprimento da barra = desempenho (0=pior, 1=melhor); neutro = magnitude
+      const frac=isNeutro(ind)?posVal(v,ind):goodness(v,ind);
+      const pct=Math.round(frac*100);
+      const barCor=corInd(v,ind);
       const med=medUF[ind];
-      const medPct=med!=null?Math.max(0,Math.min(100,((med-esc.p5)/(esc.p95-esc.p5+.001))*100)):null;
+      const medFrac=med!=null?(isNeutro(ind)?posVal(med,ind):goodness(med,ind)):null;
       const isAtivo=ind===IND;
       const slug=indToSlug[ind];
-      const tick=medPct!=null?`<div class="find-tick" style="left:${medPct.toFixed(1)}%" title="média ${m.u}: ${fmt(med)}"></div>`:'';
+      const tick=medFrac!=null?`<div class="find-tick" style="left:${(medFrac*100).toFixed(1)}%" title="média ${m.u}: ${fmt(med)}"></div>`:'';
       return`<div class="find${isAtivo?' find-ativo':''}" data-ind="${slug}" onclick="mudarIndicador('${slug}')" title="Ver no mapa">
         <div class="find-info">
           <div class="find-n">${meta.nome} <span class="find-badge ${isAtivo?'find-no-mapa':'find-ver-mapa'}">${isAtivo?'no mapa ↗':'ver no mapa'}</span></div>
@@ -1012,7 +1022,6 @@ function buildRank(){
   if(!inds.includes(rankInd)) rankInd=inds[0];
   const sel=document.getElementById('rk-sel');
   sel.innerHTML=inds.map(i=>`<option value="${i}" ${i===rankInd?'selected':''}>${D.meta[i]?D.meta[i].nome:i}</option>`).join('');
-  const esc=getEsc(rankInd);
 
   // Top 10 municípios + mini barras
   let vs=D.municipios.map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
@@ -1026,7 +1035,7 @@ function buildRank(){
     el.className='rk-item';
     el.innerHTML=`<span class="rk-pos">${i+1}</span>
       <span class="rk-nm">${x.m.m} <span class="rk-uf">${x.m.u}</span></span>
-      <span class="rk-bar-wrap"><span class="rk-bar" style="width:${(Math.abs(x.v)/maxMun*100).toFixed(0)}%;background:${getCor(x.v,esc)}"></span></span>
+      <span class="rk-bar-wrap"><span class="rk-bar" style="width:${(Math.abs(x.v)/maxMun*100).toFixed(0)}%;background:${corInd(x.v,rankInd)}"></span></span>
       <span class="rk-v">${fmt(x.v)}</span>`;
     el.onclick=()=>selecionarPorChave(chaveOf(x.m),false);
     munWrap.appendChild(el);
@@ -1056,7 +1065,7 @@ function buildRank(){
     el.className='rk-item';
     el.innerHTML=`<span class="rk-pos">${i+1}</span>
       <span class="rk-nm">${x.u} <span class="rk-uf">${x.n} mun.</span></span>
-      <span class="rk-bar-wrap"><span class="rk-bar" style="width:${(Math.abs(x.v)/maxEst*100).toFixed(0)}%;background:${getCor(x.v,esc)}"></span></span>
+      <span class="rk-bar-wrap"><span class="rk-bar" style="width:${(Math.abs(x.v)/maxEst*100).toFixed(0)}%;background:${corInd(x.v,rankInd)}"></span></span>
       <span class="rk-v">${fmt(x.v)}</span>`;
     estWrap.appendChild(el);
   });
