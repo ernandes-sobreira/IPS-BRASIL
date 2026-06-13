@@ -325,11 +325,22 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   color:var(--muted);transition:all .13s;margin:-2px 0;}
 .st-swap:hover{border-color:var(--accent);color:var(--accent);}
 .st-swap svg{width:13px;height:13px;}
+.st-help{font-size:.6rem;color:var(--muted);line-height:1.45;margin:-2px 0 9px;}
+.st-help b{color:var(--text);}
 .st-readout{background:var(--bg);border-radius:9px;padding:10px 11px;margin:8px 0 4px;}
+.st-r-top{display:flex;align-items:baseline;gap:7px;}
 .st-r-big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;line-height:1;
   font-variant-numeric:tabular-nums;}
-.st-r-word{font-size:.66rem;font-weight:700;font-family:'Syne',sans-serif;margin-left:7px;}
-.st-r-sub{font-size:.6rem;color:var(--muted);margin-top:5px;line-height:1.4;}
+.st-r-word{font-size:.66rem;font-weight:700;font-family:'Syne',sans-serif;}
+.st-mini{display:block;width:100%;height:120px;background:var(--surface);
+  border:1px solid var(--border);border-radius:7px;margin:8px 0;cursor:pointer;}
+.st-r-sub{font-size:.62rem;color:var(--text);margin-top:5px;line-height:1.4;}
+.st-r-stats{font-size:.6rem;color:var(--muted);margin-top:6px;line-height:1.4;
+  font-variant-numeric:tabular-nums;}
+.st-r-stats b{color:var(--text);}
+.st-r-sig{font-size:.6rem;color:var(--muted);margin-top:6px;line-height:1.45;
+  background:var(--surface);border-radius:6px;padding:6px 8px;}
+.st-r-sig b{color:var(--text);}
 .st-r-warn{font-size:.6rem;color:#9a5a00;background:#fff3e0;border-radius:5px;
   padding:4px 7px;margin-top:6px;line-height:1.35;}
 .st-rank-row{display:flex;align-items:center;gap:7px;padding:4px 0;cursor:pointer;
@@ -547,6 +558,7 @@ body.desktop #btn-panel{display:none;}
       <div class="scroll-area">
         <div class="st-note"><b>Relacionar variáveis.</b> Escolha duas e veja se andam juntas nos 5.570 municípios. <b>Correlação não é causa</b> — duas coisas podem subir juntas por um terceiro motivo.</div>
         <div class="slabel">Histórias para começar</div>
+        <div class="st-help">O número <b>r</b> vai de −1 a +1: perto de <b>0</b> = sem relação; perto de <b>±1</b> = relação forte (+ sobem juntas, − uma sobe e a outra cai). Clique num card para ver o gráfico.</div>
         <div class="st-stories" id="st-stories"></div>
         <div class="slabel" style="margin-top:14px;">Relacionar duas variáveis</div>
         <div class="st-pick">
@@ -1331,7 +1343,9 @@ const STAT_STORIES=[
 ];
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function short(s){return s.length>30?s.slice(0,29)+'…':s;}
-function low(s){return s?s.charAt(0).toLowerCase()+s.slice(1):s;}
+function low(s){if(!s)return s;const w=s.split(' ')[0];
+  if(w.length>1&&w===w.toUpperCase())return s; // preserva siglas (PIB, IPS…)
+  return s.charAt(0).toLowerCase()+s.slice(1);}
 function statKey(name){if(D.meta[name])return name;const t=name.trim().toLowerCase();
   return Object.keys(D.meta).find(k=>k.trim().toLowerCase()===t)||null;}
 function statCol(ind){return statCols[ind]||(statCols[ind]=D.municipios.map(m=>{const v=m.i[ind];return(v==null||!isFinite(v))?NaN:v;}));}
@@ -1360,7 +1374,7 @@ function ensureStatsInit(){
     const r=pearsonInd(x,y).r;
     return `<button class="st-story" data-i="${idx}" onclick="playStory(${idx})">
       <div class="st-story-t">${esc(s.t)}</div>
-      <div class="st-story-r">r = ${r==null?'—':(r>=0?'+':'')+r.toFixed(2)}</div></button>`;
+      <div class="st-story-r">r = ${r==null?'—':(r>=0?'+':'')+r.toFixed(2)}${r==null?'':' · '+strengthWord(r)}</div></button>`;
   }).join('');
   document.getElementById('st-reg-leg').innerHTML=Object.entries(REG_COR).map(([r,c])=>
     `<span><i style="background:${c}"></i>${r}</span>`).join('');
@@ -1414,23 +1428,61 @@ function renderStats(){
   const ro=document.getElementById('st-readout');
   if(r==null){ro.innerHTML=`<div class="st-r-sub">Dados insuficientes para relacionar esse par.</div>`;}
   else{
-    const cor=r>=0?'#1e8a4d':'#7a2da0';
-    ro.innerHTML=`<div><span class="st-r-big" style="color:${cor}">${(r>=0?'+':'')+r.toFixed(2)}</span>`+
+    const cor=r>=0?'#1e8a4d':'#7a2da0', p=pearsonP(r,n), r2=r*r;
+    ro.innerHTML=
+      `<div class="st-r-top"><span class="st-r-big" style="color:${cor}">${(r>=0?'+':'')+r.toFixed(2)}</span>`+
       `<span class="st-r-word" style="color:${cor}">${rWord(r)}</span></div>`+
+      `<canvas id="st-mini" class="st-mini"></canvas>`+
       `<div class="st-r-sub">${interpFrase(r,mx,my)}</div>`+
+      `<div class="st-r-stats"><b>r² = ${r2.toFixed(2).replace('.',',')}</b> — explica ~${Math.round(r2*100)}% da variação · ${esc(fmtP(p))}</div>`+
+      `<div class="st-r-sig">${sigFrase(p,n)}</div>`+
       (Math.abs(r)>=.85?`<div class="st-r-warn">⚠ Correlação altíssima: podem ser quase a mesma variável (uma derivada da outra). Pouco surpreendente.</div>`:'');
+    drawMini();
   }
   document.getElementById('st-rank-lbl').textContent='O que mais se relaciona com: '+my.nome;
   renderCorrRank(y);
   renderStatView();
 }
-function rWord(r){const a=Math.abs(r);
-  const f=a>=.7?'muito forte':a>=.5?'forte':a>=.3?'moderada':a>=.15?'fraca':'quase nula';
-  return (r>0?'positiva ':'negativa ')+f;}
+function strengthWord(r){const a=Math.abs(r);
+  return a>=.7?'muito forte':a>=.5?'forte':a>=.3?'moderada':a>=.15?'fraca':'quase nula';}
+function rWord(r){return (r>0?'positiva ':'negativa ')+strengthWord(r);}
 function interpFrase(r,mx,my){
   if(Math.abs(r)<.15) return `Praticamente não há relação entre ${esc(low(my.nome))} e ${esc(low(mx.nome))}.`;
   return `Onde há mais <b>${esc(low(mx.nome))}</b>, tende a haver ${r>0?'mais':'menos'} <b>${esc(low(my.nome))}</b>.`;
 }
+// ── p-valor (teste t de Pearson) via função beta incompleta ──
+function gammaln(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,
+  -1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x,tmp=x+5.5; tmp-=(x+0.5)*Math.log(tmp); let ser=1.000000000190015;
+  for(let j=0;j<6;j++){y++;ser+=c[j]/y;} return -tmp+Math.log(2.5066282746310005*ser/x);}
+function betacf(a,b,x){const MAXIT=200,EPS=3e-12,FPMIN=1e-300;
+  let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+  if(Math.abs(d)<FPMIN)d=FPMIN; d=1/d; let h=d;
+  for(let m=1;m<=MAXIT;m++){const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2)); d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN; d=1/d; h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2)); d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN;
+    c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN; d=1/d; const del=d*c; h*=del;
+    if(Math.abs(del-1)<EPS)break;}
+  return h;}
+function ibeta(a,b,x){if(x<=0)return 0; if(x>=1)return 1;
+  const bt=Math.exp(gammaln(a+b)-gammaln(a)-gammaln(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x<(a+1)/(a+b+2)?bt*betacf(a,b,x)/a:1-bt*betacf(b,a,1-x)/b;}
+function pearsonP(r,n){ // p bicaudal
+  if(r==null||n<3)return null;
+  const df=n-2, rr=Math.min(0.999999999,Math.abs(r));
+  const t=rr*Math.sqrt(df/(1-rr*rr));
+  if(!isFinite(t))return 0;
+  return ibeta(df/2,0.5,df/(df+t*t));}
+function fmtP(p){ if(p==null)return '—';
+  if(p<1e-4)return 'p < 0,0001';
+  if(p<0.01)return 'p = '+p.toFixed(4).replace('.',',');
+  return 'p = '+p.toFixed(3).replace('.',',');}
+function sigFrase(p,n){
+  if(p==null)return '';
+  if(p<0.05) return `<b>Significativa</b> (${esc(fmtP(p))}): é bem improvável que essa relação seja só acaso. `+
+    `Mas atenção — com ${n.toLocaleString('pt-BR')} cidades quase tudo dá "significativo"; o que importa mesmo é a <b>força</b> (r) e o <b>formato</b> do gráfico.`;
+  return `<b>Não é significativa</b> (${esc(fmtP(p))}): pode ser apenas acaso.`;}
 function renderCorrRank(ind){
   const all=Object.keys(D.meta).filter(k=>k!==ind).map(k=>({k,r:pearsonInd(ind,k).r})).filter(o=>o.r!=null);
   all.sort((a,b)=>Math.abs(b.r)-Math.abs(a.r));
@@ -1483,39 +1535,51 @@ function renderMatrix(cat){
 function linreg(pts){let n=pts.length,sx=0,sy=0,sxx=0,sxy=0;for(const p of pts){sx+=p[0];sy+=p[1];sxx+=p[0]*p[0];sxy+=p[0]*p[1];}
   const d=n*sxx-sx*sx; if(!d)return null; const m=(n*sxy-sx*sy)/d; return{m,b:(sy-m*sx)/n};}
 function hexA(hex,al){const n=parseInt(hex.slice(1),16);return`rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${al})`;}
-function drawScatter(){
-  const cv=document.getElementById('st-canvas'), wrap=document.getElementById('st-scatter-wrap');
-  if(!cv||!wrap) return;
-  const W=wrap.clientWidth, H=wrap.clientHeight; if(W<20||H<20) return;
+function paintScatter(cv,W,H,mini){
+  if(!cv||W<20||H<20) return;
   const dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr;
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
   const {x,y}=STAT, A=statCol(x), B=statCol(y);
   const pts=[]; let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
   for(let i=0;i<A.length;i++){const a=A[i],b=B[i];if(a!==a||b!==b)continue;
     pts.push([a,b,i]); if(a<xmin)xmin=a;if(a>xmax)xmax=a;if(b<ymin)ymin=b;if(b>ymax)ymax=b;}
-  if(!pts.length){ctx.fillStyle='#9a9288';ctx.font='13px Inter';ctx.textAlign='center';ctx.fillText('Sem dados suficientes para esse par.',W/2,H/2);statPts=[];return;}
-  const padL=58,padR=16,padT=16,padB=46;
+  if(!mini) statPts=[];
+  if(!pts.length){ctx.fillStyle='#9a9288';ctx.font='13px Inter';ctx.textAlign='center';ctx.fillText('Sem dados para esse par.',W/2,H/2);return;}
+  const padL=mini?8:58, padR=mini?8:16, padT=mini?8:16, padB=mini?8:46;
   const sx=v=>padL+(v-xmin)/((xmax-xmin)||1)*(W-padL-padR);
   const sy=v=>H-padB-(v-ymin)/((ymax-ymin)||1)*(H-padT-padB);
-  ctx.strokeStyle='#ece7df'; ctx.lineWidth=1; ctx.font='10px Inter,sans-serif';
-  ctx.fillStyle='#9a9288'; ctx.textAlign='right'; ctx.textBaseline='middle';
-  for(let g=0;g<=4;g++){const yy=padT+(H-padT-padB)*g/4, val=ymax-(ymax-ymin)*g/4;
-    ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke(); ctx.fillText(fmt(val),padL-6,yy);}
-  ctx.textAlign='center'; ctx.textBaseline='top';
-  for(let g=0;g<=4;g++){const xx=padL+(W-padL-padR)*g/4, val=xmin+(xmax-xmin)*g/4; ctx.fillText(fmt(val),xx,H-padB+7);}
-  statPts=[];
-  for(const p of pts){const px=sx(p[0]),py=sy(p[1]); statPts.push([px,py,p[2]]);
-    ctx.fillStyle=hexA(REG_COR[D.municipios[p[2]].r]||'#888',.5);
-    ctx.beginPath();ctx.arc(px,py,2.3,0,6.2832);ctx.fill();}
+  if(!mini){
+    ctx.strokeStyle='#ece7df'; ctx.lineWidth=1; ctx.font='10px Inter,sans-serif';
+    ctx.fillStyle='#9a9288'; ctx.textAlign='right'; ctx.textBaseline='middle';
+    for(let g=0;g<=4;g++){const yy=padT+(H-padT-padB)*g/4, val=ymax-(ymax-ymin)*g/4;
+      ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke(); ctx.fillText(fmt(val),padL-6,yy);}
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    for(let g=0;g<=4;g++){const xx=padL+(W-padL-padR)*g/4, val=xmin+(xmax-xmin)*g/4; ctx.fillText(fmt(val),xx,H-padB+7);}
+  }
+  const rad=mini?1.5:2.3, al=mini?.4:.5;
+  for(const p of pts){const px=sx(p[0]),py=sy(p[1]); if(!mini) statPts.push([px,py,p[2]]);
+    ctx.fillStyle=hexA(REG_COR[D.municipios[p[2]].r]||'#888',al);
+    ctx.beginPath();ctx.arc(px,py,rad,0,6.2832);ctx.fill();}
   const lr=linreg(pts);
-  if(lr){ctx.strokeStyle='#1a1814';ctx.lineWidth=2.2;ctx.beginPath();
+  if(lr){ctx.strokeStyle='#1a1814';ctx.lineWidth=mini?1.6:2.2;ctx.beginPath();
     ctx.moveTo(sx(xmin),sy(lr.m*xmin+lr.b));ctx.lineTo(sx(xmax),sy(lr.m*xmax+lr.b));ctx.stroke();}
-  ctx.fillStyle='#5b5249'; ctx.font='700 11px Syne,sans-serif';
-  ctx.textAlign='center'; ctx.textBaseline='bottom';
-  const ux=D.meta[x].unidade?' ('+D.meta[x].unidade+')':'';
-  ctx.fillText(short(D.meta[x].nome)+ux, padL+(W-padL-padR)/2, H-3);
-  ctx.save(); ctx.translate(13,padT+(H-padT-padB)/2); ctx.rotate(-Math.PI/2);
-  ctx.textBaseline='top'; ctx.fillText(short(D.meta[y].nome),0,0); ctx.restore();
+  if(!mini){
+    ctx.fillStyle='#5b5249'; ctx.font='700 11px Syne,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    const ux=D.meta[x].unidade?' ('+D.meta[x].unidade+')':'';
+    ctx.fillText(short(D.meta[x].nome)+ux, padL+(W-padL-padR)/2, H-3);
+    ctx.save(); ctx.translate(13,padT+(H-padT-padB)/2); ctx.rotate(-Math.PI/2);
+    ctx.textBaseline='top'; ctx.fillText(short(D.meta[y].nome),0,0); ctx.restore();
+  }
+}
+function drawScatter(){
+  const wrap=document.getElementById('st-scatter-wrap');
+  if(wrap) paintScatter(document.getElementById('st-canvas'),wrap.clientWidth,wrap.clientHeight,false);
+}
+function drawMini(){
+  const cv=document.getElementById('st-mini'); if(!cv) return;
+  const W=cv.clientWidth||cv.parentElement.clientWidth-22, H=cv.clientHeight||120;
+  paintScatter(cv,W,H,true);
 }
 function nearestPt(e){
   const cv=document.getElementById('st-canvas'), rect=cv.getBoundingClientRect();
