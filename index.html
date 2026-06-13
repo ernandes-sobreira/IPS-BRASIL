@@ -303,6 +303,87 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 #map-wrap{flex:1;position:relative;overflow:hidden;}
 #map{position:absolute;inset:0;}
 
+/* ─── ESTATÍSTICA ─────────────────────────────────────────────────────────── */
+.st-note{font-size:.66rem;color:var(--muted);line-height:1.4;background:var(--bg);
+  border-radius:7px;padding:8px 10px;margin-bottom:12px;}
+.st-note b{color:var(--text);}
+.st-stories{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px;}
+.st-story{text-align:left;border:1.5px solid var(--border);background:var(--surface);
+  border-radius:9px;padding:8px 9px;cursor:pointer;transition:all .13s;}
+.st-story:hover{border-color:var(--accent);background:#fff5f3;}
+.st-story.on{border-color:var(--accent);background:#fff5f3;}
+.st-story-t{font-family:'Syne',sans-serif;font-weight:700;font-size:.66rem;
+  line-height:1.2;color:var(--text);margin-bottom:3px;}
+.st-story-r{font-size:.58rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+.st-pick{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;}
+.st-pick label{font-size:.58rem;font-weight:700;font-family:'Syne',sans-serif;
+  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.st-pick select{width:100%;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;
+  font-size:.7rem;font-family:inherit;background:var(--surface);color:var(--text);cursor:pointer;}
+.st-swap{align-self:center;background:var(--bg);border:1.5px solid var(--border);border-radius:50%;
+  width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--muted);transition:all .13s;margin:-2px 0;}
+.st-swap:hover{border-color:var(--accent);color:var(--accent);}
+.st-swap svg{width:13px;height:13px;}
+.st-readout{background:var(--bg);border-radius:9px;padding:10px 11px;margin:8px 0 4px;}
+.st-r-big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;line-height:1;
+  font-variant-numeric:tabular-nums;}
+.st-r-word{font-size:.66rem;font-weight:700;font-family:'Syne',sans-serif;margin-left:7px;}
+.st-r-sub{font-size:.6rem;color:var(--muted);margin-top:5px;line-height:1.4;}
+.st-r-warn{font-size:.6rem;color:#9a5a00;background:#fff3e0;border-radius:5px;
+  padding:4px 7px;margin-top:6px;line-height:1.35;}
+.st-rank-row{display:flex;align-items:center;gap:7px;padding:4px 0;cursor:pointer;
+  border-bottom:1px solid #f0ece6;}
+.st-rank-row:hover{background:#f7f5f0;border-radius:5px;}
+.st-rank-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.st-rank-n{flex:1;min-width:0;font-size:.66rem;line-height:1.2;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.st-rank-bar{flex-basis:42px;flex-shrink:0;height:5px;background:#ede9e2;border-radius:3px;position:relative;}
+.st-rank-bar>span{position:absolute;top:0;bottom:0;border-radius:3px;}
+.st-rank-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.66rem;
+  width:38px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
+
+/* tela grande (área do mapa) */
+#stats-screen{position:absolute;inset:0;background:var(--surface);z-index:300;
+  display:none;flex-direction:column;padding:14px 16px 16px;}
+.st-top{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-bottom:8px;flex-wrap:wrap;}
+.st-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:var(--text);
+  flex:1;min-width:140px;line-height:1.2;}
+.st-title small{display:block;font-size:.62rem;color:var(--muted);font-weight:600;
+  font-family:inherit;font-variant-numeric:tabular-nums;margin-top:2px;}
+.st-toggle{display:flex;background:var(--bg);border-radius:8px;padding:3px;gap:2px;flex-shrink:0;}
+.st-toggle button{border:none;background:none;cursor:pointer;padding:5px 12px;border-radius:6px;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.st-toggle button.on{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.st-toggle svg{width:13px;height:13px;}
+#st-scatter-wrap{flex:1;min-height:0;position:relative;}
+#st-canvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;}
+.st-reg-leg{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;
+  flex-shrink:0;margin-top:6px;font-size:.62rem;color:var(--muted);}
+.st-reg-leg span{display:inline-flex;align-items:center;gap:4px;}
+.st-reg-leg i{width:9px;height:9px;border-radius:50%;display:inline-block;}
+.st-tip{position:absolute;pointer-events:none;background:#1a1814;color:#fff;font-size:.62rem;
+  padding:5px 8px;border-radius:6px;white-space:nowrap;z-index:5;opacity:0;transition:opacity .1s;
+  transform:translate(-50%,-130%);line-height:1.35;}
+#st-matrix-view{flex:1;min-height:0;display:none;flex-direction:column;}
+.st-mx-head{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-bottom:8px;}
+.st-mx-head select{padding:6px 9px;border:1.5px solid var(--border);border-radius:7px;
+  font-size:.72rem;font-family:inherit;background:var(--surface);cursor:pointer;}
+.st-mx-scroll{flex:1;min-height:0;overflow:auto;}
+.st-mx{border-collapse:collapse;font-size:.62rem;}
+.st-mx td,.st-mx th{border:1px solid var(--surface);padding:0;text-align:center;}
+.st-mx .st-mx-rl{text-align:right;padding:0 8px;white-space:nowrap;color:var(--text);
+  font-size:.62rem;max-width:230px;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
+.st-mx .st-mx-cn{font-family:'Syne',sans-serif;font-weight:700;color:var(--muted);
+  width:26px;height:24px;}
+.st-mx-cell{width:26px;height:26px;cursor:pointer;color:#fff;font-size:.55rem;font-weight:700;
+  font-variant-numeric:tabular-nums;}
+.st-mx-cell:hover{outline:2px solid #1a1814;outline-offset:-2px;}
+.st-mx-key{font-size:.62rem;color:var(--muted);margin-top:10px;line-height:1.5;}
+.st-mx-leg{display:inline-flex;align-items:center;gap:2px;vertical-align:middle;margin:0 6px;}
+.st-mx-leg i{width:13px;height:13px;display:inline-block;}
+
 /* TRANSIÇÃO SUAVE ao trocar indicador (fill animável via CSS) */
 #map path.leaflet-interactive{
   transition:fill .3s ease, fill-opacity .3s ease;
@@ -411,6 +492,7 @@ body.desktop #btn-panel{display:none;}
       <button class="tab on" onclick="showTab('mapa',this)"><i data-lucide="map"></i><span>Mapa</span></button>
       <button class="tab"    onclick="showTab('explorar',this)"><i data-lucide="search"></i><span>Explorar</span></button>
       <button class="tab"    onclick="showTab('rankings',this)"><i data-lucide="trophy"></i><span>Rankings</span></button>
+      <button class="tab"    onclick="showTab('stats',this)"><i data-lucide="sigma"></i><span>Relações</span></button>
     </div>
 
     <!-- TAB MAPA -->
@@ -460,6 +542,24 @@ body.desktop #btn-panel{display:none;}
       </div>
     </div>
 
+    <!-- TAB ESTATÍSTICA / RELAÇÕES -->
+    <div id="tab-stats" class="tab-body" style="display:none;">
+      <div class="scroll-area">
+        <div class="st-note"><b>Relacionar variáveis.</b> Escolha duas e veja se andam juntas nos 5.570 municípios. <b>Correlação não é causa</b> — duas coisas podem subir juntas por um terceiro motivo.</div>
+        <div class="slabel">Histórias para começar</div>
+        <div class="st-stories" id="st-stories"></div>
+        <div class="slabel" style="margin-top:14px;">Relacionar duas variáveis</div>
+        <div class="st-pick">
+          <div><label>Eixo horizontal (X)</label><select id="st-x" onchange="onStatSel()"></select></div>
+          <button class="st-swap" onclick="swapStat()" title="Trocar X e Y"><i data-lucide="arrow-up-down"></i></button>
+          <div><label>Eixo vertical (Y)</label><select id="st-y" onchange="onStatSel()"></select></div>
+        </div>
+        <div class="st-readout" id="st-readout"></div>
+        <div class="slabel" style="margin-top:14px;" id="st-rank-lbl">O que mais se relaciona</div>
+        <div id="st-rank"></div>
+      </div>
+    </div>
+
     <!-- LEGENDA — sempre visível, fora do scroll -->
     <div id="legenda">
       <div id="leg-ind">—</div>
@@ -492,6 +592,32 @@ body.desktop #btn-panel{display:none;}
   <div id="map-wrap">
     <div id="map"></div>
     <div id="skel-map"><div class="skel skel-blob"></div></div>
+
+    <!-- TELA DE ESTATÍSTICA (ocupa a área do mapa) -->
+    <div id="stats-screen">
+      <div class="st-top">
+        <div class="st-title" id="st-title">—</div>
+        <div class="st-toggle">
+          <button id="st-tab-disp" class="on" onclick="setStatView('disp')"><i data-lucide="scatter-chart"></i> Dispersão</button>
+          <button id="st-tab-mx" onclick="setStatView('mx')"><i data-lucide="grid-3x3"></i> Matriz</button>
+        </div>
+      </div>
+      <div id="st-scatter-view" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+        <div id="st-scatter-wrap">
+          <canvas id="st-canvas"></canvas>
+          <div class="st-tip" id="st-tip"></div>
+        </div>
+        <div class="st-reg-leg" id="st-reg-leg"></div>
+      </div>
+      <div id="st-matrix-view">
+        <div class="st-mx-head">
+          <span class="slabel" style="margin:0;border:none;padding:0;">Correlações dentro de</span>
+          <select id="st-mx-cat" onchange="renderMatrix(this.value)"></select>
+        </div>
+        <div class="st-mx-scroll" id="st-mx-scroll"></div>
+        <div class="st-mx-key" id="st-mx-key"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1166,10 +1292,14 @@ function onHashChange(){
 function showTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   if(btn) btn.classList.add('on');
-  ['mapa','explorar','rankings'].forEach(t=>{
+  ['mapa','explorar','rankings','stats'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'flex':'none';
   });
   if(tab==='mapa') document.getElementById('tab-mapa').style.flexDirection='column';
+  const isStats=tab==='stats';
+  document.getElementById('stats-screen').style.display=isStats?'flex':'none';
+  document.getElementById('legenda').style.display=isStats?'none':'';
+  if(isStats) ensureStatsInit();
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
 }
 
@@ -1185,6 +1315,226 @@ function toggleDesktop(){
   btn.innerHTML=on?'<i data-lucide="smartphone"></i> Mobile':'<i data-lucide="monitor"></i> Desktop';
   icons();
   setTimeout(()=>leaf&&leaf.invalidateSize(),350);
+}
+
+// ─── ESTATÍSTICA / RELAÇÕES ───────────────────────────────────────────────────
+const REG_COR={'Norte':'#e8743b','Nordeste':'#c93a0e','Centro-Oeste':'#b86b00','Sudeste':'#1644a8','Sul':'#1a6b3c'};
+let statReady=false, statCols={}, corrCache={}, statPts=[];
+const STAT={x:null,y:null,view:'disp'};
+const STAT_STORIES=[
+  {t:'Dinheiro compra bem-estar?', x:'PIB PER CAPITA', y:'Índice de Progresso Social'},
+  {t:'Educação trava a gravidez precoce', x:'Ideb Ensino Fundamental', y:'Gravidez na Adolescência (<19)'},
+  {t:'Violência rouba a juventude', x:'Assassinatos de Jovens', y:'Segurança Pessoal'},
+  {t:'Saneamento é saúde', x:'Domicílios com Coleta de Resíduos Adequada', y:'Expectativa de Vida'},
+  {t:'O paradoxo da obesidade', x:'Obesidade', y:'Expectativa de Vida'},
+  {t:'Desmatar piora o meio ambiente', x:'Supressão da Vegetação Primária e Secundária', y:'Qualidade do Meio Ambiente'}
+];
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function short(s){return s.length>30?s.slice(0,29)+'…':s;}
+function low(s){return s?s.charAt(0).toLowerCase()+s.slice(1):s;}
+function statKey(name){if(D.meta[name])return name;const t=name.trim().toLowerCase();
+  return Object.keys(D.meta).find(k=>k.trim().toLowerCase()===t)||null;}
+function statCol(ind){return statCols[ind]||(statCols[ind]=D.municipios.map(m=>{const v=m.i[ind];return(v==null||!isFinite(v))?NaN:v;}));}
+function pearsonInd(a,b){
+  if(a===b)return{r:1,n:0};
+  const key=a<b?a+'|'+b:b+'|'+a; if(corrCache[key])return corrCache[key];
+  const A=statCol(a),B=statCol(b); let n=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
+  for(let i=0;i<A.length;i++){const x=A[i],y=B[i];if(x!==x||y!==y)continue;n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;}
+  let r=null;
+  if(n>=30){const cov=sab-sa*sb/n,va=saa-sa*sa/n,vb=sbb-sb*sb/n;if(va>0&&vb>0)r=cov/Math.sqrt(va*vb);}
+  return corrCache[key]={r,n};
+}
+
+function ensureStatsInit(){
+  if(statReady){requestAnimationFrame(renderStatView);return;}
+  statReady=true;
+  const grp=Object.entries(GRUPOS).map(([cat,inds])=>{
+    const ops=inds.filter(i=>D.meta[i]).map(i=>`<option value="${esc(i)}">${esc(D.meta[i].nome)}</option>`).join('');
+    return `<optgroup label="${esc(cat)}">${ops}</optgroup>`;
+  }).join('');
+  document.getElementById('st-x').innerHTML=grp;
+  document.getElementById('st-y').innerHTML=grp;
+  document.getElementById('st-mx-cat').innerHTML=Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  document.getElementById('st-stories').innerHTML=STAT_STORIES.map((s,idx)=>{
+    const x=statKey(s.x),y=statKey(s.y); if(!x||!y)return'';
+    const r=pearsonInd(x,y).r;
+    return `<button class="st-story" data-i="${idx}" onclick="playStory(${idx})">
+      <div class="st-story-t">${esc(s.t)}</div>
+      <div class="st-story-r">r = ${r==null?'—':(r>=0?'+':'')+r.toFixed(2)}</div></button>`;
+  }).join('');
+  document.getElementById('st-reg-leg').innerHTML=Object.entries(REG_COR).map(([r,c])=>
+    `<span><i style="background:${c}"></i>${r}</span>`).join('');
+  // delegação de clique no ranking
+  document.getElementById('st-rank').addEventListener('click',e=>{
+    const row=e.target.closest('.st-rank-row'); if(row) setStatPair(row.dataset.k,STAT.y,-1);
+  });
+  // hover/clique no scatter
+  const cv=document.getElementById('st-canvas');
+  cv.addEventListener('mousemove',onScatterHover);
+  cv.addEventListener('mouseleave',()=>document.getElementById('st-tip').style.opacity=0);
+  cv.addEventListener('click',onScatterClick);
+  window.addEventListener('resize',()=>{
+    if(STAT.view==='disp'&&document.getElementById('stats-screen').style.display!=='none') drawScatter();
+  });
+  const s0=STAT_STORIES[0];
+  setStatPair(statKey(s0.x)||Object.keys(D.meta)[0], statKey(s0.y)||Object.keys(D.meta)[1], 0);
+  icons();
+  requestAnimationFrame(renderStatView);
+}
+
+function setStatPair(x,y,storyIdx){
+  STAT.x=x; STAT.y=y;
+  document.getElementById('st-x').value=x;
+  document.getElementById('st-y').value=y;
+  document.querySelectorAll('.st-story').forEach(b=>b.classList.toggle('on',+b.dataset.i===storyIdx));
+  renderStats();
+}
+function onStatSel(){STAT.x=document.getElementById('st-x').value;STAT.y=document.getElementById('st-y').value;
+  document.querySelectorAll('.st-story').forEach(b=>b.classList.remove('on'));renderStats();}
+function swapStat(){setStatPair(STAT.y,STAT.x,-1);}
+function playStory(i){const s=STAT_STORIES[i];const x=statKey(s.x),y=statKey(s.y);if(x&&y)setStatPair(x,y,i);}
+function setStatView(v){
+  STAT.view=v;
+  document.getElementById('st-tab-disp').classList.toggle('on',v==='disp');
+  document.getElementById('st-tab-mx').classList.toggle('on',v==='mx');
+  document.getElementById('st-scatter-view').style.display=v==='disp'?'flex':'none';
+  document.getElementById('st-matrix-view').style.display=v==='mx'?'flex':'none';
+  renderStatView();
+}
+function renderStatView(){
+  if(STAT.view==='disp') drawScatter();
+  else{const cat=document.getElementById('st-mx-cat').value||catDeInd(STAT.y)||Object.keys(GRUPOS)[0];
+    document.getElementById('st-mx-cat').value=cat; renderMatrix(cat);}
+}
+
+function renderStats(){
+  const {x,y}=STAT, mx=D.meta[x], my=D.meta[y];
+  const {r,n}=pearsonInd(x,y);
+  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${n.toLocaleString('pt-BR')} cidades comparadas</small>`;
+  const ro=document.getElementById('st-readout');
+  if(r==null){ro.innerHTML=`<div class="st-r-sub">Dados insuficientes para relacionar esse par.</div>`;}
+  else{
+    const cor=r>=0?'#1e8a4d':'#7a2da0';
+    ro.innerHTML=`<div><span class="st-r-big" style="color:${cor}">${(r>=0?'+':'')+r.toFixed(2)}</span>`+
+      `<span class="st-r-word" style="color:${cor}">${rWord(r)}</span></div>`+
+      `<div class="st-r-sub">${interpFrase(r,mx,my)}</div>`+
+      (Math.abs(r)>=.85?`<div class="st-r-warn">⚠ Correlação altíssima: podem ser quase a mesma variável (uma derivada da outra). Pouco surpreendente.</div>`:'');
+  }
+  document.getElementById('st-rank-lbl').textContent='O que mais se relaciona com: '+my.nome;
+  renderCorrRank(y);
+  renderStatView();
+}
+function rWord(r){const a=Math.abs(r);
+  const f=a>=.7?'muito forte':a>=.5?'forte':a>=.3?'moderada':a>=.15?'fraca':'quase nula';
+  return (r>0?'positiva ':'negativa ')+f;}
+function interpFrase(r,mx,my){
+  if(Math.abs(r)<.15) return `Praticamente não há relação entre ${esc(low(my.nome))} e ${esc(low(mx.nome))}.`;
+  return `Onde há mais <b>${esc(low(mx.nome))}</b>, tende a haver ${r>0?'mais':'menos'} <b>${esc(low(my.nome))}</b>.`;
+}
+function renderCorrRank(ind){
+  const all=Object.keys(D.meta).filter(k=>k!==ind).map(k=>({k,r:pearsonInd(ind,k).r})).filter(o=>o.r!=null);
+  all.sort((a,b)=>Math.abs(b.r)-Math.abs(a.r));
+  document.getElementById('st-rank').innerHTML=all.slice(0,10).map(o=>{
+    const cat=catDeInd(o.k)||'Geral', cor=CORES[cat]||'#888', w=Math.round(Math.abs(o.r)*100);
+    const bcor=o.r>=0?'#1e8a4d':'#7a2da0';
+    return `<div class="st-rank-row" data-k="${esc(o.k)}" title="usar como eixo X">
+      <span class="st-rank-dot" style="background:${cor}"></span>
+      <span class="st-rank-n">${esc(D.meta[o.k].nome)}</span>
+      <span class="st-rank-bar"><span style="width:${w}%;${o.r>=0?'left:0':'right:0'};background:${bcor}"></span></span>
+      <span class="st-rank-v" style="color:${bcor}">${(o.r>=0?'+':'')+o.r.toFixed(2)}</span></div>`;
+  }).join('');
+}
+
+function corrColor(r){
+  if(r==null) return '#eeeae3';
+  const a=Math.min(1,Math.abs(r));
+  return r>=0
+    ? `rgb(${Math.round(255-225*a)},${Math.round(255-117*a)},${Math.round(255-178*a)})`   // → verde 30,138,77
+    : `rgb(${Math.round(255-149*a)},${Math.round(255-228*a)},${Math.round(255-95*a)})`;    // → roxo 106,27,154
+}
+function renderMatrix(cat){
+  const inds=(GRUPOS[cat]||[]).filter(i=>D.meta[i]&&statCol(i).some(v=>v===v));
+  const n=inds.length;
+  let h='<table class="st-mx"><tr><th></th>';
+  for(let j=0;j<n;j++) h+=`<th class="st-mx-cn">${j+1}</th>`;
+  h+='</tr>';
+  for(let i=0;i<n;i++){
+    h+=`<tr><td class="st-mx-rl" title="${esc(D.meta[inds[i]].nome)}">${i+1}. ${esc(short(D.meta[inds[i]].nome))}</td>`;
+    for(let j=0;j<n;j++){
+      if(i===j){h+=`<td class="st-mx-cell" style="background:#e8e3da;color:#aaa">•</td>`;continue;}
+      const r=pearsonInd(inds[i],inds[j]).r;
+      h+=`<td class="st-mx-cell" data-i="${i}" data-j="${j}" style="background:${corrColor(r)}" title="${esc(D.meta[inds[i]].nome)} × ${esc(D.meta[inds[j]].nome)}\nr = ${r==null?'—':(r>=0?'+':'')+r.toFixed(2)}"></td>`;
+    }
+    h+='</tr>';
+  }
+  h+='</table>';
+  const scroll=document.getElementById('st-mx-scroll'); scroll.innerHTML=h;
+  scroll.querySelectorAll('.st-mx-cell[data-i]').forEach(td=>{
+    td.onclick=()=>{setStatPair(inds[+td.dataset.j],inds[+td.dataset.i],-1);setStatView('disp');};
+  });
+  document.getElementById('st-mx-key').innerHTML=
+    `Cada quadradinho = correlação entre a variável da linha e a da coluna. `+
+    `<span class="st-mx-leg"><i style="background:${corrColor(-.9)}"></i><i style="background:${corrColor(-.4)}"></i><i style="background:${corrColor(0)}"></i><i style="background:${corrColor(.4)}"></i><i style="background:${corrColor(.9)}"></i></span> `+
+    `roxo = relação negativa, branco = nenhuma, verde = positiva. Clique para ver o gráfico.<br><br>`+
+    inds.map((k,i)=>`<b>${i+1}.</b> ${esc(D.meta[k].nome)}`).join(' &nbsp; ');
+}
+
+// ── scatter (canvas) ──
+function linreg(pts){let n=pts.length,sx=0,sy=0,sxx=0,sxy=0;for(const p of pts){sx+=p[0];sy+=p[1];sxx+=p[0]*p[0];sxy+=p[0]*p[1];}
+  const d=n*sxx-sx*sx; if(!d)return null; const m=(n*sxy-sx*sy)/d; return{m,b:(sy-m*sx)/n};}
+function hexA(hex,al){const n=parseInt(hex.slice(1),16);return`rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${al})`;}
+function drawScatter(){
+  const cv=document.getElementById('st-canvas'), wrap=document.getElementById('st-scatter-wrap');
+  if(!cv||!wrap) return;
+  const W=wrap.clientWidth, H=wrap.clientHeight; if(W<20||H<20) return;
+  const dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr;
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  const {x,y}=STAT, A=statCol(x), B=statCol(y);
+  const pts=[]; let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
+  for(let i=0;i<A.length;i++){const a=A[i],b=B[i];if(a!==a||b!==b)continue;
+    pts.push([a,b,i]); if(a<xmin)xmin=a;if(a>xmax)xmax=a;if(b<ymin)ymin=b;if(b>ymax)ymax=b;}
+  if(!pts.length){ctx.fillStyle='#9a9288';ctx.font='13px Inter';ctx.textAlign='center';ctx.fillText('Sem dados suficientes para esse par.',W/2,H/2);statPts=[];return;}
+  const padL=58,padR=16,padT=16,padB=46;
+  const sx=v=>padL+(v-xmin)/((xmax-xmin)||1)*(W-padL-padR);
+  const sy=v=>H-padB-(v-ymin)/((ymax-ymin)||1)*(H-padT-padB);
+  ctx.strokeStyle='#ece7df'; ctx.lineWidth=1; ctx.font='10px Inter,sans-serif';
+  ctx.fillStyle='#9a9288'; ctx.textAlign='right'; ctx.textBaseline='middle';
+  for(let g=0;g<=4;g++){const yy=padT+(H-padT-padB)*g/4, val=ymax-(ymax-ymin)*g/4;
+    ctx.beginPath();ctx.moveTo(padL,yy);ctx.lineTo(W-padR,yy);ctx.stroke(); ctx.fillText(fmt(val),padL-6,yy);}
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  for(let g=0;g<=4;g++){const xx=padL+(W-padL-padR)*g/4, val=xmin+(xmax-xmin)*g/4; ctx.fillText(fmt(val),xx,H-padB+7);}
+  statPts=[];
+  for(const p of pts){const px=sx(p[0]),py=sy(p[1]); statPts.push([px,py,p[2]]);
+    ctx.fillStyle=hexA(REG_COR[D.municipios[p[2]].r]||'#888',.5);
+    ctx.beginPath();ctx.arc(px,py,2.3,0,6.2832);ctx.fill();}
+  const lr=linreg(pts);
+  if(lr){ctx.strokeStyle='#1a1814';ctx.lineWidth=2.2;ctx.beginPath();
+    ctx.moveTo(sx(xmin),sy(lr.m*xmin+lr.b));ctx.lineTo(sx(xmax),sy(lr.m*xmax+lr.b));ctx.stroke();}
+  ctx.fillStyle='#5b5249'; ctx.font='700 11px Syne,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  const ux=D.meta[x].unidade?' ('+D.meta[x].unidade+')':'';
+  ctx.fillText(short(D.meta[x].nome)+ux, padL+(W-padL-padR)/2, H-3);
+  ctx.save(); ctx.translate(13,padT+(H-padT-padB)/2); ctx.rotate(-Math.PI/2);
+  ctx.textBaseline='top'; ctx.fillText(short(D.meta[y].nome),0,0); ctx.restore();
+}
+function nearestPt(e){
+  const cv=document.getElementById('st-canvas'), rect=cv.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top; let best=null,bd=144;
+  for(const p of statPts){const d=(p[0]-mx)**2+(p[1]-my)**2; if(d<bd){bd=d;best=p[2];}}
+  return best;
+}
+function onScatterHover(e){
+  const i=nearestPt(e), tip=document.getElementById('st-tip');
+  if(i==null){tip.style.opacity=0;return;}
+  const m=D.municipios[i];
+  tip.innerHTML=`<b>${esc(m.m)}</b> · ${esc(m.u)}<br>${esc(short(D.meta[STAT.x].nome))}: ${fmt(m.i[STAT.x])}<br>${esc(short(D.meta[STAT.y].nome))}: ${fmt(m.i[STAT.y])}`;
+  const rect=document.getElementById('st-scatter-wrap').getBoundingClientRect();
+  tip.style.left=(e.clientX-rect.left)+'px'; tip.style.top=(e.clientY-rect.top)+'px'; tip.style.opacity=1;
+}
+function onScatterClick(e){
+  const i=nearestPt(e); if(i==null)return;
+  selecionarPorChave(chaveOf(D.municipios[i]),false);
+  showTab('explorar',document.querySelectorAll('.tab')[1]);
 }
 
 // ─── FORMAT ───────────────────────────────────────────────────────────────────
