@@ -112,8 +112,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 #leg-ends{display:flex;justify-content:space-between;margin-bottom:3px;
   font-family:'Syne',sans-serif;font-size:.56rem;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
-.leg-scale{position:relative;display:flex;gap:2px;height:17px;margin:7px 0 9px;}
+.leg-scale{position:relative;display:flex;gap:2px;height:17px;margin:7px 0 4px;}
 .leg-scale>div{flex:1;border-radius:2px;transition:background .3s ease;}
+/* valores de corte entre os quintis — alinhados às fronteiras das cores */
+#leg-ticks{position:relative;height:12px;margin:0 0 3px;
+  font-size:.53rem;color:var(--muted);font-variant-numeric:tabular-nums;}
+#leg-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;top:3px;}
+#leg-ticks span::before{content:'';position:absolute;left:50%;top:-4px;
+  width:1px;height:3px;background:#b9b3a9;}
 .leg-med{position:absolute!important;top:-4px;bottom:-4px;left:50%;width:2px;margin-left:-1px;
   background:#1a1a1a;border-radius:1px;pointer-events:none;flex:none!important;
   box-shadow:0 0 0 1px rgba(255,255,255,.65);}
@@ -593,6 +599,7 @@ body.desktop #btn-panel{display:none;}
       <div id="leg-desc"></div>
       <div id="leg-ends"><span id="leg-end-lo">PIOR</span><span id="leg-end-hi">MELHOR</span></div>
       <div class="leg-scale" id="leg-scale"></div>
+      <div id="leg-ticks"></div>
       <div id="leg-axis">
         <span id="leg-lo"></span>
         <span id="leg-med"></span>
@@ -1003,6 +1010,13 @@ function atualizarLegenda(ind,esc,meta){
   sc+=`<div class="leg-med" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
   document.getElementById('leg-scale').innerHTML=sc;
 
+  // Valores de corte entre os 5 quintis (4 fronteiras), na ordem de exibição.
+  // Em "maior=pior" as cores invertem, então os cortes também.
+  const cuts=pior?[...th].reverse():[...th];
+  const pcts=[20,40,60,80];
+  document.getElementById('leg-ticks').innerHTML=
+    cuts.map((v,i)=>`<span style="left:${pcts[i]}%" title="fronteira do ${i+1}º para o ${i+2}º quinto">${fmt(v)}</span>`).join('');
+
   // Pontas = extremos; centro = mediana
   const worstV=neutro?esc.min:(pior?esc.max:esc.min);
   const bestV =neutro?esc.max:(pior?esc.min:esc.max);
@@ -1020,7 +1034,8 @@ function atualizarLegenda(ind,esc,meta){
 
   // Explicação das cores em linguagem simples
   document.getElementById('leg-dist').innerHTML=
-    `Cada cor reúne <b>20% das cidades</b> (um quinto). O traço <b>●│</b> marca a mediana.`;
+    `Os números são os <b>limites de cada quintil</b>: cada cor reúne <b>20% das cidades</b>. `+
+    `O traço <b>●│</b> marca a mediana.`;
 }
 
 // ─── CHIPS ────────────────────────────────────────────────────────────────────
