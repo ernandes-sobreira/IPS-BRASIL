@@ -112,17 +112,25 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 #leg-ends{display:flex;justify-content:space-between;margin-bottom:3px;
   font-family:'Syne',sans-serif;font-size:.56rem;font-weight:700;
   letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
-.leg-scale{display:flex;gap:2px;height:16px;margin-bottom:4px;}
-.leg-scale div{flex:1;border-radius:2px;transition:background .3s ease;}
-#leg-axis{display:flex;justify-content:space-between;font-size:.62rem;
-  color:var(--muted);gap:4px;margin-bottom:5px;}
-#leg-axis span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48%;
-  font-variant-numeric:tabular-nums;}
+.leg-scale{position:relative;display:flex;gap:2px;height:17px;margin:7px 0 9px;}
+.leg-scale>div{flex:1;border-radius:2px;transition:background .3s ease;}
+.leg-med{position:absolute!important;top:-4px;bottom:-4px;left:50%;width:2px;margin-left:-1px;
+  background:#1a1a1a;border-radius:1px;pointer-events:none;flex:none!important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.65);}
+.leg-med::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:6px;height:6px;border-radius:50%;background:#1a1a1a;box-shadow:0 0 0 1.5px #fff;}
+#leg-axis{display:flex;align-items:baseline;font-size:.62rem;
+  color:var(--muted);gap:6px;margin-bottom:5px;font-variant-numeric:tabular-nums;}
+#leg-axis #leg-lo,#leg-axis #leg-hi{white-space:nowrap;flex-shrink:0;}
+#leg-axis #leg-hi{text-align:right;}
+#leg-med{flex:1;text-align:center;color:var(--text);font-weight:600;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #leg-note{font-size:.62rem;color:var(--muted);line-height:1.35;
   padding:4px 8px;background:var(--bg);border-radius:5px;
   display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;
   vertical-align:middle;}
+.leg-nodata{display:inline-flex;align-items:center;gap:4px;}
 .leg-nodata-sw{width:11px;height:11px;border-radius:3px;background:#d8d4cc;
   border:1px solid #bbb;flex-shrink:0;display:inline-block;vertical-align:middle;}
 #leg-dist{margin-top:5px;font-size:.62rem;color:var(--muted);line-height:1.35;
@@ -138,26 +146,34 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .slabel:first-child{margin-top:0;}
 
 /* CHIPS */
-.chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.chips{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px;}
 .chip{
-  padding:4px 10px;border-radius:20px;font-size:.67rem;font-weight:700;
+  width:100%;padding:6px 12px;border-radius:20px;font-size:.68rem;font-weight:700;
   font-family:'Syne',sans-serif;cursor:pointer;
   border:1.5px solid;transition:all .13s;white-space:nowrap;
-  display:inline-flex;align-items:center;gap:5px;
+  display:flex;align-items:center;justify-content:flex-start;gap:6px;
+  overflow:hidden;text-overflow:ellipsis;
 }
-.chip svg{width:12px;height:12px;}
+.chip svg{width:13px;height:13px;flex-shrink:0;}
+.chip span{overflow:hidden;text-overflow:ellipsis;}
 
 /* INDICADOR LISTA */
 .ind-item{
-  display:flex;align-items:flex-start;gap:8px;padding:7px 8px;
-  border-radius:7px;cursor:pointer;font-size:.75rem;line-height:1.35;
+  display:flex;flex-direction:column;gap:3px;padding:7px 9px;
+  border-radius:7px;cursor:pointer;line-height:1.3;
   transition:background .1s;border:1.5px solid transparent;
 }
 .ind-item:hover{background:var(--bg);}
-.ind-item.on{background:#fff5f3;border-color:#f5cdc5;color:var(--accent);}
-.ind-name{flex:1;}
-.ind-unit{font-size:.62rem;color:var(--muted);margin-top:1px;}
-.ind-dir{font-size:.59rem;font-family:'Syne',sans-serif;font-weight:700;opacity:.6;}
+.ind-item.on{background:#fff5f3;border-color:#f5cdc5;}
+.ind-item.on .ind-name{color:var(--accent);}
+.ind-name{font-size:.78rem;font-weight:500;}
+.ind-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.ind-unit{font-size:.62rem;color:var(--muted);}
+.ind-dir{font-size:.55rem;font-family:'Syne',sans-serif;font-weight:700;
+  padding:1px 7px;border-radius:10px;white-space:nowrap;letter-spacing:.02em;}
+.ind-dir.melhor{color:#1e7a44;background:rgba(30,138,77,.13);}
+.ind-dir.pior{color:#7a2da0;background:rgba(122,45,160,.13);}
+.ind-dir.neutro{color:#5b6470;background:rgba(91,100,112,.12);}
 
 /* BUSCA */
 #srch-wrap{position:relative;margin-bottom:10px;}
@@ -225,10 +241,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .find-info{flex:1;min-width:0;}
 .find-n{font-size:.72rem;font-weight:500;line-height:1.3;}
 .find-s{font-size:.62rem;color:var(--muted);margin-top:1px;}
-.find-bar-wrap{position:relative;height:5px;background:#ede9e2;border-radius:3px;margin-top:4px;}
+.find-bar-wrap{position:relative;height:6px;background:#ede9e2;border-radius:3px;margin-top:6px;}
 .find-bar{height:100%;border-radius:3px;transition:width .3s ease,background .3s ease;}
-.find-tick{position:absolute;top:-2px;bottom:-2px;width:0;
-  border-left:1.6px solid var(--text);opacity:.5;}
+.find-tick{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;
+  background:var(--text);border-radius:1px;}
+.find-tick::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:5px;height:5px;border-radius:50%;background:var(--text);}
 .find-ativo{background:#fff5f3;border-radius:6px;padding:5px 6px;margin:0 -6px;}
 .find:hover{background:#f7f5f0;border-radius:6px;}
 .find-ver-mapa{font-size:.58rem;color:var(--muted);font-family:'Syne',sans-serif;
@@ -450,6 +468,7 @@ body.desktop #btn-panel{display:none;}
       <div class="leg-scale" id="leg-scale"></div>
       <div id="leg-axis">
         <span id="leg-lo"></span>
+        <span id="leg-med"></span>
         <span id="leg-hi"></span>
       </div>
       <div id="leg-note"></div>
@@ -492,7 +511,7 @@ let chaveSel=null;      // chave normalizada do selecionado
 let markerSel=null;     // marcador com nome no mapa
 let catMapa='Geral',catRank='Geral';
 let FUSE=null;          // índice de busca fuzzy
-let escCache={}, rankCache={}; // caches de escala e ranking por indicador
+let escCache={}, rankCache={}, quintCache={}; // caches por indicador
 let selfHash='';        // hash que a própria app definiu (evita loop)
 
 const CORES={
@@ -591,16 +610,32 @@ function rampColor(stops,t){
   const c=stops[stops.length-1][1]; return`rgb(${c[0]},${c[1]},${c[2]})`;
 }
 function isNeutro(ind){return !!(D.meta[ind]&&D.meta[ind].maior==='neutro');}
+// escala "0–N" embutida na unidade (pontos 0-100 / 0-1000 / nota 0-10) → máximo
+function scaleMax(ind){const u=(D.meta[ind]&&D.meta[ind].unidade)||'';
+  if(u.includes('0-1000'))return 1000; if(u.includes('0-100'))return 100; if(u.includes('0-10'))return 10; return null;}
 // posição 0..1 do valor na faixa nacional (p5..p95)
 function posVal(v,ind){const e=getEsc(ind);return clamp01((v-e.p5)/(e.p95-e.p5+.001));}
-// "qualidade" 0..1: 0=pior, 1=melhor — inverte quando maior=pior
-function goodness(v,ind){const t=posVal(v,ind);return D.meta[ind]&&D.meta[ind].maior==='pior'?1-t:t;}
-// cor semântica final de um valor para um indicador
-function corInd(v,ind){
-  return isNeutro(ind)?rampColor(PAL_NEUTRA,posVal(v,ind)):rampColor(PAL_QUAL,goodness(v,ind));
+
+// ── QUINTIS: 5 faixas, cada uma = 20% das cidades ────────────────────────────
+const QUINT_QUAL  =[0,.25,.5,.75,1].map(t=>rampColor(PAL_QUAL,t));   // 0=pior … 4=melhor
+const QUINT_NEUTRA=[0,.25,.5,.75,1].map(t=>rampColor(PAL_NEUTRA,t)); // claro … escuro
+function getQuintis(ind){
+  if(quintCache[ind]) return quintCache[ind];
+  const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
+  const th=[]; for(let k=1;k<=4;k++) th.push(vs.length?vs[Math.floor(vs.length*k/5)]:0);
+  return quintCache[ind]={th,n:vs.length};
 }
-// cor de um passo t (0..1) da escala atual — usada na legenda
-function corEscalaT(t,ind){return isNeutro(ind)?rampColor(PAL_NEUTRA,t):rampColor(PAL_QUAL,t);}
+function quintIdx(v,ind){const{th}=getQuintis(ind);let i=0;while(i<4&&v>=th[i])i++;return i;} // por valor ↑
+function quintQual(v,ind){const i=quintIdx(v,ind);return D.meta[ind]&&D.meta[ind].maior==='pior'?4-i:i;} // 0=pior,4=melhor
+// cor semântica final — 5 classes (quintis)
+function corInd(v,ind){
+  if(v==null) return '#d8d4cc';
+  return isNeutro(ind)?QUINT_NEUTRA[quintIdx(v,ind)]:QUINT_QUAL[quintQual(v,ind)];
+}
+// cor da faixa j (0=esquerda/pior … 4=direita/melhor) — usada na legenda
+function corQuintilLeg(j,ind){return isNeutro(ind)?QUINT_NEUTRA[j]:QUINT_QUAL[j];}
+// comprimento da barra: escalas 0–N vão de 0 a N; demais usam posição na faixa nacional
+function barFrac(v,ind){const mx=scaleMax(ind);return mx?clamp01(v/mx):posVal(v,ind);}
 
 // Ranking nacional (1º = melhor; direção depende de maior=melhor/pior)
 function getRank(ind){
@@ -789,10 +824,11 @@ function destacarFeature(layer){
   if(layer._path) layer._path.classList.add('mun-pulse'); // contorno pulsante
 }
 
-// ─── LEGENDA — 7 degraus + mini histograma + mediana ──────────────────────────
+// ─── LEGENDA — 5 quintis (cada cor = 20% das cidades) + mediana ───────────────
 function atualizarLegenda(ind,esc,meta){
   const un=meta?meta.unidade:'';
   const neutro=isNeutro(ind);
+  const pior=!!(meta&&meta.maior==='pior');
   document.getElementById('leg-ind').textContent=meta?meta.nome:ind;
   document.getElementById('leg-desc').textContent=meta?meta.simples:'';
 
@@ -800,29 +836,38 @@ function atualizarLegenda(ind,esc,meta){
   document.getElementById('leg-end-lo').textContent=neutro?'MENOR':'PIOR';
   document.getElementById('leg-end-hi').textContent=neutro?'MAIOR':'MELHOR';
 
-  // Escala em 7 degraus — esquerda = pior/menor, direita = melhor/maior
-  const N=7; let sc='';
-  for(let i=0;i<N;i++) sc+=`<div style="background:${corEscalaT((i+.5)/N,ind)}"></div>`;
+  // 5 faixas de quintil. Limites por valor crescente: [min, t20,t40,t60,t80, max]
+  const th=getQuintis(ind).th;
+  const bounds=[esc.min,...th,esc.max];
+  // ordem de exibição esq→dir = pior→melhor; em "maior=pior" inverte
+  const order=pior?[4,3,2,1,0]:[0,1,2,3,4];
+  let sc='';
+  order.forEach((blk,pos)=>{
+    const lo=bounds[blk], hi=bounds[blk+1];
+    const titulo=`${neutro?(pos+1)+'ª faixa':(pos+1)+'º quinto'} · ${fmt(lo)}–${fmt(hi)} ${un}\n20% das cidades`;
+    sc+=`<div style="background:${corQuintilLeg(pos,ind)}" title="${titulo}"></div>`;
+  });
+  sc+=`<div class="leg-med" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
   document.getElementById('leg-scale').innerHTML=sc;
 
-  // Valores nas pontas — em "maior = pior" a ponta esquerda (pior) é o valor ALTO
-  let loTxt,hiTxt;
-  if(neutro || meta.maior==='melhor'){loTxt=fmt(esc.p5)+' '+un; hiTxt=fmt(esc.p95)+' '+un;}
-  else{loTxt=fmt(esc.p95)+' '+un; hiTxt=fmt(esc.p5)+' '+un;}
-  document.getElementById('leg-lo').textContent=loTxt;
-  document.getElementById('leg-hi').textContent=hiTxt;
+  // Pontas = extremos; centro = mediana
+  const worstV=neutro?esc.min:(pior?esc.max:esc.min);
+  const bestV =neutro?esc.max:(pior?esc.min:esc.max);
+  document.getElementById('leg-lo').textContent=fmt(worstV)+' '+un;
+  document.getElementById('leg-hi').textContent=fmt(bestV)+' '+un;
+  document.getElementById('leg-med').textContent='mediana '+fmt(esc.mid);
 
   let semDado=0; for(const m of D.municipios) if(m.i[ind]==null) semDado++;
-  const semTxt=`<span><span class="leg-nodata-sw"></span> ${semDado.toLocaleString('pt-BR')} sem dado</span>`;
+  const semTxt=`<span class="leg-nodata"><span class="leg-nodata-sw"></span> ${semDado.toLocaleString('pt-BR')} sem dado</span>`;
   const note=document.getElementById('leg-note');
   note.innerHTML = neutro
-    ? `<span>Escala neutra — apenas magnitude, sem bom/ruim.</span>${semTxt}`
+    ? `<span>Escala neutra — só magnitude, sem bom/ruim.</span>${semTxt}`
     : `<span><span class="leg-dot" style="background:rgb(106,27,154)"></span> pior`+
       ` &nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor</span>${semTxt}`;
 
-  // Distribuição em linguagem simples
+  // Explicação das cores em linguagem simples
   document.getElementById('leg-dist').innerHTML=
-    `Mediana: <b>${fmt(esc.mid)} ${un}</b> · metade das cidades entre <b>${fmt(esc.p25)}</b> e <b>${fmt(esc.p75)} ${un}</b>`;
+    `Cada cor reúne <b>20% das cidades</b> (um quinto). O traço <b>●│</b> marca a mediana.`;
 }
 
 // ─── CHIPS ────────────────────────────────────────────────────────────────────
@@ -858,11 +903,13 @@ function buildIndList(){
   wrap.innerHTML='';
   for(const ind of GRUPOS[catMapa]||[]){
     const meta=D.meta[ind];if(!meta) continue;
-    const dir=meta.maior==='melhor'?'↑ maior = melhor':meta.maior==='pior'?'↑ maior = pior':'—';
+    const mm=meta.maior;
+    const dirCls=mm==='melhor'?'melhor':mm==='pior'?'pior':'neutro';
+    const dirTxt=mm==='melhor'?'↑ maior é melhor':mm==='pior'?'↑ maior é pior':'sem bom/ruim';
     const el=document.createElement('div');
     el.className='ind-item'+(ind===IND?' on':'');
-    el.innerHTML=`<div class="ind-name">${meta.nome}
-      <div class="ind-unit">${meta.unidade} <span class="ind-dir">${dir}</span></div></div>`;
+    el.innerHTML=`<div class="ind-name">${meta.nome}</div>
+      <div class="ind-meta"><span class="ind-unit">${meta.unidade}</span><span class="ind-dir ${dirCls}">${dirTxt}</span></div>`;
     el.onclick=()=>setIndicador(ind);
     wrap.appendChild(el);
   }
@@ -903,7 +950,7 @@ function abrirFicha(m){
     </div>
     ${posIps?`<div class="f-rank">Ranking IPS nacional: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
   </div>
-  <div class="f-caption">Barras = desempenho nacional: <span class="leg-dot" style="background:rgb(106,27,154)"></span>curto/roxo = pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span>longo/verde = melhor. Traço vertical = média do estado (${m.u}).</div>`;
+  <div class="f-caption">Barra = valor · cor = quintil nacional (<span class="leg-dot" style="background:rgb(106,27,154)"></span> pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor). O traço escuro <b>●│</b> marca a média do estado (${m.u}).</div>`;
 
   const medUF=D.medias_por_uf[m.u]||{};
 
@@ -912,15 +959,14 @@ function abrirFicha(m){
     const linhas=inds.map(ind=>{
       const meta=D.meta[ind],v=m.i[ind];
       if(!meta||v==null) return'';
-      // comprimento da barra = desempenho (0=pior, 1=melhor); neutro = magnitude
-      const frac=isNeutro(ind)?posVal(v,ind):goodness(v,ind);
-      const pct=Math.round(frac*100);
+      // comprimento da barra = valor (escalas 0–N vão de 0 a N); cor = quintil
+      const pct=Math.round(barFrac(v,ind)*100);
       const barCor=corInd(v,ind);
       const med=medUF[ind];
-      const medFrac=med!=null?(isNeutro(ind)?posVal(med,ind):goodness(med,ind)):null;
+      const medFrac=med!=null?barFrac(med,ind):null;
       const isAtivo=ind===IND;
       const slug=indToSlug[ind];
-      const tick=medFrac!=null?`<div class="find-tick" style="left:${(medFrac*100).toFixed(1)}%" title="média ${m.u}: ${fmt(med)}"></div>`:'';
+      const tick=medFrac!=null?`<div class="find-tick" style="left:${(medFrac*100).toFixed(1)}%" title="média ${m.u}: ${fmt(med)} ${meta.unidade}"></div>`:'';
       return`<div class="find${isAtivo?' find-ativo':''}" data-ind="${slug}" onclick="mudarIndicador('${slug}')" title="Ver no mapa">
         <div class="find-info">
           <div class="find-n">${meta.nome} <span class="find-badge ${isAtivo?'find-no-mapa':'find-ver-mapa'}">${isAtivo?'no mapa ↗':'ver no mapa'}</span></div>
