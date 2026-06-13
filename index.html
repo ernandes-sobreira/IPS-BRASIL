@@ -1568,6 +1568,9 @@ function renderMatrix(cat){
 function linreg(pts){let n=pts.length,sx=0,sy=0,sxx=0,sxy=0;for(const p of pts){sx+=p[0];sy+=p[1];sxx+=p[0]*p[0];sxy+=p[0]*p[1];}
   const d=n*sxx-sx*sx; if(!d)return null; const m=(n*sxy-sx*sy)/d; return{m,b:(sy-m*sx)/n};}
 function hexA(hex,al){const n=parseInt(hex.slice(1),16);return`rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${al})`;}
+function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function paintScatter(cv,W,H,mini){
   if(!cv||W<20||H<20) return;
   const dpr=window.devicePixelRatio||1; cv.width=W*dpr; cv.height=H*dpr;
@@ -1605,9 +1608,20 @@ function paintScatter(cv,W,H,mini){
       ctx.fillStyle=hexA(REG_COR[ms.r]||'#888',1);ctx.fill();
       ctx.lineWidth=mini?1.5:2.5;ctx.strokeStyle='#1a1814';ctx.stroke();
       ctx.lineWidth=1;ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(px,py,R+(mini?1.5:2.2),0,6.2832);ctx.stroke();
-      if(!mini){ctx.fillStyle='#1a1814';ctx.font='700 12px Syne,sans-serif';
-        ctx.textAlign=px>W*0.7?'right':'left';ctx.textBaseline='bottom';
-        ctx.fillText(' '+ms.m+' ',px+(px>W*0.7?-R:R),py-R-2);}
+      if(!mini){
+        ctx.font='700 12.5px Syne,sans-serif';
+        const label=ms.m, tw=ctx.measureText(label).width;
+        const padx=8,bh=20,bw=tw+padx*2;
+        let bx=px-bw/2, above=true, by=py-R-10-bh;
+        if(by<padT+1){above=false; by=py+R+10;}
+        bx=Math.max(2,Math.min(W-bw-2,bx));
+        const startY=above?py-R-2:py+R+2, endY=above?by+bh:by;
+        ctx.strokeStyle='#1a1814';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(px,startY);ctx.lineTo(px,endY);ctx.stroke();
+        rrect(ctx,bx,by,bw,bh,6);ctx.fillStyle='#1a1814';ctx.fill();
+        ctx.lineWidth=2;ctx.strokeStyle='#fff';ctx.stroke();
+        ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(label,bx+bw/2,by+bh/2+0.5);}
     }
   }
   if(!mini){
