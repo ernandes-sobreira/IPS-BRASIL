@@ -125,6 +125,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   box-shadow:0 0 0 1px rgba(255,255,255,.65);}
 .leg-med::after{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);
   width:6px;height:6px;border-radius:50%;background:#1a1a1a;box-shadow:0 0 0 1.5px #fff;}
+/* marcador do município selecionado — linha colorida com seta apontando de baixo */
+.leg-sel{position:absolute!important;top:-4px;bottom:-4px;width:2px;margin-left:-1px;
+  border-radius:1px;pointer-events:none;flex:none!important;z-index:3;
+  background:currentColor;box-shadow:0 0 0 1px rgba(255,255,255,.9);}
+.leg-sel::after{content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;
+  border-bottom:5px solid currentColor;filter:drop-shadow(0 1px .5px rgba(255,255,255,.9));}
 #leg-axis{display:flex;align-items:baseline;font-size:.62rem;
   color:var(--muted);gap:6px;margin-bottom:5px;font-variant-numeric:tabular-nums;}
 #leg-axis #leg-lo,#leg-axis #leg-hi{white-space:nowrap;flex-shrink:0;}
@@ -497,6 +504,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
     width:min(var(--panel),93vw);
   }
   #panel.open{transform:translateX(0);}
+  /* LEGENDA no celular: altura automática (não corta o conteúdo) + texto maior */
+  #legenda{height:auto;max-height:54vh;overflow-y:auto;padding-bottom:12px;}
+  #leg-ind{font-size:.92rem;}
+  #leg-desc{font-size:.74rem;white-space:normal;}
+  #leg-ends{font-size:.62rem;}
+  .leg-scale{height:20px;}
+  #leg-ticks{font-size:.62rem;height:14px;}
+  #leg-axis{font-size:.72rem;}
+  #leg-note,#leg-dist{font-size:.72rem;}
 }
 body.desktop #panel{position:relative;transform:none !important;}
 body.desktop #btn-panel{display:none;}
@@ -783,10 +799,17 @@ function getQuintis(ind){
   if(quintCache[ind]) return quintCache[ind];
   const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
   const th=[]; for(let k=1;k<=4;k++) th.push(vs.length?vs[Math.floor(vs.length*k/5)]:0);
-  return quintCache[ind]={th,n:vs.length};
+  return quintCache[ind]={th,n:vs.length,vs};
 }
 function quintIdx(v,ind){const{th}=getQuintis(ind);let i=0;while(i<4&&v>=th[i])i++;return i;} // por valor ↑
 function quintQual(v,ind){const i=quintIdx(v,ind);return D.meta[ind]&&D.meta[ind].maior==='pior'?4-i:i;} // 0=pior,4=melhor
+// percentil (0..1) do valor v na distribuição do indicador (ascendente, busca binária)
+function pctRank(v,ind){
+  const vs=getQuintis(ind).vs; if(!vs||!vs.length) return null;
+  let lo=0,hi=vs.length;
+  while(lo<hi){const mid=(lo+hi)>>1; vs[mid]<=v?lo=mid+1:hi=mid;}
+  return lo/vs.length;
+}
 // cor semântica final — 5 classes (quintis)
 function corInd(v,ind){
   if(v==null) return '#d8d4cc';
@@ -965,6 +988,7 @@ function selecionarMun(m,layer,chave,fromHash){
     leaf.setView([m.lat,m.lon],9,{animate:true});
   }
   abrirFicha(m);
+  atualizarLegenda(IND,getEsc(IND),D.meta[IND]); // marca o município na régua dos quintis
   if(!fromHash){const cd=chaveToCd[chaveSel]; if(cd) setHash('mun/'+cd);}
 }
 
@@ -1008,6 +1032,16 @@ function atualizarLegenda(ind,esc,meta){
     sc+=`<div style="background:${corQuintilLeg(pos,ind)}" title="${titulo}"></div>`;
   });
   sc+=`<div class="leg-med" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
+  // Marcador do município selecionado (se tiver valor neste indicador)
+  if(munSel && munSel.i[ind]!=null){
+    const sv=munSel.i[ind];
+    let sx=(pior?1-pctRank(sv,ind):pctRank(sv,ind))*100;
+    sx=Math.max(.6,Math.min(99.4,sx));
+    const sq=(neutro?quintIdx(sv,ind):quintQual(sv,ind))+1;
+    const scol=neutro?'#c93a0e':'#1366d6';
+    sc+=`<div class="leg-sel" style="left:${sx.toFixed(1)}%;color:${scol}" `+
+       `title="${munSel.m}: ${fmt(sv)} ${un} · ${sq}º quinto"></div>`;
+  }
   document.getElementById('leg-scale').innerHTML=sc;
 
   // Valores de corte entre os 5 quintis (4 fronteiras), na ordem de exibição.
@@ -1032,10 +1066,19 @@ function atualizarLegenda(ind,esc,meta){
     : `<span><span class="leg-dot" style="background:rgb(106,27,154)"></span> pior`+
       ` &nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor</span>${semTxt}`;
 
-  // Explicação das cores em linguagem simples
-  document.getElementById('leg-dist').innerHTML=
-    `Os números são os <b>limites de cada quintil</b>: cada cor reúne <b>20% das cidades</b>. `+
-    `O traço <b>●│</b> marca a mediana.`;
+  // Rodapé: situação do município selecionado, ou a explicação dos quintis
+  const distEl=document.getElementById('leg-dist');
+  if(munSel && munSel.i[ind]!=null){
+    const sv=munSel.i[ind];
+    const sq=(neutro?quintIdx(sv,ind):quintQual(sv,ind))+1;
+    const rel=sv<esc.mid?'abaixo da mediana':sv>esc.mid?'acima da mediana':'na mediana';
+    const scol=neutro?'#c93a0e':'#1366d6';
+    distEl.innerHTML=`<span class="leg-dot" style="background:${scol}"></span> `+
+      `<b>${munSel.m}</b>: ${fmt(sv)} ${un} — <b>${sq}º quinto</b> · ${rel} (${fmt(esc.mid)}).`;
+  } else {
+    distEl.innerHTML=`Os números são os <b>limites de cada quintil</b>: cada cor reúne `+
+      `<b>20% das cidades</b>. O traço <b>●│</b> marca a mediana.`;
+  }
 }
 
 // ─── CHIPS ────────────────────────────────────────────────────────────────────
@@ -1179,6 +1222,7 @@ function backSearch(){
   document.getElementById('srch-res').innerHTML='';
   limparSelecao();
   munSel=null; featureSel=null; chaveSel=null;
+  atualizarLegenda(IND,getEsc(IND),D.meta[IND]); // remove o marcador do município da régua
   setHash('ind/'+indToSlug[IND]);
 }
 
