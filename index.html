@@ -41,6 +41,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .hdr-btn svg{width:13px;height:13px;}
 .hdr-btn:hover,.hdr-btn.on{background:rgba(255,255,255,.12);color:#fff;}
 #btn-panel{display:none;}
+.hdr-select{background:#292622;color:#fff;border:1.5px solid rgba(255,255,255,.22);border-radius:6px;
+  padding:5px 27px 5px 8px;font-size:.7rem;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;max-width:150px;}
+.hdr-select option{background:#fff;color:#181614;}
+@media(max-width:720px){#hdr-logo{font-size:.9rem}.hdr-select{max-width:112px;font-size:.63rem}.hdr-btn .hdr-txt{display:none}.hdr-btn{padding:5px 7px}}
 
 /* APP SHELL */
 #app{display:flex;height:100vh;padding-top:var(--hdr);}
@@ -66,7 +70,8 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
   color:var(--muted);transition:all .14s;
   display:flex;align-items:center;justify-content:center;gap:5px;
 }
-.tab svg{width:14px;height:14px;}
+.tab svg{width:12px;height:12px;}
+#tabs .tab{font-size:.58rem;letter-spacing:.04em;gap:3px;}
 .tab.on{color:var(--accent);border-bottom-color:var(--accent);}
 
 /* CONTEÚDO DA TAB — min-height:0 é o fix para scroll dentro de flex */
@@ -422,6 +427,59 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 .st-mx-leg{display:inline-flex;align-items:center;gap:2px;vertical-align:middle;margin:0 6px;}
 .st-mx-leg i{width:13px;height:13px;display:inline-block;}
 
+
+/* ─── COMPARAÇÕES ─────────────────────────────────────────────────────────── */
+.cmp-note{font-size:.66rem;color:var(--muted);line-height:1.45;background:#f7f5f0;
+  border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:12px;}
+.cmp-note b{color:var(--text);}
+.cmp-field{margin-bottom:9px;}
+.cmp-field label{display:block;font-size:.58rem;font-family:'Syne',sans-serif;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.cmp-field select,.cmp-field input{width:100%;padding:8px 9px;border:1.5px solid var(--border);
+  border-radius:7px;background:var(--surface);font-family:inherit;font-size:.72rem;color:var(--text);}
+.cmp-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:8px 0 10px;}
+.cmp-btn{border:1.5px solid var(--border);background:var(--surface);border-radius:7px;padding:7px 8px;
+  cursor:pointer;font-family:'Syne',sans-serif;font-size:.62rem;font-weight:700;display:flex;
+  align-items:center;justify-content:center;gap:5px;color:var(--text);}
+.cmp-btn:hover{border-color:var(--accent);color:var(--accent);}.cmp-btn svg{width:13px;height:13px;}
+.cmp-method{font-size:.58rem;color:var(--muted);line-height:1.4;background:var(--bg);padding:7px 8px;
+  border-radius:6px;margin-top:8px;}
+#compare-screen{position:absolute;inset:0;background:var(--bg);z-index:810;display:none;
+  flex-direction:column;padding:16px 18px;overflow:hidden;}
+.cmp-screen-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+.cmp-screen-title{flex:1;min-width:220px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;}
+.cmp-screen-title small{display:block;font-size:.63rem;color:var(--muted);font-weight:500;margin-top:3px;}
+.cmp-screen-actions{display:flex;gap:7px;flex-wrap:wrap;}
+.cmp-hero{display:grid;grid-template-columns:minmax(0,1fr) 150px minmax(0,1fr);gap:12px;margin-bottom:12px;}
+.cmp-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;min-width:0;}
+.cmp-card.a{border-top:4px solid #1644a8}.cmp-card.b{border-top:4px solid #c93a0e}
+.cmp-name{font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cmp-sub{font-size:.62rem;color:var(--muted);margin-top:2px;}
+.cmp-value{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;line-height:1.1;margin-top:12px;}
+.cmp-unit{font-size:.6rem;color:var(--muted);margin-top:2px;}
+.cmp-rank{font-size:.61rem;color:var(--muted);margin-top:8px;}
+.cmp-diff{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+  background:#1a1814;color:white;border-radius:12px;padding:12px;}
+.cmp-diff .lbl{font-family:'Syne',sans-serif;font-size:.56rem;text-transform:uppercase;letter-spacing:.08em;opacity:.65;}
+.cmp-diff .val{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;margin:6px 0 2px;}
+.cmp-diff .pct{font-size:.62rem;opacity:.8;}.cmp-diff .win{font-size:.62rem;margin-top:9px;line-height:1.3;}
+.cmp-bars{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:12px;}
+.cmp-bar-row{display:grid;grid-template-columns:120px 1fr 65px;align-items:center;gap:8px;margin:8px 0;font-size:.66rem;}
+.cmp-bar-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;}.cmp-bar-track{height:10px;background:#ece8e1;border-radius:99px;overflow:hidden;}
+.cmp-bar-fill{height:100%;border-radius:99px;min-width:2px}.cmp-bar-val{text-align:right;font-family:'Syne',sans-serif;font-weight:700;}
+.cmp-main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,.7fr);gap:12px;min-height:0;flex:1;}
+.cmp-table-wrap,.cmp-context{background:var(--surface);border:1px solid var(--border);border-radius:12px;min-height:0;overflow:hidden;display:flex;flex-direction:column;}
+.cmp-section-title{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:800;padding:10px 12px;border-bottom:1px solid var(--border);}
+.cmp-table-scroll{overflow:auto;min-height:0;flex:1;}.cmp-table{border-collapse:collapse;width:100%;font-size:.65rem;}
+.cmp-table th{position:sticky;top:0;background:#f7f5f0;z-index:1;text-align:right;padding:7px 9px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:.58rem;text-transform:uppercase;letter-spacing:.04em;}
+.cmp-table th:first-child,.cmp-table td:first-child{text-align:left}.cmp-table td{padding:7px 9px;border-bottom:1px solid #f0ece6;text-align:right;vertical-align:middle;}
+.cmp-table tr:hover td{background:#fffaf8}.cmp-table .ind{font-weight:600;max-width:320px}.cmp-table .better{font-weight:800;color:#1e8a4d}.cmp-table .worse{color:#9b4130}.cmp-table .neutral{color:var(--muted)}
+.cmp-context-scroll{overflow:auto;min-height:0;flex:1;padding:8px 10px}.cmp-ctx-row{display:grid;grid-template-columns:24px minmax(70px,1fr) 1.2fr 55px;gap:6px;align-items:center;padding:5px 0;font-size:.62rem;border-bottom:1px solid #f2eee8;}
+.cmp-ctx-pos{font-family:'Syne',sans-serif;font-weight:800;color:var(--muted)}.cmp-ctx-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmp-ctx-track{height:6px;background:#ece8e1;border-radius:10px;overflow:hidden}.cmp-ctx-fill{height:100%;background:#7a7268;border-radius:10px}.cmp-ctx-row.sel .cmp-ctx-name{font-weight:800;color:var(--accent)}.cmp-ctx-row.sel .cmp-ctx-fill{background:var(--accent)}.cmp-ctx-val{text-align:right;font-family:'Syne',sans-serif;font-weight:700;}
+.st-scope{display:flex;align-items:center;gap:6px;margin:0 0 8px;}.st-scope label{font-size:.58rem;font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;color:var(--muted)}.st-scope select{flex:1;padding:6px 8px;border:1.5px solid var(--border);border-radius:7px;background:var(--surface);font-size:.68rem;}
+@media(max-width:980px){.cmp-hero{grid-template-columns:1fr 110px 1fr}.cmp-main{grid-template-columns:1fr}.cmp-context{max-height:260px}}
+@media(max-width:680px){#compare-screen{padding:10px}.cmp-hero{grid-template-columns:1fr}.cmp-diff{order:3}.cmp-screen-actions{width:100%}.cmp-screen-actions .cmp-btn{flex:1}.cmp-bar-row{grid-template-columns:88px 1fr 52px}.cmp-value{font-size:1.4rem}}
+
 /* TRANSIÇÃO SUAVE ao trocar indicador (fill animável via CSS) */
 #map path.leaflet-interactive{
   transition:fill .3s ease, fill-opacity .3s ease;
@@ -516,142 +574,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 }
 body.desktop #panel{position:relative;transform:none !important;}
 body.desktop #btn-panel{display:none;}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   V2 — layout amplo, filtros globais e painel flutuante
-   ───────────────────────────────────────────────────────────────────────────── */
-:root{
-  --hdr:64px;
-  --panel:374px;
-  --shadow:0 18px 60px rgba(31,29,25,.16),0 3px 12px rgba(31,29,25,.08);
-}
-#hdr{
-  height:var(--hdr);padding:0 22px;gap:10px;
-  background:rgba(24,22,20,.96);backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
-#hdr-logo{font-size:1.12rem;letter-spacing:-.03em}
-#btn-panel{display:inline-flex}
-.hdr-btn{padding:8px 12px;border-radius:10px;font-size:.68rem}
-#btn-desktop{display:none!important}
-#app{display:block;padding-top:var(--hdr);height:100vh}
-#map-wrap{position:relative;width:100%;height:calc(100vh - var(--hdr));min-width:0}
-#map{position:absolute;inset:0;width:100%;height:100%}
-
-/* painel vira drawer flutuante: não esmaga o mapa */
-#panel{
-  position:fixed;z-index:950;
-  left:16px;top:calc(var(--hdr) + 16px);bottom:16px;
-  height:auto;width:min(var(--panel),calc(100vw - 32px));min-width:0;
-  border:1px solid rgba(24,22,20,.08);border-radius:18px;
-  box-shadow:var(--shadow);overflow:hidden;
-  transform:translateX(calc(-100% - 26px));
-  transition:transform .28s cubic-bezier(.4,0,.2,1);
-}
-#panel.open{transform:translateX(0)}
-#tabs{height:48px;background:#fff;padding:4px;gap:3px}
-.tab{border:0;border-radius:10px;font-size:.62rem;letter-spacing:.055em}
-.tab.on{background:#f4f1eb;border:0;color:var(--accent)}
-.scroll-area{padding:16px 16px 18px}
-#legenda{height:auto;min-height:168px;padding:12px 16px 14px}
-.chips{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-.chip{min-width:0;padding:7px 10px;border-radius:10px}
-.ind-item{padding:9px 10px;border-radius:10px}
-.ind-name{font-size:.8rem}
-
-/* barra principal */
-#global-controls{
-  position:absolute;z-index:800;
-  top:18px;left:406px;right:18px;
-  display:grid;grid-template-columns:minmax(190px,.75fr) 145px 165px minmax(220px,1.25fr) auto;
-  gap:10px;align-items:end;
-  padding:12px;
-  border:1px solid rgba(24,22,20,.09);border-radius:18px;
-  background:rgba(255,255,255,.94);
-  box-shadow:0 12px 38px rgba(31,29,25,.13);
-  backdrop-filter:blur(14px);
-}
-.gc-title{min-width:0;padding:1px 6px 2px}
-.gc-kicker{
-  display:block;font-family:'Syne',sans-serif;font-size:.54rem;font-weight:800;
-  color:var(--accent);letter-spacing:.12em;margin-bottom:3px
-}
-.gc-title strong{
-  display:block;font-family:'Syne',sans-serif;font-size:.83rem;line-height:1.15;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
-}
-#gc-count{display:block;color:var(--muted);font-size:.64rem;margin-top:4px}
-.gc-field{min-width:0}
-.gc-field label{
-  display:block;font-family:'Syne',sans-serif;font-size:.54rem;font-weight:800;
-  text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 5px 2px
-}
-.gc-field select{
-  width:100%;height:38px;border:1px solid var(--border);border-radius:10px;
-  padding:0 30px 0 10px;background:#fff;color:var(--text);
-  font-family:'DM Sans',sans-serif;font-size:.72rem;outline:none;
-  overflow:hidden;text-overflow:ellipsis
-}
-.gc-field select:focus{border-color:#9e978d;box-shadow:0 0 0 3px rgba(24,22,20,.05)}
-.gc-actions{display:flex;gap:7px}
-.gc-btn{
-  height:38px;border:1px solid var(--border);border-radius:10px;background:#fff;
-  padding:0 11px;display:flex;align-items:center;justify-content:center;gap:6px;
-  white-space:nowrap;font-family:'Syne',sans-serif;font-size:.59rem;font-weight:800;
-  color:var(--text);cursor:pointer;transition:.15s
-}
-.gc-btn svg{width:14px;height:14px}
-.gc-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(31,29,25,.08)}
-.gc-btn-primary{background:var(--text);color:#fff;border-color:var(--text)}
-
-/* mapa e controles Leaflet não brigam com a barra */
-.leaflet-top.leaflet-left{top:94px}
-.leaflet-control-zoom{box-shadow:0 8px 20px rgba(31,29,25,.12)!important;border:0!important}
-.mtt{border-radius:10px!important;box-shadow:0 8px 28px rgba(31,29,25,.14)!important}
-
-/* quando o painel é fechado, a barra aproveita o espaço */
-#panel:not(.open) ~ #map-wrap #global-controls{left:18px}
-
-/* melhor legibilidade */
-.rk-sel,.st-pick select{border-radius:10px!important}
-#ficha-hdr{border-radius:14px}
-.st-note,.st-help{border-radius:10px}
-.rk-item{border-radius:8px}
-
-/* tablet */
-@media(max-width:1180px){
-  #global-controls{
-    left:392px;
-    grid-template-columns:130px 145px minmax(180px,1fr) auto;
-  }
-  .gc-title{display:none}
-}
-@media(max-width:900px){
-  #global-controls{
-    left:14px;right:14px;top:12px;
-    grid-template-columns:1fr 1fr;
-    gap:8px;padding:10px;border-radius:16px;
-  }
-  .gc-title{display:block;grid-column:1/-1}
-  .gc-ind{grid-column:1/-1}
-  .gc-actions{grid-column:1/-1}
-  .gc-btn{flex:1}
-  #panel{top:calc(var(--hdr) + 12px);left:12px;bottom:12px;width:min(390px,calc(100vw - 24px))}
-  .leaflet-top.leaflet-left{top:228px}
-}
-@media(max-width:560px){
-  :root{--hdr:58px}
-  #hdr{padding:0 12px}
-  .hdr-download span{display:none}
-  #global-controls{top:8px;left:8px;right:8px;padding:9px}
-  .gc-title strong{font-size:.78rem}
-  .gc-field select{height:36px;font-size:.68rem}
-  .gc-btn{height:36px}
-  #panel{top:calc(var(--hdr) + 8px);left:8px;right:8px;bottom:8px;width:auto}
-  #tabs{height:46px}
-  .leaflet-top.leaflet-left{top:218px}
-}
-
 </style>
 </head>
 <body>
@@ -663,28 +585,30 @@ body.desktop #btn-panel{display:none;}
 
 <div id="hdr">
   <div id="hdr-logo">IPS <span>Brasil</span> 2026</div>
-  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()"><i data-lucide="sliders-horizontal"></i> Explorar</button>
-  <button class="hdr-btn hdr-download" onclick="exportBaseCSV()"><i data-lucide="download"></i> Baixar dados</button>
+  <select id="global-region" class="hdr-select" onchange="setGlobalRegion(this.value)" title="Recorte regional"><option value="Brasil">Brasil inteiro</option><option>Norte</option><option>Nordeste</option><option>Centro-Oeste</option><option>Sudeste</option><option>Sul</option></select>
+  <button class="hdr-btn" onclick="exportDataCSV()" title="Baixar base do recorte atual"><i data-lucide="download"></i><span class="hdr-txt"> Dados</span></button>
+  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()"><i data-lucide="panel-left"></i> <span class="hdr-txt">Painel</span></button>
+  <button class="hdr-btn" id="btn-desktop" onclick="toggleDesktop()"><i data-lucide="monitor"></i> Desktop</button>
 </div>
 
 <div id="loadbar"><div id="loadbar-fill"></div></div>
 
 <div id="app">
-  <div id="panel" class="open">
+  <div id="panel">
     <div id="tabs">
       <button class="tab on" onclick="showTab('mapa',this)"><i data-lucide="map"></i><span>Mapa</span></button>
       <button class="tab"    onclick="showTab('explorar',this)"><i data-lucide="search"></i><span>Explorar</span></button>
       <button class="tab"    onclick="showTab('rankings',this)"><i data-lucide="trophy"></i><span>Rankings</span></button>
+      <button class="tab"    onclick="showTab('comparar',this)"><i data-lucide="git-compare-arrows"></i><span>Comparar</span></button>
       <button class="tab"    onclick="showTab('stats',this)"><i data-lucide="sigma"></i><span>Relações</span></button>
     </div>
 
     <!-- TAB MAPA -->
     <div id="tab-mapa" class="tab-body">
       <div class="scroll-area">
-        <div class="st-note" style="margin-bottom:14px;"><b>Mapa temático.</b> Use a barra acima do mapa para escolher <b>região, tipo de índice e indicador</b>. Aqui você também pode navegar pelos temas em detalhe.</div>
-        <div class="slabel">Temas</div>
+        <div class="slabel">Categoria</div>
         <div class="chips" id="mapa-chips"></div>
-        <div class="slabel">Indicadores do tema</div>
+        <div class="slabel">Indicador visualizado</div>
         <div id="ind-list"></div>
       </div>
     </div>
@@ -719,10 +643,33 @@ body.desktop #btn-panel{display:none;}
         <div class="rk-tools">
           <button id="btn-csv" onclick="exportCSV()"><i data-lucide="download"></i> Exportar CSV</button>
         </div>
-        <div class="slabel" id="rk-top-label">Top 10 municípios</div>
+        <div class="slabel" id="rk-mun-label">Top 10 municípios</div>
         <div id="rk-mun"></div>
         <div class="slabel" style="margin-top:14px;">Por estado (média)</div>
         <div id="rk-est"></div>
+      </div>
+    </div>
+
+    <!-- TAB COMPARAR -->
+    <div id="tab-comparar" class="tab-body" style="display:none;">
+      <div class="scroll-area">
+        <div class="cmp-note"><b>Compare territórios lado a lado.</b> Município × município usa os valores originais. Estado e região são sínteses calculadas a partir dos municípios e ficam identificadas como tal.</div>
+        <div class="cmp-field"><label>Escala da comparação</label>
+          <select id="cmp-mode" onchange="cmpChangeMode(this.value)">
+            <option value="mun">Município × Município</option>
+            <option value="uf">Estado × Estado</option>
+            <option value="reg">Região × Região</option>
+          </select>
+        </div>
+        <div class="cmp-field"><label>Território A</label><div id="cmp-a-wrap"></div></div>
+        <div class="cmp-field"><label>Território B</label><div id="cmp-b-wrap"></div></div>
+        <div class="cmp-actions">
+          <button class="cmp-btn" onclick="cmpSwap()"><i data-lucide="arrow-left-right"></i> Inverter A/B</button>
+          <button class="cmp-btn" onclick="exportCompareCSV()"><i data-lucide="download"></i> Baixar comparação</button>
+        </div>
+        <div class="cmp-field"><label>Grupo de indicadores</label><select id="cmp-cat" onchange="cmpChangeCat(this.value)"></select></div>
+        <div class="cmp-field"><label>Indicador em destaque</label><select id="cmp-ind" onchange="cmpChangeInd(this.value)"></select></div>
+        <div class="cmp-method" id="cmp-method"></div>
       </div>
     </div>
 
@@ -734,6 +681,7 @@ body.desktop #btn-panel{display:none;}
         <div class="st-help">O número <b>r</b> vai de −1 a +1: perto de <b>0</b> = sem relação; perto de <b>±1</b> = relação forte (+ sobem juntas, − uma sobe e a outra cai). Clique num card para ver o gráfico.</div>
         <div class="st-stories" id="st-stories"></div>
         <div class="slabel" style="margin-top:14px;">Relacionar duas variáveis</div>
+        <div class="st-scope"><label>Amostra</label><select id="st-scope" onchange="setStatScope(this.value)"><option value="Brasil">Brasil inteiro</option><option>Norte</option><option>Nordeste</option><option>Centro-Oeste</option><option>Sudeste</option><option>Sul</option></select></div>
         <div class="st-pick">
           <div><label>Eixo horizontal (X)</label><select id="st-x" onchange="onStatSel()"></select></div>
           <button class="st-swap" onclick="swapStat()" title="Trocar X e Y"><i data-lucide="arrow-up-down"></i></button>
@@ -777,40 +725,6 @@ body.desktop #btn-panel{display:none;}
   </div>
 
   <div id="map-wrap">
-    <div id="global-controls">
-      <div class="gc-title">
-        <span class="gc-kicker">PAINEL NACIONAL</span>
-        <strong>Explore os indicadores municipais</strong>
-        <span id="gc-count">5.570 municípios</span>
-      </div>
-      <div class="gc-field">
-        <label for="gc-regiao">Região</label>
-        <select id="gc-regiao" onchange="setRegiao(this.value)">
-          <option value="Brasil">Brasil inteiro</option>
-          <option value="Norte">Norte</option>
-          <option value="Nordeste">Nordeste</option>
-          <option value="Centro-Oeste">Centro-Oeste</option>
-          <option value="Sudeste">Sudeste</option>
-          <option value="Sul">Sul</option>
-        </select>
-      </div>
-      <div class="gc-field">
-        <label for="gc-cat">Tipo de índice</label>
-        <select id="gc-cat" onchange="onGlobalCategory(this.value)"></select>
-      </div>
-      <div class="gc-field gc-ind">
-        <label for="gc-ind">Indicador</label>
-        <select id="gc-ind" onchange="setIndicador(this.value)"></select>
-      </div>
-      <div class="gc-actions">
-        <button class="gc-btn gc-btn-primary" onclick="exportCurrentCSV()" title="Baixar o indicador visualizado no recorte atual">
-          <i data-lucide="download"></i><span>Indicador</span>
-        </button>
-        <button class="gc-btn" onclick="exportBaseCSV()" title="Baixar todos os indicadores do recorte atual">
-          <i data-lucide="database"></i><span>Base completa</span>
-        </button>
-      </div>
-    </div>
     <div id="map"></div>
     <div id="skel-map"><div class="skel skel-blob"></div></div>
 
@@ -839,6 +753,27 @@ body.desktop #btn-panel{display:none;}
         <div class="st-mx-key" id="st-mx-key"></div>
       </div>
     </div>
+
+    <!-- TELA DE COMPARAÇÃO (ocupa a área do mapa) -->
+    <div id="compare-screen">
+      <div class="cmp-screen-head">
+        <div class="cmp-screen-title" id="cmp-title">Comparação territorial<small id="cmp-subtitle">—</small></div>
+        <div class="cmp-screen-actions">
+          <button class="cmp-btn" onclick="cmpSwap()"><i data-lucide="arrow-left-right"></i> Inverter</button>
+          <button class="cmp-btn" onclick="exportCompareCSV()"><i data-lucide="download"></i> CSV</button>
+        </div>
+      </div>
+      <div class="cmp-hero">
+        <div class="cmp-card a" id="cmp-card-a"></div>
+        <div class="cmp-diff" id="cmp-diff"></div>
+        <div class="cmp-card b" id="cmp-card-b"></div>
+      </div>
+      <div class="cmp-bars" id="cmp-bars"></div>
+      <div class="cmp-main">
+        <div class="cmp-table-wrap"><div class="cmp-section-title" id="cmp-table-title">Perfil comparado</div><div class="cmp-table-scroll" id="cmp-table-scroll"></div></div>
+        <div class="cmp-context"><div class="cmp-section-title" id="cmp-context-title">Contexto</div><div class="cmp-context-scroll" id="cmp-context-scroll"></div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -849,6 +784,7 @@ let geoLayer=null,leaf=null;
 let IND='Índice de Progresso Social';
 let rankInd='Índice de Progresso Social';
 let rankDir='top';
+let REGION='Brasil';
 let munIdx={};
 let layerByChave={};    // chave normalizada -> layer leaflet
 let chaveToCd={}, cdToChave={};  // mapeamento código IBGE <-> chave
@@ -857,7 +793,8 @@ let featureSel=null;    // layer leaflet selecionado
 let chaveSel=null;      // chave normalizada do selecionado
 let markerSel=null;     // marcador com nome no mapa
 let catMapa='Geral',catRank='Geral';
-let REGIAO='Brasil'; // recorte geográfico global
+let cmpReady=false;
+const CMP={mode:'mun',a:null,b:null,cat:'Geral',ind:'Índice de Progresso Social'};
 let FUSE=null;          // índice de busca fuzzy
 let escCache={}, rankCache={}, quintCache={}; // caches por indicador
 let selfHash='';        // hash que a própria app definiu (evita loop)
@@ -917,9 +854,8 @@ let slugToInd={}, indToSlug={};
 
 // ─── CORES: azul=menor, vermelho=maior, SEMPRE ────────────────────────────────
 function getEsc(ind){
-  const ck=cacheKey(ind);
-  if(escCache[ck]) return escCache[ck];
-  const vs=municipiosFiltrados().map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
+  if(escCache[ind]) return escCache[ind];
+  const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
   let e;
   if(!vs.length) e={p5:0,p95:1,mid:.5,min:0,max:1,p25:0,p75:1};
   else e={
@@ -930,7 +866,7 @@ function getEsc(ind){
     p75:vs[Math.floor(vs.length*.75)],
     min:vs[0], max:vs[vs.length-1]
   };
-  escCache[ck]=e; return e;
+  escCache[ind]=e; return e;
 }
 // Paleta DIVERGENTE semântica: 0 = pior, 1 = melhor (roxo → laranja → verde)
 const PAL_QUAL=[
@@ -969,11 +905,10 @@ function posVal(v,ind){const e=getEsc(ind);return clamp01((v-e.p5)/(e.p95-e.p5+.
 const QUINT_QUAL  =[0,.25,.5,.75,1].map(t=>rampColor(PAL_QUAL,t));   // 0=pior … 4=melhor
 const QUINT_NEUTRA=[0,.25,.5,.75,1].map(t=>rampColor(PAL_NEUTRA,t)); // claro … escuro
 function getQuintis(ind){
-  const ck=cacheKey(ind);
-  if(quintCache[ck]) return quintCache[ck];
-  const vs=municipiosFiltrados().map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
+  if(quintCache[ind]) return quintCache[ind];
+  const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
   const th=[]; for(let k=1;k<=4;k++) th.push(vs.length?vs[Math.floor(vs.length*k/5)]:0);
-  return quintCache[ck]={th,n:vs.length,vs};
+  return quintCache[ind]={th,n:vs.length,vs};
 }
 function quintIdx(v,ind){const{th}=getQuintis(ind);let i=0;while(i<4&&v>=th[i])i++;return i;} // por valor ↑
 function quintQual(v,ind){const i=quintIdx(v,ind);return D.meta[ind]&&D.meta[ind].maior==='pior'?4-i:i;} // 0=pior,4=melhor
@@ -996,17 +931,16 @@ function barFrac(v,ind){const mx=scaleMax(ind);return mx?clamp01(v/mx):posVal(v,
 
 // Ranking nacional (1º = melhor; direção depende de maior=melhor/pior)
 function getRank(ind){
-  const ck=cacheKey(ind);
-  if(rankCache[ck]) return rankCache[ck];
+  if(rankCache[ind]) return rankCache[ind];
   const meta=D.meta[ind];
-  const asc = meta && meta.maior==='pior';
-  const arr=municipiosFiltrados().filter(m=>m.i[ind]!=null)
+  const asc = meta && meta.maior==='pior';   // pior: menor valor é melhor -> 1º
+  const arr=D.municipios.filter(m=>m.i[ind]!=null)
     .map(m=>({k:chaveOf(m),v:m.i[ind]}));
   arr.sort((a,b)=> asc ? a.v-b.v : b.v-a.v);
   const pos={};
   arr.forEach((x,i)=>{pos[x.k]=i+1;});
   const r={pos,total:arr.length};
-  rankCache[ck]=r; return r;
+  rankCache[ind]=r; return r;
 }
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
@@ -1073,6 +1007,17 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function nrm(s){return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();}
 function chaveOf(m){return nrm(m.m)+'_'+nrm(m.u);}
 function icons(){if(window.lucide) lucide.createIcons();}
+function inRegion(m){return !!m&&(REGION==='Brasil'||m.r===REGION);}
+function scopedMunicipios(){return REGION==='Brasil'?D.municipios:D.municipios.filter(inRegion);}
+function setGlobalRegion(reg){
+  REGION=reg||'Brasil';document.getElementById('global-region').value=REGION;
+  aplicarEstilos();buildRank();
+  const q=document.getElementById('srch')?.value;if(q&&q.length>=2)searchMun(q);
+  if(statReady){STAT.scope=REGION;const ss=document.getElementById('st-scope');if(ss)ss.value=REGION;corrCache={};renderStats();renderStoriesStats();}
+  if(REGION==='Brasil'){leaf&&leaf.setView([-14,-52],4);}
+  else if(geoLayer&&leaf){let b=null;geoLayer.eachLayer(l=>{const m=l.feature?.properties?._d;if(inRegion(m)){const lb=l.getBounds?.();if(lb)b=b?b.extend(lb):L.latLngBounds(lb);}});if(b&&b.isValid())leaf.fitBounds(b,{padding:[18,18],maxZoom:6});}
+  atualizarLegenda(IND,getEsc(IND),D.meta[IND]);
+}
 
 // slugs para permalink de indicadores
 function buildSlugs(){
@@ -1088,75 +1033,13 @@ function catDeInd(ind){
   return null;
 }
 
-function municipioVisivel(m){
-  return !!m && (REGIAO==='Brasil' || m.r===REGIAO);
-}
-function municipiosFiltrados(){
-  return REGIAO==='Brasil' ? D.municipios : D.municipios.filter(m=>m.r===REGIAO);
-}
-function cacheKey(ind){ return REGIAO+'|'+ind; }
-
-function initGlobalControls(){
-  const catSel=document.getElementById('gc-cat');
-  catSel.innerHTML=Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  catSel.value=catMapa;
-  document.getElementById('gc-regiao').value=REGIAO;
-  syncGlobalIndicator();
-  updateRegionCount();
-}
-function syncGlobalIndicator(){
-  const catSel=document.getElementById('gc-cat');
-  if(catSel) catSel.value=catMapa;
-  const sel=document.getElementById('gc-ind');
-  if(!sel || !D) return;
-  const inds=(GRUPOS[catMapa]||[]).filter(i=>D.meta[i]);
-  sel.innerHTML=inds.map(i=>`<option value="${esc(i)}">${esc(D.meta[i].nome||i)}</option>`).join('');
-  if(inds.includes(IND)) sel.value=IND;
-}
-function onGlobalCategory(cat){
-  catMapa=cat;
-  const inds=(GRUPOS[cat]||[]).filter(i=>D.meta[i]);
-  buildChips('mapa-chips',catMapa,onCatMapa);
-  buildIndList();
-  if(inds.length) setIndicador(inds.includes(IND)?IND:inds[0]);
-  syncGlobalIndicator();
-}
-function updateRegionCount(){
-  const el=document.getElementById('gc-count'); if(!el||!D) return;
-  const n=municipiosFiltrados().length;
-  el.textContent=n.toLocaleString('pt-BR')+' município'+(n===1?'':'s')+(REGIAO==='Brasil'?'':' · '+REGIAO);
-}
-function zoomRegiao(){
-  if(!leaf||!D) return;
-  if(REGIAO==='Brasil'){leaf.setView([-14,-52],4,{animate:true});return;}
-  const pts=municipiosFiltrados().filter(m=>isFinite(m.lat)&&isFinite(m.lon)).map(m=>[m.lat,m.lon]);
-  if(pts.length) leaf.fitBounds(L.latLngBounds(pts),{padding:[45,45],maxZoom:6,animate:true});
-}
-function setRegiao(reg){
-  REGIAO=reg||'Brasil';
-  escCache={}; rankCache={}; quintCache={}; corrCache={};
-  document.getElementById('gc-regiao').value=REGIAO;
-  updateRegionCount();
-  if(munSel && !municipioVisivel(munSel)){
-    limparSelecao(); munSel=null; chaveSel=null; featureSel=null;
-    const ficha=document.getElementById('ficha'); if(ficha) ficha.innerHTML='';
-  }
-  aplicarEstilos();
-  atualizarLegenda(IND,getEsc(IND),D.meta[IND]);
-  if(document.getElementById('rk-mun')) buildRank();
-  const q=document.getElementById('srch'); if(q&&q.value) searchMun(q.value);
-  if(statReady) renderStats();
-  zoomRegiao();
-}
-
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initUI(){
   initMapa();
   criarCamadaMapa();
   buildChips('rank-chips',catRank,onCatRank);
   buildRank();
-  setIndicador(IND,true);
-  initGlobalControls();
+  setIndicador(IND,true);   // monta chips/lista/estilos/legenda do mapa
   icons();
 }
 
@@ -1170,9 +1053,9 @@ function initMapa(){
 
 function getEstiloNormal(f){
   const d=f.properties._d, v=d?d.i[IND]:null;
-  if(d && !municipioVisivel(d)) return{fillColor:'#e7e3dc',weight:.2,color:'#d7d1c8',fillOpacity:.08,opacity:.22};
+  if(d&&!inRegion(d)) return{fillColor:'#ece8e1',weight:.2,color:'#d7d1c8',fillOpacity:.18,opacity:.35};
   if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
-  return{fillColor:corInd(v,IND),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.9,opacity:1};
+  return{fillColor:corInd(v,IND),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.9};
 }
 
 // Cria a camada UMA vez. Trocar indicador apenas re-estiliza (transição suave).
@@ -1184,7 +1067,7 @@ function criarCamadaMapa(){
       layerByChave[p._k]=layer;
       // Tooltip dinâmico: lê o indicador atual a cada abertura
       layer.bindTooltip(()=>tooltipHTML(p),{className:'mtt',sticky:true,opacity:1});
-      layer.on('click',()=>{if(p._d&&municipioVisivel(p._d)) selecionarMun(p._d,layer,p._k,false);});
+      layer.on('click',()=>{if(p._d&&inRegion(p._d)) selecionarMun(p._d,layer,p._k,false);});
       layer.on('mouseover',e=>{if(p._k!==chaveSel) e.target.setStyle({weight:1.5,color:'#333'});});
       layer.on('mouseout',e=>{if(p._k!==chaveSel) geoLayer.resetStyle(e.target);});
     }
@@ -1195,7 +1078,8 @@ function tooltipHTML(p){
   const d=p._d, meta=D.meta[IND];
   const nm=p.NM_MUN||'', uf=p.SIGLA_UF||'';
   const un=meta?meta.unidade:'';
-  const v=d&&municipioVisivel(d)?d.i[IND]:null;
+  const v=d?d.i[IND]:null;
+  if(d&&!inRegion(d)) return `<div class="mtt-nm">${nm} — ${uf}</div><div class="mtt-ind">${d.r} · fora do recorte ${REGION}</div>`;
   let rk='';
   if(d&&v!=null){
     const r=getRank(IND), pos=r.pos[p._k];
@@ -1269,7 +1153,7 @@ function atualizarLegenda(ind,esc,meta){
     const titulo=`${neutro?(pos+1)+'ª faixa':(pos+1)+'º quinto'} · ${fmt(lo)}–${fmt(hi)} ${un}\n20% das cidades`;
     sc+=`<div style="background:${corQuintilLeg(pos,ind)}" title="${titulo}"></div>`;
   });
-  sc+=`<div class="leg-med" title="mediana do recorte (${REGIAO}): ${fmt(esc.mid)} ${un}"></div>`;
+  sc+=`<div class="leg-med" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
   // Marcador do município selecionado (se tiver valor neste indicador)
   if(munSel && munSel.i[ind]!=null){
     const sv=munSel.i[ind];
@@ -1296,13 +1180,14 @@ function atualizarLegenda(ind,esc,meta){
   document.getElementById('leg-hi').textContent=fmt(bestV)+' '+un;
   document.getElementById('leg-med').textContent='mediana '+fmt(esc.mid);
 
-  let semDado=0; for(const m of municipiosFiltrados()) if(m.i[ind]==null) semDado++;
+  let semDado=0; for(const m of scopedMunicipios()) if(m.i[ind]==null) semDado++;
   const semTxt=`<span class="leg-nodata"><span class="leg-nodata-sw"></span> ${semDado.toLocaleString('pt-BR')} sem dado</span>`;
   const note=document.getElementById('leg-note');
   note.innerHTML = neutro
     ? `<span>Escala neutra — só magnitude, sem bom/ruim.</span>${semTxt}`
     : `<span><span class="leg-dot" style="background:rgb(106,27,154)"></span> pior`+
       ` &nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor</span>${semTxt}`;
+  if(REGION!=='Brasil') note.innerHTML+=`<span style="display:block;margin-top:3px"><b>Recorte: ${REGION}</b> · cores mantêm os quintis nacionais.</span>`;
 
   // Rodapé: situação do município selecionado, ou a explicação dos quintis
   const distEl=document.getElementById('leg-dist');
@@ -1323,7 +1208,7 @@ function atualizarLegenda(ind,esc,meta){
 function onCatMapa(cat){
   catMapa=cat;
   buildChips('mapa-chips',catMapa,onCatMapa);
-  buildIndList(); syncGlobalIndicator(); icons();
+  buildIndList(); icons();
 }
 function onCatRank(cat){
   catRank=cat;
@@ -1366,12 +1251,10 @@ function buildIndList(){
 
 // Ponto único de troca de indicador (mapa + legenda + lista + permalink)
 function setIndicador(ind,fromHash){
-  if(!D.meta[ind]) return;
   IND=ind;
   const cat=catDeInd(ind); if(cat) catMapa=cat;
   buildChips('mapa-chips',catMapa,onCatMapa);
   buildIndList();
-  syncGlobalIndicator();
   aplicarEstilos();
   atualizarLegenda(ind,getEsc(ind),D.meta[ind]);
   if(munSel) refreshFichaAtivo();
@@ -1399,9 +1282,9 @@ function abrirFicha(m){
       <span class="f-ips-v">${ips!=null?ips.toFixed(1):'—'}</span>
       <span class="f-ips-l">IPS Brasil 2026<br>escala 0–100, maior = melhor</span>
     </div>
-    ${posIps?`<div class="f-rank">Ranking IPS ${REGIAO==='Brasil'?'nacional':'na região '+REGIAO}: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
+    ${posIps?`<div class="f-rank">Ranking IPS nacional: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
   </div>
-  <div class="f-caption">Barra = valor · cor = quintil do recorte ativo (<span class="leg-dot" style="background:rgb(106,27,154)"></span> pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor). O traço escuro <b>●│</b> marca a média do estado (${m.u}).</div>`;
+  <div class="f-caption">Barra = valor · cor = quintil nacional (<span class="leg-dot" style="background:rgb(106,27,154)"></span> pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor). O traço escuro <b>●│</b> marca a média do estado (${m.u}).</div>`;
 
   const medUF=D.medias_por_uf[m.u]||{};
 
@@ -1482,9 +1365,9 @@ function searchMun(q){
   const qn=nrm(q);
   let found;
   if(FUSE){
-    found=FUSE.search(qn).map(r=>r.item.m).filter(m=>municipioVisivel(m)).slice(0,12);
+    found=FUSE.search(qn).map(r=>r.item.m).filter(inRegion).slice(0,12);
   }else{
-    found=municipiosFiltrados().filter(m=>nrm(m.m).includes(qn)||nrm(m.u).includes(qn)).slice(0,12);
+    found=D.municipios.filter(m=>inRegion(m)&&(nrm(m.m).includes(qn)||nrm(m.u).includes(qn))).slice(0,12);
   }
   if(!found.length){res.innerHTML='<div class="sr-empty">Nenhum município encontrado.</div>';return;}
   res.innerHTML='';
@@ -1516,18 +1399,18 @@ function setDir(d){
 }
 
 function buildRank(){
-  const lbl=document.getElementById('rk-top-label'); if(lbl) lbl.textContent='Top 10 municípios'+(REGIAO==='Brasil'?'':' · '+REGIAO);
   const inds=GRUPOS[catRank]||[];
   if(!inds.includes(rankInd)) rankInd=inds[0];
   const sel=document.getElementById('rk-sel');
   sel.innerHTML=inds.map(i=>`<option value="${i}" ${i===rankInd?'selected':''}>${D.meta[i]?D.meta[i].nome:i}</option>`).join('');
 
   // Top 10 municípios + mini barras
-  let vs=municipiosFiltrados().map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
+  let vs=scopedMunicipios().map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
   vs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
   const top=vs.slice(0,10);
   const maxMun=Math.max(...top.map(x=>Math.abs(x.v)),1);
   const munWrap=document.getElementById('rk-mun');
+  const rkl=document.getElementById('rk-mun-label');if(rkl)rkl.textContent='Top 10 municípios'+(REGION==='Brasil'?'':' · '+REGION);
   munWrap.innerHTML='';
   top.forEach((x,i)=>{
     const el=document.createElement('div');
@@ -1542,7 +1425,7 @@ function buildRank(){
 
   // Estados — média ponderada por população
   const ufSoma={},ufPop={},ufN={};
-  for(const m of municipiosFiltrados()){
+  for(const m of scopedMunicipios()){
     const v=m.i[rankInd]; const pop=m.i['POPULAÇÃO 2025']||0;
     if(v==null) continue;
     if(!ufSoma[m.u]){ufSoma[m.u]=0;ufPop[m.u]=0;ufN[m.u]=0;}
@@ -1571,48 +1454,31 @@ function buildRank(){
 }
 
 // ─── EXPORTAR CSV ─────────────────────────────────────────────────────────────
-function saveCSV(lines,filename){
-  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
-}
-function regSlug(){return REGIAO==='Brasil'?'brasil':nrm(REGIAO).toLowerCase().replace(/[^a-z0-9]+/g,'-');}
 function exportCSV(){
   const ind=rankInd, meta=D.meta[ind];
-  let rows=municipiosFiltrados().map(m=>({m,v:m.i[ind]})).filter(x=>x.v!=null);
+  let rows=scopedMunicipios().map(m=>({m,v:m.i[ind]})).filter(x=>x.v!=null);
   rows.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
   const sep=';';
   const head=['Posicao','Municipio','UF','Regiao','Indicador','Valor','Unidade'];
   const lines=[head.join(sep)];
-  rows.forEach((x,i)=>lines.push([
-    i+1,csvq(x.m.m),x.m.u,csvq(x.m.r),csvq(meta?meta.nome:ind),
-    String(x.v).replace('.',','),csvq(meta?meta.unidade:'')
-  ].join(sep)));
-  saveCSV(lines,'ips_ranking_'+regSlug()+'_'+indToSlug[ind]+'_'+(rankDir==='top'?'maiores':'menores')+'.csv');
+  rows.forEach((x,i)=>{
+    lines.push([
+      i+1, csvq(x.m.m), x.m.u, csvq(x.m.r), csvq(meta?meta.nome:ind),
+      String(x.v).replace('.',','), csvq(meta?meta.unidade:'')
+    ].join(sep));
+  });
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='ips_ranking_'+indToSlug[ind]+'_'+(REGION==='Brasil'?'brasil':nrm(REGION).toLowerCase().replace(/[^a-z0-9]+/g,'_'))+'_'+(rankDir==='top'?'maiores':'menores')+'.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-function exportCurrentCSV(){
-  const ind=IND, meta=D.meta[ind], sep=';';
-  const rows=municipiosFiltrados().filter(m=>m.i[ind]!=null);
-  const head=['Municipio','UF','Regiao','Indicador','Valor','Unidade'];
-  const lines=[head.join(sep)];
-  rows.forEach(m=>lines.push([
-    csvq(m.m),m.u,csvq(m.r),csvq(meta?meta.nome:ind),
-    String(m.i[ind]).replace('.',','),csvq(meta?meta.unidade:'')
-  ].join(sep)));
-  saveCSV(lines,'ips_'+regSlug()+'_'+indToSlug[ind]+'.csv');
-}
-function exportBaseCSV(){
-  if(!D) return;
-  const sep=';', inds=Object.keys(D.meta);
-  const head=['Municipio','UF','Regiao','Latitude','Longitude',...inds];
-  const lines=[head.map(csvq).join(sep)];
-  for(const m of municipiosFiltrados()){
-    const row=[m.m,m.u,m.r,m.lat??'',m.lon??'',...inds.map(i=>m.i[i]??'')];
-    lines.push(row.map(v=>typeof v==='number'?String(v).replace('.',','):csvq(v)).join(sep));
-  }
-  saveCSV(lines,'ips_base_completa_'+regSlug()+'.csv');
+function exportDataCSV(){
+  const inds=Object.keys(D.meta),sep=';',head=['Municipio','UF','Regiao','Latitude','Longitude',...inds];const lines=[head.map(csvq).join(sep)];
+  for(const m of scopedMunicipios())lines.push([csvq(m.m),m.u,csvq(m.r),String(m.lat??'').replace('.',','),String(m.lon??'').replace('.',','),...inds.map(i=>{const v=m.i[i];return v==null?'':String(v).replace('.',',');})].join(sep));
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='ips_dados_'+(REGION==='Brasil'?'brasil':nrm(REGION).toLowerCase().replace(/[^a-z0-9]+/g,'_'))+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function csvq(s){s=String(s); return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 
@@ -1641,19 +1507,21 @@ function onHashChange(){
 function showTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   if(btn) btn.classList.add('on');
-  ['mapa','explorar','rankings','stats'].forEach(t=>{
+  ['mapa','explorar','rankings','comparar','stats'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'flex':'none';
   });
   if(tab==='mapa') document.getElementById('tab-mapa').style.flexDirection='column';
-  const isStats=tab==='stats';
+  const isStats=tab==='stats', isCompare=tab==='comparar';
   document.getElementById('stats-screen').style.display=isStats?'flex':'none';
-  document.getElementById('legenda').style.display=isStats?'none':'';
+  document.getElementById('compare-screen').style.display=isCompare?'flex':'none';
+  document.getElementById('legenda').style.display=(isStats||isCompare)?'none':'';
   if(isStats){ if(chaveSel) statSel=chaveSel; ensureStatsInit(); if(statReady) renderStats(); }
+  if(isCompare){ ensureCompareInit(); renderCompare(); }
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
 }
 
-let panelOpen=true;
-function togglePanel(){panelOpen=!panelOpen;document.getElementById('panel').classList.toggle('open',panelOpen);setTimeout(()=>leaf&&leaf.invalidateSize(),320);}
+let panelOpen=false;
+function togglePanel(){panelOpen=!panelOpen;document.getElementById('panel').classList.toggle('open',panelOpen);}
 function openPanel(){panelOpen=true;document.getElementById('panel').classList.add('open');}
 function closePanel(){panelOpen=false;document.getElementById('panel').classList.remove('open');}
 function toggleDesktop(){
@@ -1666,10 +1534,117 @@ function toggleDesktop(){
   setTimeout(()=>leaf&&leaf.invalidateSize(),350);
 }
 
+
+// ─── COMPARAÇÕES TERRITORIAIS ────────────────────────────────────────────────
+const UF_NOMES={AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
+const REGIOES=['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'];
+function ensureCompareInit(){
+  if(cmpReady)return; cmpReady=true;
+  document.getElementById('cmp-cat').innerHTML=Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  // defaults: Cáceres se existir; caso contrário dois primeiros municípios
+  const cac=Object.keys(munIdx).find(k=>k===nrm('Cáceres')+'_MT');
+  CMP.a=cac||chaveOf(D.municipios[0]); CMP.b=chaveOf(D.municipios.find(m=>chaveOf(m)!==CMP.a)||D.municipios[1]);
+  cmpRenderEntityInputs(); cmpChangeCat(CMP.cat,false); icons();
+}
+function cmpChangeMode(mode){CMP.mode=mode;const all=cmpEntityIds();CMP.a=all[0]||null;CMP.b=all[1]||all[0]||null;cmpRenderEntityInputs();renderCompare();}
+function cmpEntityIds(){
+  if(CMP.mode==='mun')return D.municipios.map(chaveOf);
+  if(CMP.mode==='uf')return [...new Set(D.municipios.map(m=>m.u))].sort((a,b)=>(UF_NOMES[a]||a).localeCompare(UF_NOMES[b]||b,'pt-BR'));
+  return REGIOES.slice();
+}
+function cmpLabel(id){
+  if(CMP.mode==='mun'){const m=munIdx[id];return m?`${m.m} · ${m.u}`:'—';}
+  if(CMP.mode==='uf')return `${UF_NOMES[id]||id} · ${id}`;
+  return id||'—';
+}
+function cmpSub(id){
+  if(CMP.mode==='mun'){const m=munIdx[id];return m?m.r:'';}
+  if(CMP.mode==='uf'){const m=D.municipios.find(x=>x.u===id);return m?m.r:'';}
+  return 'Região do Brasil';
+}
+function cmpRenderEntityInputs(){
+  const ids=cmpEntityIds();
+  function html(which){
+    const cur=which==='a'?CMP.a:CMP.b;
+    if(CMP.mode==='mun'){
+      const dl='cmp-list-'+which;
+      return `<input id="cmp-${which}" list="${dl}" value="${esc(cmpLabel(cur))}" onchange="cmpPickMun('${which}',this.value)" placeholder="Digite o município…"><datalist id="${dl}">${D.municipios.map(m=>`<option value="${esc(m.m+' · '+m.u)}"></option>`).join('')}</datalist>`;
+    }
+    return `<select id="cmp-${which}" onchange="cmpPick('${which}',this.value)">${ids.map(id=>`<option value="${esc(id)}" ${id===cur?'selected':''}>${esc(cmpLabel(id))}</option>`).join('')}</select>`;
+  }
+  document.getElementById('cmp-a-wrap').innerHTML=html('a');document.getElementById('cmp-b-wrap').innerHTML=html('b');
+  cmpUpdateMethod();
+}
+function cmpPick(which,val){CMP[which]=val;renderCompare();}
+function cmpPickMun(which,label){
+  const t=nrm(label).replace(/\s*[·\-–—]\s*/g,'_');
+  let id=Object.keys(munIdx).find(k=>nrm(cmpLabel(k))===nrm(label));
+  if(!id){const mm=D.municipios.find(m=>nrm(m.m+' '+m.u)===nrm(label.replace(/[·\-–—]/g,' ')));if(mm)id=chaveOf(mm);}
+  if(id){CMP[which]=id;document.getElementById('cmp-'+which).value=cmpLabel(id);renderCompare();}
+}
+function cmpSwap(){const t=CMP.a;CMP.a=CMP.b;CMP.b=t;cmpRenderEntityInputs();renderCompare();}
+function cmpChangeCat(cat,draw=true){CMP.cat=cat;const inds=(GRUPOS[cat]||[]).filter(i=>D.meta[i]);if(!inds.includes(CMP.ind))CMP.ind=inds[0]||Object.keys(D.meta)[0];const sel=document.getElementById('cmp-ind');sel.innerHTML=inds.map(i=>`<option value="${esc(i)}" ${i===CMP.ind?'selected':''}>${esc(D.meta[i].nome)}</option>`).join('');if(draw)renderCompare();}
+function cmpChangeInd(ind){CMP.ind=ind;renderCompare();}
+function cmpMembers(id){
+  if(CMP.mode==='mun'){const m=munIdx[id];return m?[m]:[];}
+  if(CMP.mode==='uf')return D.municipios.filter(m=>m.u===id);
+  return D.municipios.filter(m=>m.r===id);
+}
+function cmpAgg(id,ind){
+  const ms=cmpMembers(id), vals=ms.filter(m=>m.i[ind]!=null&&isFinite(m.i[ind]));
+  if(!vals.length)return{v:null,n:0,method:'sem dados'};
+  if(CMP.mode==='mun')return{v:vals[0].i[ind],n:1,method:'valor municipal original'};
+  if(ind==='POPULAÇÃO 2025'||ind==='ÁREA km²')return{v:vals.reduce((s,m)=>s+m.i[ind],0),n:vals.length,method:'soma dos municípios'};
+  let sw=0,sp=0;for(const m of vals){const w=m.i['POPULAÇÃO 2025'];if(w!=null&&isFinite(w)&&w>0){sw+=m.i[ind]*w;sp+=w;}}
+  if(sp>0)return{v:sw/sp,n:vals.length,method:'média municipal ponderada pela população'};
+  return{v:vals.reduce((s,m)=>s+m.i[ind],0)/vals.length,n:vals.length,method:'média municipal simples'};
+}
+function cmpUpdateMethod(){const el=document.getElementById('cmp-method');if(!el)return;
+  el.innerHTML=CMP.mode==='mun'?'<b>Municípios:</b> comparação direta dos valores da base, sem recalcular os indicadores.':
+    '<b>Estados/regiões:</b> indicadores são sínteses calculadas na plataforma. Em geral usa-se média municipal ponderada pela população; População e Área são somadas. Esses valores derivados não substituem estatísticas oficiais estaduais/regionais.';
+}
+function cmpRank(id,ind){const ids=cmpEntityIds().map(k=>({k,...cmpAgg(k,ind)})).filter(x=>x.v!=null);const meta=D.meta[ind],asc=meta&&meta.maior==='pior';ids.sort((a,b)=>asc?a.v-b.v:b.v-a.v);const pos=ids.findIndex(x=>x.k===id);return pos<0?null:{pos:pos+1,total:ids.length};}
+function cmpWinner(va,vb,ind){if(va==null||vb==null)return'';const m=D.meta[ind];if(!m||m.maior==='neutro'||va===vb)return va===vb?'empate':'escala neutra';const aBetter=m.maior==='pior'?va<vb:va>vb;return aBetter?'A melhor':'B melhor';}
+function cmpFmtDiff(va,vb){if(va==null||vb==null)return{abs:'—',pct:'—'};const d=va-vb;return{abs:(d>=0?'+':'')+fmt(d),pct:vb!==0?((d/vb)*100>=0?'+':'')+((d/vb)*100).toFixed(1).replace('.',',')+'%':'—'};}
+function renderCompare(){
+  if(!cmpReady||!CMP.a||!CMP.b)return;cmpUpdateMethod();
+  const ind=CMP.ind, meta=D.meta[ind], A=cmpAgg(CMP.a,ind),B=cmpAgg(CMP.b,ind),df=cmpFmtDiff(A.v,B.v),win=cmpWinner(A.v,B.v,ind),ra=cmpRank(CMP.a,ind),rb=cmpRank(CMP.b,ind);
+  document.getElementById('cmp-title').childNodes[0].nodeValue=`${cmpLabel(CMP.a)} × ${cmpLabel(CMP.b)} `;
+  document.getElementById('cmp-subtitle').textContent=`${meta?meta.nome:ind} · ${CMP.mode==='mun'?'valores municipais originais':'síntese calculada a partir dos municípios'}`;
+  const card=(id,x,r)=>`<div class="cmp-name">${esc(cmpLabel(id))}</div><div class="cmp-sub">${esc(cmpSub(id))}</div><div class="cmp-value">${x.v==null?'—':fmt(x.v)}</div><div class="cmp-unit">${esc(meta?.unidade||'')}</div><div class="cmp-rank">${r?`${r.pos}º de ${r.total} na escala selecionada · `:''}${esc(x.method)}${x.n>1?' · '+x.n.toLocaleString('pt-BR')+' municípios':''}</div>`;
+  document.getElementById('cmp-card-a').innerHTML=card(CMP.a,A,ra);document.getElementById('cmp-card-b').innerHTML=card(CMP.b,B,rb);
+  document.getElementById('cmp-diff').innerHTML=`<div class="lbl">Diferença A − B</div><div class="val">${df.abs}</div><div class="pct">${df.pct}</div><div class="win">${esc(win)}</div>`;
+  const vals=[A.v,B.v].filter(v=>v!=null),lo=vals.length?Math.min(0,...vals):0,hi=vals.length?Math.max(...vals):1,span=(hi-lo)||1;
+  const bar=(id,x,cl)=>`<div class="cmp-bar-row"><div class="cmp-bar-label">${esc(cmpLabel(id))}</div><div class="cmp-bar-track"><div class="cmp-bar-fill" style="width:${x.v==null?0:Math.max(2,(x.v-lo)/span*100)}%;background:${cl}"></div></div><div class="cmp-bar-val">${x.v==null?'—':fmt(x.v)}</div></div>`;
+  document.getElementById('cmp-bars').innerHTML=`<div class="cmp-section-title" style="padding:0 0 6px;border:0">${esc(meta?meta.nome:ind)}</div>`+bar(CMP.a,A,'#1644a8')+bar(CMP.b,B,'#c93a0e');
+  renderCompareTable();renderCompareContext();icons();
+}
+function renderCompareTable(){
+  const inds=(GRUPOS[CMP.cat]||[]).filter(i=>D.meta[i]);document.getElementById('cmp-table-title').textContent='Perfil comparado · '+CMP.cat;
+  let h='<table class="cmp-table"><thead><tr><th>Indicador</th><th>A</th><th>B</th><th>A − B</th></tr></thead><tbody>';
+  for(const ind of inds){const a=cmpAgg(CMP.a,ind),b=cmpAgg(CMP.b,ind),meta=D.meta[ind],d=(a.v==null||b.v==null)?null:a.v-b.v,w=cmpWinner(a.v,b.v,ind);let ca='',cb='';if(w==='A melhor')ca='better',cb='worse';else if(w==='B melhor')cb='better',ca='worse';else ca=cb='neutral';h+=`<tr data-ind="${esc(ind)}" style="cursor:pointer"><td class="ind" title="${esc(meta.nome)}">${esc(meta.nome)}</td><td class="${ca}">${a.v==null?'—':fmt(a.v)}</td><td class="${cb}">${b.v==null?'—':fmt(b.v)}</td><td>${d==null?'—':(d>=0?'+':'')+fmt(d)}</td></tr>`;}
+  h+='</tbody></table>';const wrap=document.getElementById('cmp-table-scroll');wrap.innerHTML=h;wrap.querySelectorAll('tr[data-ind]').forEach(tr=>tr.onclick=()=>{CMP.ind=tr.dataset.ind;document.getElementById('cmp-ind').value=CMP.ind;renderCompare();});
+}
+function renderCompareContext(){
+  const box=document.getElementById('cmp-context-scroll'),title=document.getElementById('cmp-context-title');
+  if(CMP.mode==='mun'){
+    title.textContent='Contexto dos dois municípios';
+    const ia=cmpRank(CMP.a,CMP.ind),ib=cmpRank(CMP.b,CMP.ind);box.innerHTML=`<div class="cmp-note" style="margin:4px">No indicador destacado, <b>${esc(cmpLabel(CMP.a))}</b> está ${ia?ia.pos+'º de '+ia.total:'sem ranking'} e <b>${esc(cmpLabel(CMP.b))}</b> está ${ib?ib.pos+'º de '+ib.total:'sem ranking'} entre os municípios com dados. Troque o indicador para atualizar a comparação.</div>`;return;
+  }
+  title.textContent=CMP.mode==='reg'?'Todas as regiões neste indicador':'Todos os estados neste indicador';
+  const meta=D.meta[CMP.ind],asc=meta&&meta.maior==='pior';let rows=cmpEntityIds().map(k=>({k,...cmpAgg(k,CMP.ind)})).filter(x=>x.v!=null);rows.sort((a,b)=>asc?a.v-b.v:b.v-a.v);const mx=Math.max(...rows.map(x=>Math.abs(x.v)),1);
+  box.innerHTML=rows.map((x,i)=>`<div class="cmp-ctx-row ${(x.k===CMP.a||x.k===CMP.b)?'sel':''}"><div class="cmp-ctx-pos">${i+1}</div><div class="cmp-ctx-name">${esc(cmpLabel(x.k))}</div><div class="cmp-ctx-track"><div class="cmp-ctx-fill" style="width:${Math.abs(x.v)/mx*100}%"></div></div><div class="cmp-ctx-val">${fmt(x.v)}</div></div>`).join('');
+}
+function exportCompareCSV(){
+  if(!cmpReady)return;const inds=(GRUPOS[CMP.cat]||[]).filter(i=>D.meta[i]),sep=';';const lines=[['Escala','Territorio_A','Territorio_B','Indicador','Valor_A','Valor_B','Diferenca_A_menos_B','Unidade','Metodo_A','Metodo_B'].join(sep)];
+  for(const ind of inds){const a=cmpAgg(CMP.a,ind),b=cmpAgg(CMP.b,ind),d=(a.v==null||b.v==null)?'':a.v-b.v,meta=D.meta[ind];lines.push([CMP.mode,csvq(cmpLabel(CMP.a)),csvq(cmpLabel(CMP.b)),csvq(meta.nome),a.v==null?'':String(a.v).replace('.',','),b.v==null?'':String(b.v).replace('.',','),d===''?'':String(d).replace('.',','),csvq(meta.unidade||''),csvq(a.method),csvq(b.method)].join(sep));}
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`ips_comparacao_${CMP.mode}_${CMP.cat.toLowerCase().replace(/[^a-z0-9]+/g,'_')}.csv`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
 // ─── ESTATÍSTICA / RELAÇÕES ───────────────────────────────────────────────────
 const REG_COR={'Norte':'#e8743b','Nordeste':'#c93a0e','Centro-Oeste':'#b86b00','Sudeste':'#1644a8','Sul':'#1a6b3c'};
 let statReady=false, statCols={}, corrCache={}, statPts=[], statSel=null;
-const STAT={x:null,y:null,view:'disp'};
+const STAT={x:null,y:null,view:'disp',scope:'Brasil'};
 const STAT_STORIES=[
   {t:'Dinheiro compra bem-estar?', x:'PIB PER CAPITA', y:'Índice de Progresso Social'},
   {t:'Educação trava a gravidez precoce', x:'Ideb Ensino Fundamental', y:'Gravidez na Adolescência (<19)'},
@@ -1686,21 +1661,24 @@ function low(s){if(!s)return s;const w=s.split(' ')[0];
 function statKey(name){if(D.meta[name])return name;const t=name.trim().toLowerCase();
   return Object.keys(D.meta).find(k=>k.trim().toLowerCase()===t)||null;}
 function statCol(ind){return statCols[ind]||(statCols[ind]=D.municipios.map(m=>{const v=m.i[ind];return(v==null||!isFinite(v))?NaN:v;}));}
+function statInScope(i){return STAT.scope==='Brasil'||D.municipios[i].r===STAT.scope;}
 function pearsonInd(a,b){
   if(a===b)return{r:1,n:0};
-  const base=a<b?a+'|'+b:b+'|'+a, key=REGIAO+'|'+base; if(corrCache[key])return corrCache[key];
+  const ab=a<b?a+'|'+b:b+'|'+a, key=STAT.scope+'|'+ab; if(corrCache[key])return corrCache[key];
   const A=statCol(a),B=statCol(b); let n=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
-  for(let i=0;i<A.length;i++){
-    if(!municipioVisivel(D.municipios[i])) continue;
-    const x=A[i],y=B[i];if(x!==x||y!==y)continue;n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;
-  }
+  for(let i=0;i<A.length;i++){if(!statInScope(i))continue;const x=A[i],y=B[i];if(x!==x||y!==y)continue;n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;}
   let r=null;
   if(n>=30){const cov=sab-sa*sb/n,va=saa-sa*sa/n,vb=sbb-sb*sb/n;if(va>0&&vb>0)r=cov/Math.sqrt(va*vb);}
   return corrCache[key]={r,n};
 }
+function setStatScope(v){STAT.scope=v||'Brasil';corrCache={};renderStats();renderStoriesStats();}
+function renderStoriesStats(){
+  document.querySelectorAll('.st-story').forEach((b,idx)=>{const st=STAT_STORIES[idx];if(!st)return;const x=statKey(st.x),y=statKey(st.y);if(!x||!y)return;const r=pearsonInd(x,y).r;const el=b.querySelector('.st-story-r');if(el)el.textContent='r = '+(r==null?'—':(r>=0?'+':'')+r.toFixed(2)+(r==null?'':' · '+strengthWord(r)));});
+}
 
 function ensureStatsInit(){
   if(statReady){requestAnimationFrame(renderStatView);return;}
+  STAT.scope=REGION;
   statReady=true;
   const grp=Object.entries(GRUPOS).map(([cat,inds])=>{
     const ops=inds.filter(i=>D.meta[i]).map(i=>`<option value="${esc(i)}">${esc(D.meta[i].nome)}</option>`).join('');
@@ -1709,6 +1687,7 @@ function ensureStatsInit(){
   document.getElementById('st-x').innerHTML=grp;
   document.getElementById('st-y').innerHTML=grp;
   document.getElementById('st-mx-cat').innerHTML=Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  document.getElementById('st-scope').value=STAT.scope;
   document.getElementById('st-stories').innerHTML=STAT_STORIES.map((s,idx)=>{
     const x=statKey(s.x),y=statKey(s.y); if(!x||!y)return'';
     const r=pearsonInd(x,y).r;
@@ -1764,7 +1743,7 @@ function renderStatView(){
 function renderStats(){
   const {x,y}=STAT, mx=D.meta[x], my=D.meta[y];
   const {r,n}=pearsonInd(x,y);
-  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${n.toLocaleString('pt-BR')} cidades comparadas${REGIAO==='Brasil'?'':' · '+REGIAO}</small>`;
+  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${STAT.scope==='Brasil'?'Brasil inteiro':esc(STAT.scope)} · ${n.toLocaleString('pt-BR')} municípios</small>`;
   const ro=document.getElementById('st-readout');
   if(r==null){ro.innerHTML=`<div class="st-r-sub">Dados insuficientes para relacionar esse par.</div>`;}
   else{
@@ -1774,7 +1753,7 @@ function renderStats(){
       `<span class="st-r-word" style="color:${cor}">${rWord(r)}</span></div>`+
       `<canvas id="st-mini" class="st-mini"></canvas>`+
       `<div class="st-r-sub">${interpFrase(r,mx,my)}</div>`+
-      `<div class="st-r-stats"><b>r² = ${r2.toFixed(2).replace('.',',')}</b> — explica ~${Math.round(r2*100)}% da variação · ${esc(fmtP(p))}</div>`+
+      `<div class="st-r-stats"><b>R² = ${r2.toFixed(2).replace('.',',')}</b> — explica ~${Math.round(r2*100)}% da variação · ${esc(fmtP(p))}</div>`+
       `<div class="st-r-sig">${sigFrase(p,n)}</div>`+
       (Math.abs(r)>=.85?`<div class="st-r-warn">⚠ Correlação altíssima: podem ser quase a mesma variável (uma derivada da outra). Pouco surpreendente.</div>`:'');
     drawMini();
@@ -1788,7 +1767,7 @@ function rankPos(ind,chave){const r=getRank(ind);return r&&r.pos[chave]?{pos:r.p
 function renderMun(){
   const box=document.getElementById('st-mun'); if(!box) return;
   const m=statSel&&munIdx[statSel];
-  if(!m){ box.innerHTML=`<div class="st-mun-hint">💡 Clique num ponto do gráfico para destacar um município e ver os números dele.</div>`; return; }
+  if(!m||(STAT.scope!=='Brasil'&&m.r!==STAT.scope)){ box.innerHTML=`<div class="st-mun-hint">💡 Clique num ponto do gráfico para destacar um município dentro do recorte atual.</div>`; return; }
   const {x,y}=STAT, vx=m.i[x], vy=m.i[y];
   const rx=rankPos(x,statSel), ry=rankPos(y,statSel);
   const line=(meta,v,rk)=>`<div class="st-mun-row"><span>${esc(short(meta.nome))}</span><b>${v==null?'—':fmt(v)} ${esc(meta.unidade||'')}</b></div>`+
@@ -1902,7 +1881,7 @@ function paintScatter(cv,W,H,mini){
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
   const {x,y}=STAT, A=statCol(x), B=statCol(y);
   const pts=[]; let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
-  for(let i=0;i<A.length;i++){if(!municipioVisivel(D.municipios[i]))continue;const a=A[i],b=B[i];if(a!==a||b!==b)continue;
+  for(let i=0;i<A.length;i++){if(!statInScope(i))continue;const a=A[i],b=B[i];if(a!==a||b!==b)continue;
     pts.push([a,b,i]); if(a<xmin)xmin=a;if(a>xmax)xmax=a;if(b<ymin)ymin=b;if(b>ymax)ymax=b;}
   if(!mini) statPts=[];
   if(!pts.length){ctx.fillStyle='#9a9288';ctx.font='13px Inter';ctx.textAlign='center';ctx.fillText('Sem dados para esse par.',W/2,H/2);return;}
@@ -1923,9 +1902,20 @@ function paintScatter(cv,W,H,mini){
     ctx.beginPath();ctx.arc(px,py,rad,0,6.2832);ctx.fill();}
   const lr=linreg(pts);
   if(lr){ctx.strokeStyle='#1a1814';ctx.lineWidth=mini?1.6:2.2;ctx.beginPath();
-    ctx.moveTo(sx(xmin),sy(lr.m*xmin+lr.b));ctx.lineTo(sx(xmax),sy(lr.m*xmax+lr.b));ctx.stroke();}
+    ctx.moveTo(sx(xmin),sy(lr.m*xmin+lr.b));ctx.lineTo(sx(xmax),sy(lr.m*xmax+lr.b));ctx.stroke();
+    if(!mini){
+      const pr=pearsonInd(x,y).r, r2=pr==null?null:pr*pr;
+      const eq=`ŷ = ${lr.m.toFixed(3)}x ${lr.b>=0?'+':'−'} ${Math.abs(lr.b).toFixed(3)}`;
+      const st=`R² = ${r2==null?'—':r2.toFixed(3)}   ·   r = ${pr==null?'—':(pr>=0?'+':'')+pr.toFixed(3)}   ·   n = ${pts.length.toLocaleString('pt-BR')}`;
+      ctx.font='700 11px Syne,sans-serif'; const w=Math.max(ctx.measureText(eq).width,ctx.measureText(st).width)+20, h=44;
+      const bx=Math.max(padL+4,W-padR-w-4), by=padT+4;
+      rrect(ctx,bx,by,w,h,7);ctx.fillStyle='rgba(255,255,255,.93)';ctx.fill();ctx.strokeStyle='rgba(24,22,20,.18)';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle='#1a1814';ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(eq,bx+10,by+8);
+      ctx.font='600 10px DM Sans,sans-serif';ctx.fillStyle='#6e665d';ctx.fillText(st,bx+10,by+25);
+    }
+  }
   // município destacado
-  const ms=statSel&&D.municipios.find(mm=>chaveOf(mm)===statSel);
+  const ms=statSel&&D.municipios.find(mm=>chaveOf(mm)===statSel&&(STAT.scope==='Brasil'||mm.r===STAT.scope));
   if(ms){const a=ms.i[x],b=ms.i[y];
     if(a!=null&&b!=null&&isFinite(a)&&isFinite(b)){
       const px=sx(a),py=sy(b), R=mini?4:7;
