@@ -516,6 +516,142 @@ html,body{height:100%;overflow:hidden;background:var(--bg);
 }
 body.desktop #panel{position:relative;transform:none !important;}
 body.desktop #btn-panel{display:none;}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   V2 — layout amplo, filtros globais e painel flutuante
+   ───────────────────────────────────────────────────────────────────────────── */
+:root{
+  --hdr:64px;
+  --panel:374px;
+  --shadow:0 18px 60px rgba(31,29,25,.16),0 3px 12px rgba(31,29,25,.08);
+}
+#hdr{
+  height:var(--hdr);padding:0 22px;gap:10px;
+  background:rgba(24,22,20,.96);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+#hdr-logo{font-size:1.12rem;letter-spacing:-.03em}
+#btn-panel{display:inline-flex}
+.hdr-btn{padding:8px 12px;border-radius:10px;font-size:.68rem}
+#btn-desktop{display:none!important}
+#app{display:block;padding-top:var(--hdr);height:100vh}
+#map-wrap{position:relative;width:100%;height:calc(100vh - var(--hdr));min-width:0}
+#map{position:absolute;inset:0;width:100%;height:100%}
+
+/* painel vira drawer flutuante: não esmaga o mapa */
+#panel{
+  position:fixed;z-index:950;
+  left:16px;top:calc(var(--hdr) + 16px);bottom:16px;
+  height:auto;width:min(var(--panel),calc(100vw - 32px));min-width:0;
+  border:1px solid rgba(24,22,20,.08);border-radius:18px;
+  box-shadow:var(--shadow);overflow:hidden;
+  transform:translateX(calc(-100% - 26px));
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+}
+#panel.open{transform:translateX(0)}
+#tabs{height:48px;background:#fff;padding:4px;gap:3px}
+.tab{border:0;border-radius:10px;font-size:.62rem;letter-spacing:.055em}
+.tab.on{background:#f4f1eb;border:0;color:var(--accent)}
+.scroll-area{padding:16px 16px 18px}
+#legenda{height:auto;min-height:168px;padding:12px 16px 14px}
+.chips{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.chip{min-width:0;padding:7px 10px;border-radius:10px}
+.ind-item{padding:9px 10px;border-radius:10px}
+.ind-name{font-size:.8rem}
+
+/* barra principal */
+#global-controls{
+  position:absolute;z-index:800;
+  top:18px;left:406px;right:18px;
+  display:grid;grid-template-columns:minmax(190px,.75fr) 145px 165px minmax(220px,1.25fr) auto;
+  gap:10px;align-items:end;
+  padding:12px;
+  border:1px solid rgba(24,22,20,.09);border-radius:18px;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 12px 38px rgba(31,29,25,.13);
+  backdrop-filter:blur(14px);
+}
+.gc-title{min-width:0;padding:1px 6px 2px}
+.gc-kicker{
+  display:block;font-family:'Syne',sans-serif;font-size:.54rem;font-weight:800;
+  color:var(--accent);letter-spacing:.12em;margin-bottom:3px
+}
+.gc-title strong{
+  display:block;font-family:'Syne',sans-serif;font-size:.83rem;line-height:1.15;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+#gc-count{display:block;color:var(--muted);font-size:.64rem;margin-top:4px}
+.gc-field{min-width:0}
+.gc-field label{
+  display:block;font-family:'Syne',sans-serif;font-size:.54rem;font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 5px 2px
+}
+.gc-field select{
+  width:100%;height:38px;border:1px solid var(--border);border-radius:10px;
+  padding:0 30px 0 10px;background:#fff;color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:.72rem;outline:none;
+  overflow:hidden;text-overflow:ellipsis
+}
+.gc-field select:focus{border-color:#9e978d;box-shadow:0 0 0 3px rgba(24,22,20,.05)}
+.gc-actions{display:flex;gap:7px}
+.gc-btn{
+  height:38px;border:1px solid var(--border);border-radius:10px;background:#fff;
+  padding:0 11px;display:flex;align-items:center;justify-content:center;gap:6px;
+  white-space:nowrap;font-family:'Syne',sans-serif;font-size:.59rem;font-weight:800;
+  color:var(--text);cursor:pointer;transition:.15s
+}
+.gc-btn svg{width:14px;height:14px}
+.gc-btn:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(31,29,25,.08)}
+.gc-btn-primary{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* mapa e controles Leaflet não brigam com a barra */
+.leaflet-top.leaflet-left{top:94px}
+.leaflet-control-zoom{box-shadow:0 8px 20px rgba(31,29,25,.12)!important;border:0!important}
+.mtt{border-radius:10px!important;box-shadow:0 8px 28px rgba(31,29,25,.14)!important}
+
+/* quando o painel é fechado, a barra aproveita o espaço */
+#panel:not(.open) ~ #map-wrap #global-controls{left:18px}
+
+/* melhor legibilidade */
+.rk-sel,.st-pick select{border-radius:10px!important}
+#ficha-hdr{border-radius:14px}
+.st-note,.st-help{border-radius:10px}
+.rk-item{border-radius:8px}
+
+/* tablet */
+@media(max-width:1180px){
+  #global-controls{
+    left:392px;
+    grid-template-columns:130px 145px minmax(180px,1fr) auto;
+  }
+  .gc-title{display:none}
+}
+@media(max-width:900px){
+  #global-controls{
+    left:14px;right:14px;top:12px;
+    grid-template-columns:1fr 1fr;
+    gap:8px;padding:10px;border-radius:16px;
+  }
+  .gc-title{display:block;grid-column:1/-1}
+  .gc-ind{grid-column:1/-1}
+  .gc-actions{grid-column:1/-1}
+  .gc-btn{flex:1}
+  #panel{top:calc(var(--hdr) + 12px);left:12px;bottom:12px;width:min(390px,calc(100vw - 24px))}
+  .leaflet-top.leaflet-left{top:228px}
+}
+@media(max-width:560px){
+  :root{--hdr:58px}
+  #hdr{padding:0 12px}
+  .hdr-download span{display:none}
+  #global-controls{top:8px;left:8px;right:8px;padding:9px}
+  .gc-title strong{font-size:.78rem}
+  .gc-field select{height:36px;font-size:.68rem}
+  .gc-btn{height:36px}
+  #panel{top:calc(var(--hdr) + 8px);left:8px;right:8px;bottom:8px;width:auto}
+  #tabs{height:46px}
+  .leaflet-top.leaflet-left{top:218px}
+}
+
 </style>
 </head>
 <body>
@@ -527,14 +663,14 @@ body.desktop #btn-panel{display:none;}
 
 <div id="hdr">
   <div id="hdr-logo">IPS <span>Brasil</span> 2026</div>
-  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()"><i data-lucide="panel-left"></i> Painel</button>
-  <button class="hdr-btn" id="btn-desktop" onclick="toggleDesktop()"><i data-lucide="monitor"></i> Desktop</button>
+  <button class="hdr-btn" id="btn-panel" onclick="togglePanel()"><i data-lucide="sliders-horizontal"></i> Explorar</button>
+  <button class="hdr-btn hdr-download" onclick="exportBaseCSV()"><i data-lucide="download"></i> Baixar dados</button>
 </div>
 
 <div id="loadbar"><div id="loadbar-fill"></div></div>
 
 <div id="app">
-  <div id="panel">
+  <div id="panel" class="open">
     <div id="tabs">
       <button class="tab on" onclick="showTab('mapa',this)"><i data-lucide="map"></i><span>Mapa</span></button>
       <button class="tab"    onclick="showTab('explorar',this)"><i data-lucide="search"></i><span>Explorar</span></button>
@@ -545,9 +681,10 @@ body.desktop #btn-panel{display:none;}
     <!-- TAB MAPA -->
     <div id="tab-mapa" class="tab-body">
       <div class="scroll-area">
-        <div class="slabel">Categoria</div>
+        <div class="st-note" style="margin-bottom:14px;"><b>Mapa temático.</b> Use a barra acima do mapa para escolher <b>região, tipo de índice e indicador</b>. Aqui você também pode navegar pelos temas em detalhe.</div>
+        <div class="slabel">Temas</div>
         <div class="chips" id="mapa-chips"></div>
-        <div class="slabel">Indicador visualizado</div>
+        <div class="slabel">Indicadores do tema</div>
         <div id="ind-list"></div>
       </div>
     </div>
@@ -582,7 +719,7 @@ body.desktop #btn-panel{display:none;}
         <div class="rk-tools">
           <button id="btn-csv" onclick="exportCSV()"><i data-lucide="download"></i> Exportar CSV</button>
         </div>
-        <div class="slabel">Top 10 municípios</div>
+        <div class="slabel" id="rk-top-label">Top 10 municípios</div>
         <div id="rk-mun"></div>
         <div class="slabel" style="margin-top:14px;">Por estado (média)</div>
         <div id="rk-est"></div>
@@ -640,6 +777,40 @@ body.desktop #btn-panel{display:none;}
   </div>
 
   <div id="map-wrap">
+    <div id="global-controls">
+      <div class="gc-title">
+        <span class="gc-kicker">PAINEL NACIONAL</span>
+        <strong>Explore os indicadores municipais</strong>
+        <span id="gc-count">5.570 municípios</span>
+      </div>
+      <div class="gc-field">
+        <label for="gc-regiao">Região</label>
+        <select id="gc-regiao" onchange="setRegiao(this.value)">
+          <option value="Brasil">Brasil inteiro</option>
+          <option value="Norte">Norte</option>
+          <option value="Nordeste">Nordeste</option>
+          <option value="Centro-Oeste">Centro-Oeste</option>
+          <option value="Sudeste">Sudeste</option>
+          <option value="Sul">Sul</option>
+        </select>
+      </div>
+      <div class="gc-field">
+        <label for="gc-cat">Tipo de índice</label>
+        <select id="gc-cat" onchange="onGlobalCategory(this.value)"></select>
+      </div>
+      <div class="gc-field gc-ind">
+        <label for="gc-ind">Indicador</label>
+        <select id="gc-ind" onchange="setIndicador(this.value)"></select>
+      </div>
+      <div class="gc-actions">
+        <button class="gc-btn gc-btn-primary" onclick="exportCurrentCSV()" title="Baixar o indicador visualizado no recorte atual">
+          <i data-lucide="download"></i><span>Indicador</span>
+        </button>
+        <button class="gc-btn" onclick="exportBaseCSV()" title="Baixar todos os indicadores do recorte atual">
+          <i data-lucide="database"></i><span>Base completa</span>
+        </button>
+      </div>
+    </div>
     <div id="map"></div>
     <div id="skel-map"><div class="skel skel-blob"></div></div>
 
@@ -686,6 +857,7 @@ let featureSel=null;    // layer leaflet selecionado
 let chaveSel=null;      // chave normalizada do selecionado
 let markerSel=null;     // marcador com nome no mapa
 let catMapa='Geral',catRank='Geral';
+let REGIAO='Brasil'; // recorte geográfico global
 let FUSE=null;          // índice de busca fuzzy
 let escCache={}, rankCache={}, quintCache={}; // caches por indicador
 let selfHash='';        // hash que a própria app definiu (evita loop)
@@ -745,8 +917,9 @@ let slugToInd={}, indToSlug={};
 
 // ─── CORES: azul=menor, vermelho=maior, SEMPRE ────────────────────────────────
 function getEsc(ind){
-  if(escCache[ind]) return escCache[ind];
-  const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
+  const ck=cacheKey(ind);
+  if(escCache[ck]) return escCache[ck];
+  const vs=municipiosFiltrados().map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
   let e;
   if(!vs.length) e={p5:0,p95:1,mid:.5,min:0,max:1,p25:0,p75:1};
   else e={
@@ -757,7 +930,7 @@ function getEsc(ind){
     p75:vs[Math.floor(vs.length*.75)],
     min:vs[0], max:vs[vs.length-1]
   };
-  escCache[ind]=e; return e;
+  escCache[ck]=e; return e;
 }
 // Paleta DIVERGENTE semântica: 0 = pior, 1 = melhor (roxo → laranja → verde)
 const PAL_QUAL=[
@@ -796,10 +969,11 @@ function posVal(v,ind){const e=getEsc(ind);return clamp01((v-e.p5)/(e.p95-e.p5+.
 const QUINT_QUAL  =[0,.25,.5,.75,1].map(t=>rampColor(PAL_QUAL,t));   // 0=pior … 4=melhor
 const QUINT_NEUTRA=[0,.25,.5,.75,1].map(t=>rampColor(PAL_NEUTRA,t)); // claro … escuro
 function getQuintis(ind){
-  if(quintCache[ind]) return quintCache[ind];
-  const vs=D.municipios.map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
+  const ck=cacheKey(ind);
+  if(quintCache[ck]) return quintCache[ck];
+  const vs=municipiosFiltrados().map(m=>m.i[ind]).filter(v=>v!=null).sort((a,b)=>a-b);
   const th=[]; for(let k=1;k<=4;k++) th.push(vs.length?vs[Math.floor(vs.length*k/5)]:0);
-  return quintCache[ind]={th,n:vs.length,vs};
+  return quintCache[ck]={th,n:vs.length,vs};
 }
 function quintIdx(v,ind){const{th}=getQuintis(ind);let i=0;while(i<4&&v>=th[i])i++;return i;} // por valor ↑
 function quintQual(v,ind){const i=quintIdx(v,ind);return D.meta[ind]&&D.meta[ind].maior==='pior'?4-i:i;} // 0=pior,4=melhor
@@ -822,16 +996,17 @@ function barFrac(v,ind){const mx=scaleMax(ind);return mx?clamp01(v/mx):posVal(v,
 
 // Ranking nacional (1º = melhor; direção depende de maior=melhor/pior)
 function getRank(ind){
-  if(rankCache[ind]) return rankCache[ind];
+  const ck=cacheKey(ind);
+  if(rankCache[ck]) return rankCache[ck];
   const meta=D.meta[ind];
-  const asc = meta && meta.maior==='pior';   // pior: menor valor é melhor -> 1º
-  const arr=D.municipios.filter(m=>m.i[ind]!=null)
+  const asc = meta && meta.maior==='pior';
+  const arr=municipiosFiltrados().filter(m=>m.i[ind]!=null)
     .map(m=>({k:chaveOf(m),v:m.i[ind]}));
   arr.sort((a,b)=> asc ? a.v-b.v : b.v-a.v);
   const pos={};
   arr.forEach((x,i)=>{pos[x.k]=i+1;});
   const r={pos,total:arr.length};
-  rankCache[ind]=r; return r;
+  rankCache[ck]=r; return r;
 }
 
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
@@ -913,13 +1088,75 @@ function catDeInd(ind){
   return null;
 }
 
+function municipioVisivel(m){
+  return !!m && (REGIAO==='Brasil' || m.r===REGIAO);
+}
+function municipiosFiltrados(){
+  return REGIAO==='Brasil' ? D.municipios : D.municipios.filter(m=>m.r===REGIAO);
+}
+function cacheKey(ind){ return REGIAO+'|'+ind; }
+
+function initGlobalControls(){
+  const catSel=document.getElementById('gc-cat');
+  catSel.innerHTML=Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  catSel.value=catMapa;
+  document.getElementById('gc-regiao').value=REGIAO;
+  syncGlobalIndicator();
+  updateRegionCount();
+}
+function syncGlobalIndicator(){
+  const catSel=document.getElementById('gc-cat');
+  if(catSel) catSel.value=catMapa;
+  const sel=document.getElementById('gc-ind');
+  if(!sel || !D) return;
+  const inds=(GRUPOS[catMapa]||[]).filter(i=>D.meta[i]);
+  sel.innerHTML=inds.map(i=>`<option value="${esc(i)}">${esc(D.meta[i].nome||i)}</option>`).join('');
+  if(inds.includes(IND)) sel.value=IND;
+}
+function onGlobalCategory(cat){
+  catMapa=cat;
+  const inds=(GRUPOS[cat]||[]).filter(i=>D.meta[i]);
+  buildChips('mapa-chips',catMapa,onCatMapa);
+  buildIndList();
+  if(inds.length) setIndicador(inds.includes(IND)?IND:inds[0]);
+  syncGlobalIndicator();
+}
+function updateRegionCount(){
+  const el=document.getElementById('gc-count'); if(!el||!D) return;
+  const n=municipiosFiltrados().length;
+  el.textContent=n.toLocaleString('pt-BR')+' município'+(n===1?'':'s')+(REGIAO==='Brasil'?'':' · '+REGIAO);
+}
+function zoomRegiao(){
+  if(!leaf||!D) return;
+  if(REGIAO==='Brasil'){leaf.setView([-14,-52],4,{animate:true});return;}
+  const pts=municipiosFiltrados().filter(m=>isFinite(m.lat)&&isFinite(m.lon)).map(m=>[m.lat,m.lon]);
+  if(pts.length) leaf.fitBounds(L.latLngBounds(pts),{padding:[45,45],maxZoom:6,animate:true});
+}
+function setRegiao(reg){
+  REGIAO=reg||'Brasil';
+  escCache={}; rankCache={}; quintCache={}; corrCache={};
+  document.getElementById('gc-regiao').value=REGIAO;
+  updateRegionCount();
+  if(munSel && !municipioVisivel(munSel)){
+    limparSelecao(); munSel=null; chaveSel=null; featureSel=null;
+    const ficha=document.getElementById('ficha'); if(ficha) ficha.innerHTML='';
+  }
+  aplicarEstilos();
+  atualizarLegenda(IND,getEsc(IND),D.meta[IND]);
+  if(document.getElementById('rk-mun')) buildRank();
+  const q=document.getElementById('srch'); if(q&&q.value) searchMun(q.value);
+  if(statReady) renderStats();
+  zoomRegiao();
+}
+
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 function initUI(){
   initMapa();
   criarCamadaMapa();
   buildChips('rank-chips',catRank,onCatRank);
   buildRank();
-  setIndicador(IND,true);   // monta chips/lista/estilos/legenda do mapa
+  setIndicador(IND,true);
+  initGlobalControls();
   icons();
 }
 
@@ -933,8 +1170,9 @@ function initMapa(){
 
 function getEstiloNormal(f){
   const d=f.properties._d, v=d?d.i[IND]:null;
+  if(d && !municipioVisivel(d)) return{fillColor:'#e7e3dc',weight:.2,color:'#d7d1c8',fillOpacity:.08,opacity:.22};
   if(v==null) return{fillColor:'#d8d4cc',weight:.3,color:'#bbb',fillOpacity:.7};
-  return{fillColor:corInd(v,IND),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.9};
+  return{fillColor:corInd(v,IND),weight:.3,color:'rgba(0,0,0,.12)',fillOpacity:.9,opacity:1};
 }
 
 // Cria a camada UMA vez. Trocar indicador apenas re-estiliza (transição suave).
@@ -946,7 +1184,7 @@ function criarCamadaMapa(){
       layerByChave[p._k]=layer;
       // Tooltip dinâmico: lê o indicador atual a cada abertura
       layer.bindTooltip(()=>tooltipHTML(p),{className:'mtt',sticky:true,opacity:1});
-      layer.on('click',()=>{if(p._d) selecionarMun(p._d,layer,p._k,false);});
+      layer.on('click',()=>{if(p._d&&municipioVisivel(p._d)) selecionarMun(p._d,layer,p._k,false);});
       layer.on('mouseover',e=>{if(p._k!==chaveSel) e.target.setStyle({weight:1.5,color:'#333'});});
       layer.on('mouseout',e=>{if(p._k!==chaveSel) geoLayer.resetStyle(e.target);});
     }
@@ -957,7 +1195,7 @@ function tooltipHTML(p){
   const d=p._d, meta=D.meta[IND];
   const nm=p.NM_MUN||'', uf=p.SIGLA_UF||'';
   const un=meta?meta.unidade:'';
-  const v=d?d.i[IND]:null;
+  const v=d&&municipioVisivel(d)?d.i[IND]:null;
   let rk='';
   if(d&&v!=null){
     const r=getRank(IND), pos=r.pos[p._k];
@@ -1031,7 +1269,7 @@ function atualizarLegenda(ind,esc,meta){
     const titulo=`${neutro?(pos+1)+'ª faixa':(pos+1)+'º quinto'} · ${fmt(lo)}–${fmt(hi)} ${un}\n20% das cidades`;
     sc+=`<div style="background:${corQuintilLeg(pos,ind)}" title="${titulo}"></div>`;
   });
-  sc+=`<div class="leg-med" title="mediana nacional: ${fmt(esc.mid)} ${un}"></div>`;
+  sc+=`<div class="leg-med" title="mediana do recorte (${REGIAO}): ${fmt(esc.mid)} ${un}"></div>`;
   // Marcador do município selecionado (se tiver valor neste indicador)
   if(munSel && munSel.i[ind]!=null){
     const sv=munSel.i[ind];
@@ -1058,7 +1296,7 @@ function atualizarLegenda(ind,esc,meta){
   document.getElementById('leg-hi').textContent=fmt(bestV)+' '+un;
   document.getElementById('leg-med').textContent='mediana '+fmt(esc.mid);
 
-  let semDado=0; for(const m of D.municipios) if(m.i[ind]==null) semDado++;
+  let semDado=0; for(const m of municipiosFiltrados()) if(m.i[ind]==null) semDado++;
   const semTxt=`<span class="leg-nodata"><span class="leg-nodata-sw"></span> ${semDado.toLocaleString('pt-BR')} sem dado</span>`;
   const note=document.getElementById('leg-note');
   note.innerHTML = neutro
@@ -1085,7 +1323,7 @@ function atualizarLegenda(ind,esc,meta){
 function onCatMapa(cat){
   catMapa=cat;
   buildChips('mapa-chips',catMapa,onCatMapa);
-  buildIndList(); icons();
+  buildIndList(); syncGlobalIndicator(); icons();
 }
 function onCatRank(cat){
   catRank=cat;
@@ -1128,10 +1366,12 @@ function buildIndList(){
 
 // Ponto único de troca de indicador (mapa + legenda + lista + permalink)
 function setIndicador(ind,fromHash){
+  if(!D.meta[ind]) return;
   IND=ind;
   const cat=catDeInd(ind); if(cat) catMapa=cat;
   buildChips('mapa-chips',catMapa,onCatMapa);
   buildIndList();
+  syncGlobalIndicator();
   aplicarEstilos();
   atualizarLegenda(ind,getEsc(ind),D.meta[ind]);
   if(munSel) refreshFichaAtivo();
@@ -1159,9 +1399,9 @@ function abrirFicha(m){
       <span class="f-ips-v">${ips!=null?ips.toFixed(1):'—'}</span>
       <span class="f-ips-l">IPS Brasil 2026<br>escala 0–100, maior = melhor</span>
     </div>
-    ${posIps?`<div class="f-rank">Ranking IPS nacional: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
+    ${posIps?`<div class="f-rank">Ranking IPS ${REGIAO==='Brasil'?'nacional':'na região '+REGIAO}: <b>${posIps}º</b> de ${rIps.total.toLocaleString('pt-BR')}</div>`:''}
   </div>
-  <div class="f-caption">Barra = valor · cor = quintil nacional (<span class="leg-dot" style="background:rgb(106,27,154)"></span> pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor). O traço escuro <b>●│</b> marca a média do estado (${m.u}).</div>`;
+  <div class="f-caption">Barra = valor · cor = quintil do recorte ativo (<span class="leg-dot" style="background:rgb(106,27,154)"></span> pior &nbsp;→&nbsp; <span class="leg-dot" style="background:rgb(30,138,77)"></span> melhor). O traço escuro <b>●│</b> marca a média do estado (${m.u}).</div>`;
 
   const medUF=D.medias_por_uf[m.u]||{};
 
@@ -1242,9 +1482,9 @@ function searchMun(q){
   const qn=nrm(q);
   let found;
   if(FUSE){
-    found=FUSE.search(qn).slice(0,12).map(r=>r.item.m);
+    found=FUSE.search(qn).map(r=>r.item.m).filter(m=>municipioVisivel(m)).slice(0,12);
   }else{
-    found=D.municipios.filter(m=>nrm(m.m).includes(qn)||nrm(m.u).includes(qn)).slice(0,12);
+    found=municipiosFiltrados().filter(m=>nrm(m.m).includes(qn)||nrm(m.u).includes(qn)).slice(0,12);
   }
   if(!found.length){res.innerHTML='<div class="sr-empty">Nenhum município encontrado.</div>';return;}
   res.innerHTML='';
@@ -1276,13 +1516,14 @@ function setDir(d){
 }
 
 function buildRank(){
+  const lbl=document.getElementById('rk-top-label'); if(lbl) lbl.textContent='Top 10 municípios'+(REGIAO==='Brasil'?'':' · '+REGIAO);
   const inds=GRUPOS[catRank]||[];
   if(!inds.includes(rankInd)) rankInd=inds[0];
   const sel=document.getElementById('rk-sel');
   sel.innerHTML=inds.map(i=>`<option value="${i}" ${i===rankInd?'selected':''}>${D.meta[i]?D.meta[i].nome:i}</option>`).join('');
 
   // Top 10 municípios + mini barras
-  let vs=D.municipios.map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
+  let vs=municipiosFiltrados().map(m=>({m,v:m.i[rankInd]})).filter(x=>x.v!=null);
   vs.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
   const top=vs.slice(0,10);
   const maxMun=Math.max(...top.map(x=>Math.abs(x.v)),1);
@@ -1301,7 +1542,7 @@ function buildRank(){
 
   // Estados — média ponderada por população
   const ufSoma={},ufPop={},ufN={};
-  for(const m of D.municipios){
+  for(const m of municipiosFiltrados()){
     const v=m.i[rankInd]; const pop=m.i['POPULAÇÃO 2025']||0;
     if(v==null) continue;
     if(!ufSoma[m.u]){ufSoma[m.u]=0;ufPop[m.u]=0;ufN[m.u]=0;}
@@ -1330,26 +1571,48 @@ function buildRank(){
 }
 
 // ─── EXPORTAR CSV ─────────────────────────────────────────────────────────────
+function saveCSV(lines,filename){
+  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function regSlug(){return REGIAO==='Brasil'?'brasil':nrm(REGIAO).toLowerCase().replace(/[^a-z0-9]+/g,'-');}
 function exportCSV(){
   const ind=rankInd, meta=D.meta[ind];
-  let rows=D.municipios.map(m=>({m,v:m.i[ind]})).filter(x=>x.v!=null);
+  let rows=municipiosFiltrados().map(m=>({m,v:m.i[ind]})).filter(x=>x.v!=null);
   rows.sort((a,b)=>rankDir==='top'?b.v-a.v:a.v-b.v);
   const sep=';';
   const head=['Posicao','Municipio','UF','Regiao','Indicador','Valor','Unidade'];
   const lines=[head.join(sep)];
-  rows.forEach((x,i)=>{
-    lines.push([
-      i+1, csvq(x.m.m), x.m.u, csvq(x.m.r), csvq(meta?meta.nome:ind),
-      String(x.v).replace('.',','), csvq(meta?meta.unidade:'')
-    ].join(sep));
-  });
-  const blob=new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='ips_ranking_'+indToSlug[ind]+'_'+(rankDir==='top'?'maiores':'menores')+'.csv';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  rows.forEach((x,i)=>lines.push([
+    i+1,csvq(x.m.m),x.m.u,csvq(x.m.r),csvq(meta?meta.nome:ind),
+    String(x.v).replace('.',','),csvq(meta?meta.unidade:'')
+  ].join(sep)));
+  saveCSV(lines,'ips_ranking_'+regSlug()+'_'+indToSlug[ind]+'_'+(rankDir==='top'?'maiores':'menores')+'.csv');
+}
+function exportCurrentCSV(){
+  const ind=IND, meta=D.meta[ind], sep=';';
+  const rows=municipiosFiltrados().filter(m=>m.i[ind]!=null);
+  const head=['Municipio','UF','Regiao','Indicador','Valor','Unidade'];
+  const lines=[head.join(sep)];
+  rows.forEach(m=>lines.push([
+    csvq(m.m),m.u,csvq(m.r),csvq(meta?meta.nome:ind),
+    String(m.i[ind]).replace('.',','),csvq(meta?meta.unidade:'')
+  ].join(sep)));
+  saveCSV(lines,'ips_'+regSlug()+'_'+indToSlug[ind]+'.csv');
+}
+function exportBaseCSV(){
+  if(!D) return;
+  const sep=';', inds=Object.keys(D.meta);
+  const head=['Municipio','UF','Regiao','Latitude','Longitude',...inds];
+  const lines=[head.map(csvq).join(sep)];
+  for(const m of municipiosFiltrados()){
+    const row=[m.m,m.u,m.r,m.lat??'',m.lon??'',...inds.map(i=>m.i[i]??'')];
+    lines.push(row.map(v=>typeof v==='number'?String(v).replace('.',','):csvq(v)).join(sep));
+  }
+  saveCSV(lines,'ips_base_completa_'+regSlug()+'.csv');
 }
 function csvq(s){s=String(s); return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 
@@ -1389,8 +1652,8 @@ function showTab(tab,btn){
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
 }
 
-let panelOpen=false;
-function togglePanel(){panelOpen=!panelOpen;document.getElementById('panel').classList.toggle('open',panelOpen);}
+let panelOpen=true;
+function togglePanel(){panelOpen=!panelOpen;document.getElementById('panel').classList.toggle('open',panelOpen);setTimeout(()=>leaf&&leaf.invalidateSize(),320);}
 function openPanel(){panelOpen=true;document.getElementById('panel').classList.add('open');}
 function closePanel(){panelOpen=false;document.getElementById('panel').classList.remove('open');}
 function toggleDesktop(){
@@ -1425,9 +1688,12 @@ function statKey(name){if(D.meta[name])return name;const t=name.trim().toLowerCa
 function statCol(ind){return statCols[ind]||(statCols[ind]=D.municipios.map(m=>{const v=m.i[ind];return(v==null||!isFinite(v))?NaN:v;}));}
 function pearsonInd(a,b){
   if(a===b)return{r:1,n:0};
-  const key=a<b?a+'|'+b:b+'|'+a; if(corrCache[key])return corrCache[key];
+  const base=a<b?a+'|'+b:b+'|'+a, key=REGIAO+'|'+base; if(corrCache[key])return corrCache[key];
   const A=statCol(a),B=statCol(b); let n=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
-  for(let i=0;i<A.length;i++){const x=A[i],y=B[i];if(x!==x||y!==y)continue;n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;}
+  for(let i=0;i<A.length;i++){
+    if(!municipioVisivel(D.municipios[i])) continue;
+    const x=A[i],y=B[i];if(x!==x||y!==y)continue;n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;
+  }
   let r=null;
   if(n>=30){const cov=sab-sa*sb/n,va=saa-sa*sa/n,vb=sbb-sb*sb/n;if(va>0&&vb>0)r=cov/Math.sqrt(va*vb);}
   return corrCache[key]={r,n};
@@ -1498,7 +1764,7 @@ function renderStatView(){
 function renderStats(){
   const {x,y}=STAT, mx=D.meta[x], my=D.meta[y];
   const {r,n}=pearsonInd(x,y);
-  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${n.toLocaleString('pt-BR')} cidades comparadas</small>`;
+  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${n.toLocaleString('pt-BR')} cidades comparadas${REGIAO==='Brasil'?'':' · '+REGIAO}</small>`;
   const ro=document.getElementById('st-readout');
   if(r==null){ro.innerHTML=`<div class="st-r-sub">Dados insuficientes para relacionar esse par.</div>`;}
   else{
@@ -1636,7 +1902,7 @@ function paintScatter(cv,W,H,mini){
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
   const {x,y}=STAT, A=statCol(x), B=statCol(y);
   const pts=[]; let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;
-  for(let i=0;i<A.length;i++){const a=A[i],b=B[i];if(a!==a||b!==b)continue;
+  for(let i=0;i<A.length;i++){if(!municipioVisivel(D.municipios[i]))continue;const a=A[i],b=B[i];if(a!==a||b!==b)continue;
     pts.push([a,b,i]); if(a<xmin)xmin=a;if(a>xmax)xmax=a;if(b<ymin)ymin=b;if(b>ymax)ymax=b;}
   if(!mini) statPts=[];
   if(!pts.length){ctx.fillStyle='#9a9288';ctx.font='13px Inter';ctx.textAlign='center';ctx.fillText('Sem dados para esse par.',W/2,H/2);return;}
