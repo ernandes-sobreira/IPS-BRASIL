@@ -9,7 +9,7 @@
 <script src="https://unpkg.com/topojson-client@3"></script>
 <script src="https://unpkg.com/fuse.js@7.0.0/dist/fuse.min.js"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f6f3ee; --surface:#ffffff; --surface-2:#fbf8f3;
@@ -70,19 +70,20 @@ body{letter-spacing:-.01em;}
 }
 
 /* TABS — altura fixa */
-#tabs{display:flex;gap:8px;padding:14px 14px 0;border-bottom:none;flex-shrink:0;height:auto;overflow-x:auto;scrollbar-width:none;}
-#tabs::-webkit-scrollbar{display:none;}
+#tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:14px 14px 4px;border-bottom:none;flex-shrink:0;height:auto;}
+#tabs .tab:nth-child(-n+3){grid-column:span 2;}
+#tabs .tab:nth-child(n+4){grid-column:span 3;}
 .tab{
-  flex:none;height:auto;background:var(--surface-2);
+  flex:none;width:100%;height:auto;background:var(--surface-2);
   border:1px solid var(--border);border-bottom:1px solid var(--border);
   border-radius:999px;padding:9px 14px;
   font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:700;
   letter-spacing:0;text-transform:none;cursor:pointer;
-  color:var(--muted);transition:all .16s ease;min-width:max-content;
+  color:var(--muted);transition:all .16s ease;min-width:0;
   display:flex;align-items:center;justify-content:center;gap:7px;
 }
 .tab svg{width:14px;height:14px;}
-#tabs .tab{font-size:.8rem;letter-spacing:0;gap:7px;}
+#tabs .tab{font-size:.79rem;letter-spacing:0;gap:7px;white-space:nowrap;}
 .tab:hover{background:#fff;border-color:var(--border-strong);color:var(--text);}
 .tab.on{color:var(--accent);background:var(--accent-soft);border-color:#f1cabd;box-shadow:inset 0 0 0 1px rgba(194,85,45,.06);}
 
@@ -101,15 +102,21 @@ body{letter-spacing:-.01em;}
   min-height:0;
   overflow-y:scroll;
   overflow-x:hidden;
-  padding:18px;
-  /* scrollbar sempre visível e com cor */
-  scrollbar-width:auto;
-  scrollbar-color:#c8c2b8 transparent;
+  padding:18px 14px 28px 18px;
+  scrollbar-gutter:stable;
+  /* barra de rolagem deliberadamente visível */
+  scrollbar-width:thin;
+  scrollbar-color:#aa9d8c #eee8df;
 }
-.scroll-area::-webkit-scrollbar{width:7px;}
-.scroll-area::-webkit-scrollbar-track{background:#f0ece6;border-radius:4px;}
-.scroll-area::-webkit-scrollbar-thumb{background:#c8c2b8;border-radius:4px;}
-.scroll-area::-webkit-scrollbar-thumb:hover{background:#9a9288;}
+.scroll-area::-webkit-scrollbar{width:11px;}
+.scroll-area::-webkit-scrollbar-track{background:#eee8df;border-radius:999px;margin:8px 2px;}
+.scroll-area::-webkit-scrollbar-thumb{background:#aa9d8c;border:2px solid #eee8df;border-radius:999px;}
+.scroll-area::-webkit-scrollbar-thumb:hover{background:#85786a;}
+#tab-stats{position:relative;}
+.stats-scroll-cue{position:absolute;left:18px;right:20px;bottom:8px;z-index:8;pointer-events:none;display:flex;justify-content:center;transition:opacity .18s ease;}
+.stats-scroll-cue span{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(23,21,18,.88);color:#fff;font-size:.68rem;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.15);}
+.stats-scroll-cue svg{width:13px;height:13px;}
+.stats-scroll-cue.hide{opacity:0;}
 
 /* LEGENDA — altura fixa, nunca some */
 #legenda{
@@ -334,42 +341,47 @@ body{letter-spacing:-.01em;}
 #map{position:absolute;inset:0;}
 
 /* ─── ESTATÍSTICA ─────────────────────────────────────────────────────────── */
-.st-note{font-size:.66rem;color:var(--muted);line-height:1.4;background:var(--bg);
-  border-radius:7px;padding:8px 10px;margin-bottom:12px;}
+.st-note{font-size:.83rem;color:var(--muted);line-height:1.55;background:linear-gradient(135deg,#fff7f1 0%,#fbf8f4 100%);
+  border:1px solid #f0dfd3;border-radius:18px;padding:14px 15px;margin-bottom:16px;box-shadow:var(--shadow-soft);}
 .st-note b{color:var(--text);}
-.st-stories{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px;}
-.st-story{text-align:left;border:1.5px solid var(--border);background:var(--surface);
-  border-radius:9px;padding:8px 9px;cursor:pointer;transition:all .13s;}
-.st-story:hover{border-color:var(--accent);background:#fff5f3;}
-.st-story.on{border-color:var(--accent);background:#fff5f3;}
-.st-story-t{font-family:'Syne',sans-serif;font-weight:700;font-size:.66rem;
-  line-height:1.2;color:var(--text);margin-bottom:3px;}
-.st-story-r{font-size:.58rem;color:var(--muted);font-variant-numeric:tabular-nums;}
-.st-pick{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;}
-.st-pick label{font-size:.58rem;font-weight:700;font-family:'Syne',sans-serif;
-  letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
-.st-pick select{width:100%;padding:7px 8px;border:1.5px solid var(--border);border-radius:7px;
-  font-size:.7rem;font-family:inherit;background:var(--surface);color:var(--text);cursor:pointer;}
-.st-swap{align-self:center;background:var(--bg);border:1.5px solid var(--border);border-radius:50%;
-  width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+.st-stories{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:8px;}
+.st-story{text-align:left;border:1px solid var(--border);background:rgba(255,255,255,.92);
+  border-radius:15px;padding:11px 12px;cursor:pointer;transition:all .16s ease;box-shadow:0 4px 14px rgba(27,21,15,.035);}
+.st-story:hover{border-color:#efc8b8;background:#fff9f5;transform:translateY(-1px);box-shadow:0 8px 18px rgba(27,21,15,.07);}
+.st-story.on{border-color:#efbca7;background:var(--accent-soft);box-shadow:inset 0 0 0 1px rgba(194,85,45,.05);}
+.st-story-t{font-family:'DM Sans',sans-serif;font-weight:800;font-size:.78rem;
+  line-height:1.3;color:var(--text);margin-bottom:5px;}
+.st-story-r{font-size:.68rem;color:var(--muted);font-variant-numeric:tabular-nums;font-weight:650;}
+.st-config-card{background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:18px;padding:14px;margin:8px 0 12px;box-shadow:var(--shadow-soft);}
+.st-config-title{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;margin-bottom:4px;}
+.st-config-sub{font-size:.7rem;color:var(--muted);line-height:1.4;margin-bottom:12px;}
+.st-pick{display:flex;flex-direction:column;gap:8px;margin:10px 0 2px;}
+.st-pick label{font-size:.68rem;font-weight:800;font-family:'DM Sans',sans-serif;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--muted);}
+.st-pick select{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:13px;
+  font-size:.82rem;font-family:inherit;background:var(--surface-2);color:var(--text);cursor:pointer;}
+.st-swap{align-self:center;background:#fff;border:1px solid var(--border);border-radius:50%;
+  width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(27,21,15,.06);
   color:var(--muted);transition:all .13s;margin:-2px 0;}
 .st-swap:hover{border-color:var(--accent);color:var(--accent);}
 .st-swap svg{width:13px;height:13px;}
-.st-help{font-size:.6rem;color:var(--muted);line-height:1.45;margin:-2px 0 9px;}
+.st-help{font-size:.72rem;color:var(--muted);line-height:1.5;margin:-1px 0 10px;}
 .st-help b{color:var(--text);}
-.st-readout{background:var(--bg);border-radius:9px;padding:10px 11px;margin:8px 0 4px;}
-.st-r-top{display:flex;align-items:baseline;gap:7px;}
-.st-r-big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;line-height:1;
+.st-readout{background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:18px;padding:14px;margin:10px 0 6px;box-shadow:var(--shadow-soft);}
+.st-r-top{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.st-metric{padding:10px 11px;border-radius:14px;background:var(--surface-2);border:1px solid var(--border);}
+.st-metric-label{display:block;font-size:.63rem;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.st-r-big{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;line-height:1;
   font-variant-numeric:tabular-nums;}
-.st-r-word{font-size:.66rem;font-weight:700;font-family:'Syne',sans-serif;}
-.st-mini{display:block;width:100%;height:120px;background:var(--surface);
-  border:1px solid var(--border);border-radius:7px;margin:8px 0;cursor:pointer;}
-.st-r-sub{font-size:.62rem;color:var(--text);margin-top:5px;line-height:1.4;}
-.st-r-stats{font-size:.6rem;color:var(--muted);margin-top:6px;line-height:1.4;
+.st-r-word{display:block;font-size:.68rem;font-weight:700;font-family:'DM Sans',sans-serif;margin-top:5px;}
+.st-mini{display:block;width:100%;height:126px;background:#fff;
+  border:1px solid var(--border);border-radius:14px;margin:10px 0;cursor:pointer;}
+.st-r-sub{font-size:.76rem;color:var(--text);margin-top:7px;line-height:1.5;}
+.st-r-stats{font-size:.7rem;color:var(--muted);margin-top:7px;line-height:1.5;
   font-variant-numeric:tabular-nums;}
 .st-r-stats b{color:var(--text);}
-.st-r-sig{font-size:.6rem;color:var(--muted);margin-top:6px;line-height:1.45;
-  background:var(--surface);border-radius:6px;padding:6px 8px;}
+.st-r-sig{font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.5;
+  background:var(--surface-2);border-radius:12px;padding:9px 10px;border:1px solid var(--border);}
 .st-r-sig b{color:var(--text);}
 .st-mun{background:#fff5f3;border:1.5px solid #f5cdc5;border-radius:9px;
   padding:9px 11px;margin:8px 0 4px;font-size:.66rem;line-height:1.5;}
@@ -385,17 +397,17 @@ body{letter-spacing:-.01em;}
   cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
 .st-mun-ficha svg{width:13px;height:13px;}
 .st-mun-hint{font-size:.6rem;color:var(--muted);font-style:italic;margin:6px 0 0;}
-.st-r-warn{font-size:.6rem;color:#9a5a00;background:#fff3e0;border-radius:5px;
-  padding:4px 7px;margin-top:6px;line-height:1.35;}
-.st-rank-row{display:flex;align-items:center;gap:7px;padding:4px 0;cursor:pointer;
-  border-bottom:1px solid #f0ece6;}
-.st-rank-row:hover{background:#f7f5f0;border-radius:5px;}
+.st-r-warn{font-size:.7rem;color:#8b5818;background:#fff5e7;border:1px solid #f2d5ad;border-radius:12px;
+  padding:8px 10px;margin-top:8px;line-height:1.45;}
+.st-rank-row{display:flex;align-items:center;gap:8px;padding:8px 6px;cursor:pointer;
+  border-bottom:1px solid #f0ece6;border-radius:10px;}
+.st-rank-row:hover{background:#faf7f2;}
 .st-rank-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.st-rank-n{flex:1;min-width:0;font-size:.66rem;line-height:1.2;
+.st-rank-n{flex:1;min-width:0;font-size:.74rem;line-height:1.3;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .st-rank-bar{flex-basis:42px;flex-shrink:0;height:5px;background:#ede9e2;border-radius:3px;position:relative;}
 .st-rank-bar>span{position:absolute;top:0;bottom:0;border-radius:3px;}
-.st-rank-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.66rem;
+.st-rank-v{font-family:'Syne',sans-serif;font-weight:700;font-size:.72rem;
   width:38px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
 
 /* tela grande (área do mapa) */
@@ -489,7 +501,16 @@ body{letter-spacing:-.01em;}
 .cmp-table tr:hover td{background:#fffaf8}.cmp-table .ind{font-weight:700;max-width:320px}.cmp-table .better{font-weight:800;color:#1e8a4d}.cmp-table .worse{color:#9b4130}.cmp-table .neutral{color:var(--muted)}
 .cmp-context-scroll{overflow:auto;min-height:0;flex:1;padding:10px 14px}.cmp-ctx-row{display:grid;grid-template-columns:24px minmax(80px,1fr) 1.2fr 60px;gap:8px;align-items:center;padding:8px 0;font-size:.72rem;border-bottom:1px solid #f2eee8;}
 .cmp-ctx-pos{font-family:'Syne',sans-serif;font-weight:800;color:var(--muted)}.cmp-ctx-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmp-ctx-track{height:6px;background:#ece8e1;border-radius:10px;overflow:hidden}.cmp-ctx-fill{height:100%;background:#7a7268;border-radius:10px}.cmp-ctx-row.sel .cmp-ctx-name{font-weight:800;color:var(--accent)}.cmp-ctx-row.sel .cmp-ctx-fill{background:var(--accent)}.cmp-ctx-val{text-align:right;font-family:'Syne',sans-serif;font-weight:700;}
-.st-scope{display:flex;align-items:center;gap:8px;margin:0 0 12px;}.st-scope label{font-size:.72rem;font-family:'DM Sans',sans-serif;font-weight:800;text-transform:uppercase;color:var(--muted)}.st-scope select{flex:1;padding:11px 12px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);font-size:.86rem;}
+.st-scope{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:10px;margin:0 0 12px;}.st-scope label{font-size:.68rem;font-family:'DM Sans',sans-serif;font-weight:800;text-transform:uppercase;color:var(--muted);letter-spacing:.05em}.st-scope select{width:100%;padding:11px 34px 11px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);font-size:.82rem;}
+.st-scope-meta{grid-column:2;font-size:.66rem;color:var(--muted);margin-top:-5px;line-height:1.35;}
+#stats-screen{background:linear-gradient(180deg,#fbfaf7 0%,#f5f0e9 100%);padding:20px 22px 18px;}
+.st-top{background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow-soft);margin-bottom:12px;}
+.st-title{font-size:1.05rem;letter-spacing:-.02em;}
+#st-scatter-view,#st-matrix-view{background:rgba(255,255,255,.94);border:1px solid var(--border);border-radius:20px;padding:12px;box-shadow:var(--shadow-soft);overflow:hidden;}
+.st-reg-leg{padding:7px 6px 0;border-top:1px solid #f0ece6;margin-top:8px;}
+.st-toggle{background:#f4efe8;border:1px solid var(--border);}
+.st-toggle button{font-size:.68rem;padding:7px 13px;border-radius:9px;}
+.st-toggle button.on{box-shadow:0 3px 10px rgba(27,21,15,.08);}
 @media(max-width:980px){:root{--panel:360px}.cmp-hero{grid-template-columns:1fr 130px 1fr}.cmp-main{grid-template-columns:1fr}.cmp-context{max-height:300px}}
 @media(max-width:680px){#compare-screen{padding:12px}.cmp-hero{grid-template-columns:1fr}.cmp-diff{order:3}.cmp-screen-actions{width:100%}.cmp-screen-actions .cmp-btn{flex:1}.cmp-bar-row{grid-template-columns:92px 1fr 56px}.cmp-value{font-size:1.6rem}}
 
@@ -580,8 +601,8 @@ body{letter-spacing:-.01em;}
   /* LEGENDA no celular: altura automática (não corta o conteúdo) + texto maior */
   #legenda{height:auto;max-height:54vh;overflow-y:auto;padding-bottom:12px;}
   #map-wrap{border-radius:20px;}
-  #tabs{padding:12px 12px 0;}
-  #tabs .tab{font-size:.76rem;padding:8px 12px;}
+  #tabs{padding:12px 12px 4px;gap:7px;}
+  #tabs .tab{font-size:.72rem;padding:8px 7px;gap:5px;}
   #leg-ind{font-size:.92rem;}
   #leg-desc{font-size:.74rem;white-space:normal;}
   #leg-ends{font-size:.62rem;}
@@ -695,22 +716,27 @@ body.desktop #btn-panel{display:none;}
     <!-- TAB ESTATÍSTICA / RELAÇÕES -->
     <div id="tab-stats" class="tab-body" style="display:none;">
       <div class="scroll-area">
-        <div class="st-note"><b>Relacionar variáveis.</b> Escolha duas e veja se andam juntas nos 5.570 municípios. <b>Correlação não é causa</b> — duas coisas podem subir juntas por um terceiro motivo.</div>
-        <div class="slabel">Histórias para começar</div>
-        <div class="st-help">O número <b>r</b> vai de −1 a +1: perto de <b>0</b> = sem relação; perto de <b>±1</b> = relação forte (+ sobem juntas, − uma sobe e a outra cai). Clique num card para ver o gráfico.</div>
+        <div class="st-note"><b>Explore relações entre indicadores.</b> Escolha duas variáveis e um território para ver a associação entre os municípios. <b>Correlação não implica causalidade</b>: use o gráfico para investigar padrões, não para afirmar causa e efeito.</div>
+        <div class="slabel">Atalhos para explorar</div>
+        <div class="st-help">Comece por uma hipótese pronta ou monte sua própria análise. <b>r</b> mede a força e direção da associação; <b>R²</b> mostra quanto da variação linear é compartilhada.</div>
         <div class="st-stories" id="st-stories"></div>
-        <div class="slabel" style="margin-top:14px;">Relacionar duas variáveis</div>
-        <div class="st-scope"><label>Amostra</label><select id="st-scope" onchange="setStatScope(this.value)"><option value="Brasil">Brasil inteiro</option><option>Norte</option><option>Nordeste</option><option>Centro-Oeste</option><option>Sudeste</option><option>Sul</option></select></div>
-        <div class="st-pick">
-          <div><label>Eixo horizontal (X)</label><select id="st-x" onchange="onStatSel()"></select></div>
-          <button class="st-swap" onclick="swapStat()" title="Trocar X e Y"><i data-lucide="arrow-up-down"></i></button>
-          <div><label>Eixo vertical (Y)</label><select id="st-y" onchange="onStatSel()"></select></div>
+        <div class="slabel" style="margin-top:16px;">Monte sua relação</div>
+        <div class="st-config-card">
+          <div class="st-config-title">Território e variáveis</div>
+          <div class="st-config-sub">Analise o Brasil, uma região ou um estado. O gráfico usa apenas municípios com dados válidos para as duas variáveis.</div>
+          <div class="st-scope"><label>Recorte</label><select id="st-scope" onchange="setStatScope(this.value)"></select><div class="st-scope-meta" id="st-scope-meta">—</div></div>
+          <div class="st-pick">
+            <div><label>Eixo horizontal (X)</label><select id="st-x" onchange="onStatSel()"></select></div>
+            <button class="st-swap" onclick="swapStat()" title="Trocar X e Y"><i data-lucide="arrow-up-down"></i></button>
+            <div><label>Eixo vertical (Y)</label><select id="st-y" onchange="onStatSel()"></select></div>
+          </div>
         </div>
         <div class="st-readout" id="st-readout"></div>
         <div id="st-mun"></div>
         <div class="slabel" style="margin-top:14px;" id="st-rank-lbl">O que mais se relaciona</div>
         <div id="st-rank"></div>
       </div>
+      <div class="stats-scroll-cue" id="stats-scroll-cue"><span><i data-lucide="chevrons-down"></i> role para ver mais</span></div>
     </div>
 
     <!-- LEGENDA — sempre visível, fora do scroll -->
@@ -1032,7 +1058,7 @@ function setGlobalRegion(reg){
   REGION=reg||'Brasil';document.getElementById('global-region').value=REGION;
   aplicarEstilos();buildRank();
   const q=document.getElementById('srch')?.value;if(q&&q.length>=2)searchMun(q);
-  if(statReady){STAT.scope=REGION;const ss=document.getElementById('st-scope');if(ss)ss.value=REGION;corrCache={};renderStats();renderStoriesStats();}
+  if(statReady){STAT.scope=REGION;const ss=document.getElementById('st-scope');if(ss)ss.value=REGION;corrCache={};renderStats();renderStoriesStats();renderStatLegend();}
   if(REGION==='Brasil'){leaf&&leaf.setView([-14,-52],4);}
   else if(geoLayer&&leaf){let b=null;geoLayer.eachLayer(l=>{const m=l.feature?.properties?._d;if(inRegion(m)){const lb=l.getBounds?.();if(lb)b=b?b.extend(lb):L.latLngBounds(lb);}});if(b&&b.isValid())leaf.fitBounds(b,{padding:[18,18],maxZoom:6});}
   atualizarLegenda(IND,getEsc(IND),D.meta[IND]);
@@ -1534,7 +1560,7 @@ function showTab(tab,btn){
   document.getElementById('stats-screen').style.display=isStats?'flex':'none';
   document.getElementById('compare-screen').style.display=isCompare?'flex':'none';
   document.getElementById('legenda').style.display=(isStats||isCompare)?'none':'';
-  if(isStats){ if(chaveSel) statSel=chaveSel; ensureStatsInit(); if(statReady) renderStats(); }
+  if(isStats){ if(chaveSel) statSel=chaveSel; ensureStatsInit(); if(statReady) renderStats(); requestAnimationFrame(updateStatsScrollCue); }
   if(isCompare){ ensureCompareInit(); renderCompare(); }
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
 }
@@ -1680,17 +1706,38 @@ function low(s){if(!s)return s;const w=s.split(' ')[0];
 function statKey(name){if(D.meta[name])return name;const t=name.trim().toLowerCase();
   return Object.keys(D.meta).find(k=>k.trim().toLowerCase()===t)||null;}
 function statCol(ind){return statCols[ind]||(statCols[ind]=D.municipios.map(m=>{const v=m.i[ind];return(v==null||!isFinite(v))?NaN:v;}));}
-function statInScope(i){return STAT.scope==='Brasil'||D.municipios[i].r===STAT.scope;}
+function statScopeLabel(scope=STAT.scope){
+  if(scope==='Brasil')return 'Brasil inteiro';
+  if(String(scope).startsWith('UF:')){const uf=String(scope).slice(3);return `${UF_NOMES[uf]||uf} · ${uf}`;}
+  return scope;
+}
+function statMunInScope(m){
+  if(STAT.scope==='Brasil')return true;
+  if(String(STAT.scope).startsWith('UF:'))return m.u===String(STAT.scope).slice(3);
+  return m.r===STAT.scope;
+}
+function statInScope(i){return statMunInScope(D.municipios[i]);}
+function statScopeMunicipalCount(){return D.municipios.reduce((n,m)=>n+(statMunInScope(m)?1:0),0);}
 function pearsonInd(a,b){
   if(a===b)return{r:1,n:0};
   const ab=a<b?a+'|'+b:b+'|'+a, key=STAT.scope+'|'+ab; if(corrCache[key])return corrCache[key];
   const A=statCol(a),B=statCol(b); let n=0,sa=0,sb=0,saa=0,sbb=0,sab=0;
   for(let i=0;i<A.length;i++){if(!statInScope(i))continue;const x=A[i],y=B[i];if(x!==x||y!==y)continue;n++;sa+=x;sb+=y;saa+=x*x;sbb+=y*y;sab+=x*y;}
   let r=null;
-  if(n>=30){const cov=sab-sa*sb/n,va=saa-sa*sa/n,vb=sbb-sb*sb/n;if(va>0&&vb>0)r=cov/Math.sqrt(va*vb);}
+  if(n>=3){const cov=sab-sa*sb/n,va=saa-sa*sa/n,vb=sbb-sb*sb/n;if(va>0&&vb>0)r=cov/Math.sqrt(va*vb);}
   return corrCache[key]={r,n};
 }
-function setStatScope(v){STAT.scope=v||'Brasil';corrCache={};renderStats();renderStoriesStats();}
+function setStatScope(v){STAT.scope=v||'Brasil';corrCache={};renderStats();renderStoriesStats();renderStatLegend();updateStatsScrollCue();}
+function renderStatLegend(){
+  const el=document.getElementById('st-reg-leg');if(!el)return;
+  if(STAT.scope==='Brasil'){el.innerHTML=Object.entries(REG_COR).map(([r,c])=>`<span><i style="background:${c}"></i>${r}</span>`).join('');return;}
+  if(String(STAT.scope).startsWith('UF:')){const uf=String(STAT.scope).slice(3),m=D.municipios.find(x=>x.u===uf),reg=m?m.r:'';el.innerHTML=`<span><i style="background:${REG_COR[reg]||'#888'}"></i>${esc(UF_NOMES[uf]||uf)} · ${uf}</span>`;return;}
+  el.innerHTML=`<span><i style="background:${REG_COR[STAT.scope]||'#888'}"></i>${esc(STAT.scope)}</span>`;
+}
+function updateStatsScrollCue(){
+  const sc=document.querySelector('#tab-stats .scroll-area'),cue=document.getElementById('stats-scroll-cue');if(!sc||!cue)return;
+  const more=sc.scrollHeight-sc.scrollTop-sc.clientHeight>24;cue.classList.toggle('hide',!more);
+}
 function renderStoriesStats(){
   document.querySelectorAll('.st-story').forEach((b,idx)=>{const st=STAT_STORIES[idx];if(!st)return;const x=statKey(st.x),y=statKey(st.y);if(!x||!y)return;const r=pearsonInd(x,y).r;const el=b.querySelector('.st-story-r');if(el)el.textContent='r = '+(r==null?'—':(r>=0?'+':'')+r.toFixed(2)+(r==null?'':' · '+strengthWord(r)));});
 }
@@ -1706,7 +1753,11 @@ function ensureStatsInit(){
   document.getElementById('st-x').innerHTML=grp;
   document.getElementById('st-y').innerHTML=grp;
   document.getElementById('st-mx-cat').innerHTML=Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
-  document.getElementById('st-scope').value=STAT.scope;
+  const scopeSel=document.getElementById('st-scope');
+  const ufs=[...new Set(D.municipios.map(m=>m.u))].sort((a,b)=>(UF_NOMES[a]||a).localeCompare(UF_NOMES[b]||b,'pt-BR'));
+  scopeSel.innerHTML=`<optgroup label="Brasil e regiões"><option value="Brasil">Brasil inteiro</option>${REGIOES.map(r=>`<option value="${esc(r)}">${esc(r)}</option>`).join('')}</optgroup>`+
+    `<optgroup label="Estados">${ufs.map(uf=>`<option value="UF:${uf}">${esc(UF_NOMES[uf]||uf)} · ${uf}</option>`).join('')}</optgroup>`;
+  scopeSel.value=STAT.scope;
   document.getElementById('st-stories').innerHTML=STAT_STORIES.map((s,idx)=>{
     const x=statKey(s.x),y=statKey(s.y); if(!x||!y)return'';
     const r=pearsonInd(x,y).r;
@@ -1714,12 +1765,13 @@ function ensureStatsInit(){
       <div class="st-story-t">${esc(s.t)}</div>
       <div class="st-story-r">r = ${r==null?'—':(r>=0?'+':'')+r.toFixed(2)}${r==null?'':' · '+strengthWord(r)}</div></button>`;
   }).join('');
-  document.getElementById('st-reg-leg').innerHTML=Object.entries(REG_COR).map(([r,c])=>
-    `<span><i style="background:${c}"></i>${r}</span>`).join('');
+  renderStatLegend();
   // delegação de clique no ranking
   document.getElementById('st-rank').addEventListener('click',e=>{
     const row=e.target.closest('.st-rank-row'); if(row) setStatPair(row.dataset.k,STAT.y,-1);
   });
+  const statScroll=document.querySelector('#tab-stats .scroll-area');
+  if(statScroll){statScroll.addEventListener('scroll',updateStatsScrollCue,{passive:true});requestAnimationFrame(updateStatsScrollCue);}
   // hover/clique no scatter
   const cv=document.getElementById('st-canvas');
   cv.addEventListener('mousemove',onScatterHover);
@@ -1762,31 +1814,35 @@ function renderStatView(){
 function renderStats(){
   const {x,y}=STAT, mx=D.meta[x], my=D.meta[y];
   const {r,n}=pearsonInd(x,y);
-  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${STAT.scope==='Brasil'?'Brasil inteiro':esc(STAT.scope)} · ${n.toLocaleString('pt-BR')} municípios</small>`;
+  document.getElementById('st-title').innerHTML=`${esc(my.nome)} <small>× ${esc(mx.nome)} · ${esc(statScopeLabel())} · ${n.toLocaleString('pt-BR')} municípios com dados</small>`;
+  const sm=document.getElementById('st-scope-meta');if(sm)sm.textContent=`${statScopeMunicipalCount().toLocaleString('pt-BR')} municípios no recorte · ${n.toLocaleString('pt-BR')} usados nesta relação`;
   const ro=document.getElementById('st-readout');
   if(r==null){ro.innerHTML=`<div class="st-r-sub">Dados insuficientes para relacionar esse par.</div>`;}
   else{
     const cor=r>=0?'#1e8a4d':'#7a2da0', p=pearsonP(r,n), r2=r*r;
     ro.innerHTML=
-      `<div class="st-r-top"><span class="st-r-big" style="color:${cor}">${(r>=0?'+':'')+r.toFixed(2)}</span>`+
-      `<span class="st-r-word" style="color:${cor}">${rWord(r)}</span></div>`+
+      `<div class="st-r-top">`+
+      `<div class="st-metric"><span class="st-metric-label">Correlação · r</span><span class="st-r-big" style="color:${cor}">${(r>=0?'+':'')+r.toFixed(2)}</span><span class="st-r-word" style="color:${cor}">${rWord(r)}</span></div>`+
+      `<div class="st-metric"><span class="st-metric-label">Ajuste linear · R²</span><span class="st-r-big">${r2.toFixed(2).replace('.',',')}</span><span class="st-r-word">~${Math.round(r2*100)}% da variação</span></div></div>`+
       `<canvas id="st-mini" class="st-mini"></canvas>`+
       `<div class="st-r-sub">${interpFrase(r,mx,my)}</div>`+
-      `<div class="st-r-stats"><b>R² = ${r2.toFixed(2).replace('.',',')}</b> — explica ~${Math.round(r2*100)}% da variação · ${esc(fmtP(p))}</div>`+
+      `<div class="st-r-stats"><b>${esc(fmtP(p))}</b> · n = ${n.toLocaleString('pt-BR')}</div>`+
       `<div class="st-r-sig">${sigFrase(p,n)}</div>`+
-      (Math.abs(r)>=.85?`<div class="st-r-warn">⚠ Correlação altíssima: podem ser quase a mesma variável (uma derivada da outra). Pouco surpreendente.</div>`:'');
+      (n<30?`<div class="st-r-warn">⚠ <b>Amostra pequena:</b> esta estimativa usa apenas ${n.toLocaleString('pt-BR')} municípios. Observe o gráfico e interprete r, R² e p com cautela.</div>`:'')+
+      (Math.abs(r)>=.85?`<div class="st-r-warn">⚠ Correlação altíssima: as variáveis podem representar dimensões muito próximas ou uma ser derivada da outra.</div>`:'');
     drawMini();
   }
   document.getElementById('st-rank-lbl').textContent='O que mais se relaciona com: '+my.nome;
   renderCorrRank(y);
   renderMun();
   renderStatView();
+  requestAnimationFrame(updateStatsScrollCue);
 }
 function rankPos(ind,chave){const r=getRank(ind);return r&&r.pos[chave]?{pos:r.pos[chave],total:r.total}:null;}
 function renderMun(){
   const box=document.getElementById('st-mun'); if(!box) return;
   const m=statSel&&munIdx[statSel];
-  if(!m||(STAT.scope!=='Brasil'&&m.r!==STAT.scope)){ box.innerHTML=`<div class="st-mun-hint">💡 Clique num ponto do gráfico para destacar um município dentro do recorte atual.</div>`; return; }
+  if(!m||!statMunInScope(m)){ box.innerHTML=`<div class="st-mun-hint">💡 Clique num ponto do gráfico para destacar um município dentro do recorte atual.</div>`; return; }
   const {x,y}=STAT, vx=m.i[x], vy=m.i[y];
   const rx=rankPos(x,statSel), ry=rankPos(y,statSel);
   const line=(meta,v,rk)=>`<div class="st-mun-row"><span>${esc(short(meta.nome))}</span><b>${v==null?'—':fmt(v)} ${esc(meta.unidade||'')}</b></div>`+
@@ -1934,7 +1990,7 @@ function paintScatter(cv,W,H,mini){
     }
   }
   // município destacado
-  const ms=statSel&&D.municipios.find(mm=>chaveOf(mm)===statSel&&(STAT.scope==='Brasil'||mm.r===STAT.scope));
+  const ms=statSel&&D.municipios.find(mm=>chaveOf(mm)===statSel&&statMunInScope(mm));
   if(ms){const a=ms.i[x],b=ms.i[y];
     if(a!=null&&b!=null&&isFinite(a)&&isFinite(b)){
       const px=sx(a),py=sy(b), R=mini?4:7;
