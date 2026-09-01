@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>IPS Brasil 2026 — Mapa de Indicadores</title>
+<meta name="theme-color" content="#171512">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=8">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=8">
+<link rel="shortcut icon" href="favicon.ico?v=8">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
@@ -541,7 +545,12 @@ body{letter-spacing:-.01em;}
 .indoc-intro{font-size:.82rem;color:var(--muted);line-height:1.55;background:linear-gradient(180deg,#fbf8f4,#f7f3ee);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:14px;}
 .indoc-search{position:relative;margin-bottom:10px}.indoc-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted)}
 .indoc-search input{width:100%;padding:11px 12px 11px 36px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);font:inherit;font-size:.84rem;outline:none}.indoc-search input:focus{background:#fff;border-color:#efcabc;box-shadow:0 0 0 4px rgba(194,85,45,.08)}
-.indoc-cat{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);font:inherit;font-size:.82rem;margin-bottom:10px}
+.indoc-cat{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);font:inherit;font-size:.82rem;margin-bottom:0}
+.indoc-search-main input{font-size:.9rem;padding-top:12px;padding-bottom:12px}
+.indoc-quick{display:flex;gap:6px;flex-wrap:wrap;margin:-2px 0 10px}.indoc-quick button{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 9px;font:700 .68rem 'DM Sans',sans-serif;color:var(--muted);cursor:pointer;transition:.14s}.indoc-quick button:hover{border-color:#efcabc;background:var(--accent-soft);color:var(--accent)}
+.indoc-filter-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;margin-bottom:10px}.indoc-count{font-size:.68rem;color:var(--muted);white-space:nowrap;background:#f7f3ee;border:1px solid var(--border);border-radius:999px;padding:7px 9px}
+.indoc-match{font-size:.64rem;color:var(--accent);font-weight:700;margin-top:3px}
+.indoc-list .sr-empty{padding:14px 10px;line-height:1.5}
 .indoc-list{display:flex;flex-direction:column;gap:5px}.indoc-item{padding:9px 10px;border:1px solid transparent;border-radius:12px;cursor:pointer;transition:.14s;background:transparent}.indoc-item:hover{background:#fbf8f4;border-color:var(--border)}.indoc-item.on{background:var(--accent-soft);border-color:#f1cabd}.indoc-item b{display:block;font-size:.8rem;line-height:1.3}.indoc-item span{font-size:.67rem;color:var(--muted);display:block;margin-top:2px}
 #indicator-screen{position:absolute;inset:0;z-index:820;display:none;overflow:auto;background:linear-gradient(180deg,#faf8f4 0%,#f4efe8 100%);padding:26px 30px 36px;scrollbar-gutter:stable;}
 #indicator-screen::-webkit-scrollbar{width:10px}#indicator-screen::-webkit-scrollbar-track{background:#eee8df}#indicator-screen::-webkit-scrollbar-thumb{background:#b3a799;border:2px solid #eee8df;border-radius:99px}
@@ -851,9 +860,16 @@ body.desktop #btn-panel{display:none;}
     <!-- TAB DICIONÁRIO DE INDICADORES -->
     <div id="tab-indicadores" class="tab-body" style="display:none;">
       <div class="scroll-area">
-        <div class="indoc-intro"><b>Dicionário do painel.</b> Consulte o que cada indicador representa, sua unidade, direção de leitura e como ele entra na metodologia do IPS.</div>
-        <div class="indoc-search"><i data-lucide="search"></i><input id="indoc-search" type="text" placeholder="Buscar indicador…" oninput="renderIndicatorList()"></div>
-        <select class="indoc-cat" id="indoc-cat" onchange="renderIndicatorList()"></select>
+        <div class="indoc-intro"><b>Pesquisar indicadores.</b> Digite qualquer parte do nome ou tema. Por exemplo: <b>emp</b>, <b>água</b>, <b>clima</b>, <b>internet</b> ou <b>violência</b>. Os resultados aparecem enquanto você digita.</div>
+        <div class="indoc-search indoc-search-main"><i data-lucide="search"></i><input id="indoc-search" type="text" placeholder="Ex.: emp, saneamento, clima…" oninput="renderIndicatorList()" autocomplete="off"></div>
+        <div class="indoc-quick" aria-label="Buscas rápidas">
+          <button onclick="quickIndicatorSearch('emp')">emprego</button>
+          <button onclick="quickIndicatorSearch('água')">água</button>
+          <button onclick="quickIndicatorSearch('clima')">clima</button>
+          <button onclick="quickIndicatorSearch('educação')">educação</button>
+          <button onclick="quickIndicatorSearch('internet')">internet</button>
+        </div>
+        <div class="indoc-filter-row"><select class="indoc-cat" id="indoc-cat" onchange="renderIndicatorList()"></select><span id="indoc-count" class="indoc-count">—</span></div>
         <div class="indoc-list" id="indoc-list"></div>
       </div>
     </div>
@@ -1729,12 +1745,42 @@ function ensureIndicatorDocs(){
   sel.innerHTML='<option value="Todos">Todos os grupos</option>'+Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
   renderIndicatorList();
 }
+function normIndicatorSearch(s){
+  return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+}
+function quickIndicatorSearch(q){
+  const el=document.getElementById('indoc-search');
+  if(!el)return; el.value=q; renderIndicatorList(); el.focus();
+}
+function indicatorSearchScore(ind,q){
+  const m=D.meta[ind]||{};
+  const nome=normIndicatorSearch(m.nome||ind), key=normIndicatorSearch(ind), simples=normIndicatorSearch(m.simples||''), unidade=normIndicatorSearch(m.unidade||''), cat=normIndicatorSearch(indocCategory(ind));
+  const hay=[nome,key,simples,unidade,cat].join(' ');
+  const tokens=normIndicatorSearch(q).split(' ').filter(Boolean);
+  if(!tokens.length)return 100;
+  if(!tokens.every(t=>hay.includes(t)))return null;
+  let score=50;
+  const full=tokens.join(' ');
+  if(nome===full||key===full)score=0;
+  else if(nome.startsWith(full)||key.startsWith(full))score=5;
+  else if(nome.includes(full)||key.includes(full))score=10;
+  else if(tokens.every(t=>nome.includes(t)||key.includes(t)))score=20;
+  else if(tokens.every(t=>simples.includes(t)))score=30;
+  else score=40;
+  return score;
+}
 function renderIndicatorList(){
-  if(!D)return;const q=(document.getElementById('indoc-search')?.value||'').trim().toLowerCase();const cat=document.getElementById('indoc-cat')?.value||'Todos';
+  if(!D)return;
+  const raw=(document.getElementById('indoc-search')?.value||'').trim();
+  const cat=document.getElementById('indoc-cat')?.value||'Todos';
   let inds=Object.keys(D.meta).filter(ind=>cat==='Todos'||(GRUPOS[cat]||[]).includes(ind));
-  if(q)inds=inds.filter(ind=>((D.meta[ind]?.nome||ind)+' '+(D.meta[ind]?.simples||'')+' '+ind).toLowerCase().includes(q));
+  if(raw){
+    inds=inds.map(ind=>({ind,score:indicatorSearchScore(ind,raw)})).filter(x=>x.score!==null).sort((a,b)=>a.score-b.score||(D.meta[a.ind]?.nome||a.ind).localeCompare(D.meta[b.ind]?.nome||b.ind,'pt-BR')).map(x=>x.ind);
+  }
+  const count=document.getElementById('indoc-count');
+  if(count)count.textContent=`${inds.length} ${inds.length===1?'resultado':'resultados'}`;
   const box=document.getElementById('indoc-list');
-  box.innerHTML=inds.map(ind=>{const m=D.meta[ind]||{};return `<div class="indoc-item ${ind===INDOC?'on':''}" onclick='renderIndicatorDetail(${JSON.stringify(ind)})'><b>${esc(m.nome||ind)}</b><span>${esc(indocKind(ind))} · ${esc(m.unidade||'unidade não informada')}</span></div>`}).join('')||'<div class="sr-empty">Nenhum indicador encontrado.</div>';
+  box.innerHTML=inds.map(ind=>{const m=D.meta[ind]||{};const hint=raw?`<div class="indoc-match">corresponde a “${esc(raw)}”</div>`:'';return `<div class="indoc-item ${ind===INDOC?'on':''}" onclick='renderIndicatorDetail(${JSON.stringify(ind)})'><b>${esc(m.nome||ind)}</b><span>${esc(indocKind(ind))} · ${esc(m.unidade||'unidade não informada')}</span>${hint}</div>`}).join('')||'<div class="sr-empty"><b>Nenhum indicador encontrado.</b><br>Tente outra parte da palavra, por exemplo “emp”, “água”, “saúde” ou “internet”.</div>';
 }
 function renderIndicatorDetail(ind){
   if(!D||!D.meta[ind])return;INDOC=ind;renderIndicatorList();const m=D.meta[ind]||{};const vals=D.municipios.map(x=>x.i[ind]).filter(v=>Number.isFinite(v)).sort((a,b)=>a-b);const n=vals.length,miss=D.municipios.length-n;const med=n?vals[Math.floor(n/2)]:null;const min=n?vals[0]:null,max=n?vals[n-1]:null;const cat=indocCategory(ind);const dir=m.maior==='melhor'?'maior = melhor':m.maior==='pior'?'menor = melhor':'leitura neutra';
