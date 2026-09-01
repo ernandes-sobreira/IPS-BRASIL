@@ -90,6 +90,27 @@ body{letter-spacing:-.01em;}
 .tab:hover{background:#fff;border-color:var(--border-strong);color:var(--text);}
 .tab.on{color:var(--accent);background:var(--accent-soft);border-color:#f1cabd;box-shadow:inset 0 0 0 1px rgba(194,85,45,.06);}
 
+
+/* BUSCA GLOBAL DE INDICADOR — sempre visível no painel */
+#global-ind-search{position:relative;z-index:450;padding:12px 14px 10px;background:rgba(255,255,255,.98);border-bottom:1px solid var(--border);flex-shrink:0;}
+.gis-label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 7px;font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.055em;}
+.gis-label span:last-child{font-size:.64rem;font-weight:600;text-transform:none;letter-spacing:0;color:#999187;}
+.gis-box{position:relative;display:flex;align-items:center;}
+.gis-box>svg{position:absolute;left:12px;width:17px;height:17px;color:#8a8176;pointer-events:none;}
+#global-ind-input{width:100%;height:44px;padding:0 40px 0 39px;border:1px solid var(--border-strong);border-radius:14px;background:var(--surface-2);font:600 .88rem 'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .16s,box-shadow .16s,background .16s;}
+#global-ind-input::placeholder{color:#999187;font-weight:500;}
+#global-ind-input:focus{background:#fff;border-color:#e4a58e;box-shadow:0 0 0 4px rgba(194,85,45,.09);}
+.gis-clear{position:absolute;right:8px;width:29px;height:29px;border:none;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;display:none;align-items:center;justify-content:center;}
+.gis-clear:hover{background:#eee8df;color:var(--text)}.gis-clear svg{width:15px;height:15px;}
+#global-ind-results{display:none;position:absolute;left:14px;right:14px;top:77px;max-height:310px;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 42px rgba(28,22,16,.16);padding:6px;z-index:999;scrollbar-gutter:stable;}
+#global-ind-results.open{display:block;}
+.gis-result{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;border-radius:11px;cursor:pointer;border:1px solid transparent;}
+.gis-result:hover,.gis-result.active{background:var(--accent-soft);border-color:#f0c8b9;}
+.gis-result-main{min-width:0}.gis-result-name{font-size:.82rem;font-weight:800;color:var(--text);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.gis-result-meta{font-size:.66rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gis-go{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:.65rem;font-weight:800;white-space:nowrap}.gis-go svg{width:13px;height:13px;}
+.gis-empty{padding:14px 12px;font-size:.75rem;color:var(--muted);line-height:1.45;}.gis-empty b{color:var(--text)}
+@media(max-width:768px){#global-ind-search{padding:10px 12px 9px}#global-ind-results{left:12px;right:12px;top:73px}.gis-label span:last-child{display:none}}
+
 /* CONTEÚDO DA TAB — min-height:0 é o fix para scroll dentro de flex */
 .tab-body{
   flex:1;
@@ -758,7 +779,13 @@ body.desktop #btn-panel{display:none;}
       <button class="tab"    onclick="showTab('rankings',this)"><i data-lucide="trophy"></i><span>Rankings</span></button>
       <button class="tab"    onclick="showTab('comparar',this)"><i data-lucide="git-compare-arrows"></i><span>Comparar</span></button>
       <button class="tab"    onclick="showTab('stats',this)"><i data-lucide="sigma"></i><span>Relações</span></button>
-      <button class="tab"    onclick="showTab('indicadores',this)"><i data-lucide="book-open"></i><span>Indicadores</span></button>
+      <button class="tab"    onclick="showTab('indicadores',this)" title="Pesquisar e entender indicadores"><i data-lucide="book-open"></i><span>Indicadores</span></button>
+    </div>
+
+    <div id="global-ind-search">
+      <div class="gis-label"><span>Buscar indicador</span><span>digite parte do nome</span></div>
+      <div class="gis-box"><i data-lucide="search"></i><input id="global-ind-input" type="text" placeholder="Ex.: emp, água, clima, renda…" autocomplete="off" oninput="globalIndicatorSearch()" onfocus="globalIndicatorSearch()" onkeydown="globalIndicatorKey(event)"><button class="gis-clear" id="global-ind-clear" onclick="clearGlobalIndicatorSearch()" title="Limpar busca"><i data-lucide="x"></i></button></div>
+      <div id="global-ind-results"></div>
     </div>
 
     <!-- TAB MAPA -->
@@ -1723,6 +1750,51 @@ function toggleDesktop(){
 }
 
 
+
+
+// ─── BUSCA GLOBAL DE INDICADORES ────────────────────────────────────────────
+let globalIndMatches=[], globalIndActive=-1;
+function globalIndicatorSearch(){
+  if(!D)return;
+  const input=document.getElementById('global-ind-input'), box=document.getElementById('global-ind-results'), clear=document.getElementById('global-ind-clear');
+  if(!input||!box)return;
+  const raw=input.value.trim();
+  if(clear)clear.style.display=raw?'flex':'none';
+  if(!raw){box.classList.remove('open');box.innerHTML='';globalIndMatches=[];globalIndActive=-1;return;}
+  globalIndMatches=Object.keys(D.meta).map(ind=>({ind,score:indicatorSearchScore(ind,raw)})).filter(x=>x.score!==null).sort((a,b)=>a.score-b.score||(D.meta[a.ind]?.nome||a.ind).localeCompare(D.meta[b.ind]?.nome||b.ind,'pt-BR')).slice(0,12).map(x=>x.ind);
+  globalIndActive=-1;
+  if(!globalIndMatches.length){box.innerHTML='<div class="gis-empty"><b>Nenhum indicador encontrado.</b><br>Tente outra parte da palavra, como “emp”, “água”, “saúde” ou “internet”.</div>';box.classList.add('open');return;}
+  box.innerHTML=globalIndMatches.map((ind,i)=>{const m=D.meta[ind]||{};return `<div class="gis-result" data-idx="${i}" onmousedown="event.preventDefault();chooseGlobalIndicator(${JSON.stringify(ind)})"><div class="gis-result-main"><div class="gis-result-name">${esc(m.nome||ind)}</div><div class="gis-result-meta">${esc(indocCategory(ind))} · ${esc(m.unidade||'unidade não informada')}</div></div><span class="gis-go">ver no mapa <i data-lucide="arrow-right"></i></span></div>`}).join('');
+  box.classList.add('open');icons();
+}
+function chooseGlobalIndicator(ind){
+  if(!D?.meta?.[ind])return;
+  const input=document.getElementById('global-ind-input');if(input)input.value=D.meta[ind].nome||ind;
+  const box=document.getElementById('global-ind-results');if(box){box.classList.remove('open');box.innerHTML='';}
+  const clear=document.getElementById('global-ind-clear');if(clear)clear.style.display='flex';
+  setIndicador(ind);
+  showTab('mapa',document.querySelector('#tabs .tab:nth-child(1)'));
+  if(window.innerWidth<=768)closePanel();
+}
+function clearGlobalIndicatorSearch(){
+  const input=document.getElementById('global-ind-input');if(input){input.value='';input.focus();}
+  const box=document.getElementById('global-ind-results');if(box){box.classList.remove('open');box.innerHTML='';}
+  const clear=document.getElementById('global-ind-clear');if(clear)clear.style.display='none';
+  globalIndMatches=[];globalIndActive=-1;
+}
+function globalIndicatorKey(e){
+  const box=document.getElementById('global-ind-results');
+  if(e.key==='Escape'){box?.classList.remove('open');return;}
+  if(!globalIndMatches.length)return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+    e.preventDefault();globalIndActive=(globalIndActive+(e.key==='ArrowDown'?1:-1)+globalIndMatches.length)%globalIndMatches.length;
+    box?.querySelectorAll('.gis-result').forEach((el,i)=>el.classList.toggle('active',i===globalIndActive));
+    box?.querySelector(`.gis-result[data-idx="${globalIndActive}"]`)?.scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'){
+    e.preventDefault();chooseGlobalIndicator(globalIndMatches[globalIndActive>=0?globalIndActive:0]);
+  }
+}
+document.addEventListener('click',e=>{const wrap=document.getElementById('global-ind-search');if(wrap&&!wrap.contains(e.target))document.getElementById('global-ind-results')?.classList.remove('open');});
 
 // ─── DICIONÁRIO / METODOLOGIA ───────────────────────────────────────────────
 let indocReady=false;
