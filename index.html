@@ -70,9 +70,8 @@ body{letter-spacing:-.01em;}
 }
 
 /* TABS — altura fixa */
-#tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;padding:14px 14px 4px;border-bottom:none;flex-shrink:0;height:auto;}
-#tabs .tab:nth-child(-n+3){grid-column:span 2;}
-#tabs .tab:nth-child(n+4){grid-column:span 3;}
+#tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:14px 14px 6px;border-bottom:none;flex-shrink:0;height:auto;}
+#tabs .tab{grid-column:auto;}
 .tab{
   flex:none;width:100%;height:auto;background:var(--surface-2);
   border:1px solid var(--border);border-bottom:1px solid var(--border);
@@ -514,6 +513,45 @@ body{letter-spacing:-.01em;}
 @media(max-width:980px){:root{--panel:360px}.cmp-hero{grid-template-columns:1fr 130px 1fr}.cmp-main{grid-template-columns:1fr}.cmp-context{max-height:300px}}
 @media(max-width:680px){#compare-screen{padding:12px}.cmp-hero{grid-template-columns:1fr}.cmp-diff{order:3}.cmp-screen-actions{width:100%}.cmp-screen-actions .cmp-btn{flex:1}.cmp-bar-row{grid-template-columns:92px 1fr 56px}.cmp-value{font-size:1.6rem}}
 
+
+/* ─── V6 · DENSIDADE VISUAL E DICIONÁRIO ─────────────────────────────────── */
+/* Comparação: conteúdo centralizado, mais compacto e com ritmo editorial */
+#compare-screen{overflow-y:auto;scrollbar-gutter:stable;padding:22px 28px 30px;}
+#compare-screen::-webkit-scrollbar{width:10px}#compare-screen::-webkit-scrollbar-track{background:#eee8df}#compare-screen::-webkit-scrollbar-thumb{background:#b3a799;border:2px solid #eee8df;border-radius:99px}
+.cmp-screen-head,.cmp-hero,.cmp-bars,.cmp-main{width:min(100%,1220px);margin-left:auto;margin-right:auto;}
+.cmp-screen-head{margin-bottom:14px;align-items:center;}
+.cmp-screen-title{font-size:clamp(1.15rem,1.5vw,1.5rem);letter-spacing:-.035em;}
+.cmp-screen-title small{font-size:.76rem;margin-top:5px;}
+.cmp-hero{grid-template-columns:minmax(0,1fr) 148px minmax(0,1fr);gap:14px;margin-bottom:14px;}
+.cmp-card{padding:16px 18px;border-radius:20px;min-height:150px;display:flex;flex-direction:column;justify-content:center;}
+.cmp-name{font-size:1.02rem;line-height:1.15;}
+.cmp-value{font-size:2rem;margin-top:14px;}
+.cmp-diff{border-radius:20px;padding:14px 10px;min-height:150px;}
+.cmp-diff .val{font-size:1.45rem;}
+.cmp-bars{padding:14px 18px;border-radius:20px;margin-bottom:14px;}
+.cmp-bar-row{grid-template-columns:135px minmax(0,1fr) 64px;margin:8px 0;}
+.cmp-main{grid-template-columns:minmax(0,1.45fr) minmax(280px,.72fr);gap:14px;flex:0 0 auto;height:360px;min-height:360px;}
+.cmp-table-wrap,.cmp-context{border-radius:20px;}
+.cmp-section-title{padding:12px 15px;font-size:.78rem;}
+.cmp-table td{padding:9px 11px}.cmp-table th{padding:9px 11px}.cmp-context-scroll{padding:10px 13px}
+@media(min-width:1550px){.cmp-screen-head,.cmp-hero,.cmp-bars,.cmp-main{width:min(100%,1160px)}.cmp-main{height:350px;min-height:350px}}
+@media(max-width:1050px){.cmp-main{grid-template-columns:1fr;height:auto;min-height:0}.cmp-table-wrap{height:360px}.cmp-context{max-height:260px}.cmp-hero{grid-template-columns:1fr 126px 1fr}}
+
+/* Dicionário de indicadores */
+.indoc-intro{font-size:.82rem;color:var(--muted);line-height:1.55;background:linear-gradient(180deg,#fbf8f4,#f7f3ee);border:1px solid var(--border);border-radius:16px;padding:12px 14px;margin-bottom:14px;}
+.indoc-search{position:relative;margin-bottom:10px}.indoc-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted)}
+.indoc-search input{width:100%;padding:11px 12px 11px 36px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);font:inherit;font-size:.84rem;outline:none}.indoc-search input:focus{background:#fff;border-color:#efcabc;box-shadow:0 0 0 4px rgba(194,85,45,.08)}
+.indoc-cat{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);font:inherit;font-size:.82rem;margin-bottom:10px}
+.indoc-list{display:flex;flex-direction:column;gap:5px}.indoc-item{padding:9px 10px;border:1px solid transparent;border-radius:12px;cursor:pointer;transition:.14s;background:transparent}.indoc-item:hover{background:#fbf8f4;border-color:var(--border)}.indoc-item.on{background:var(--accent-soft);border-color:#f1cabd}.indoc-item b{display:block;font-size:.8rem;line-height:1.3}.indoc-item span{font-size:.67rem;color:var(--muted);display:block;margin-top:2px}
+#indicator-screen{position:absolute;inset:0;z-index:820;display:none;overflow:auto;background:linear-gradient(180deg,#faf8f4 0%,#f4efe8 100%);padding:26px 30px 36px;scrollbar-gutter:stable;}
+#indicator-screen::-webkit-scrollbar{width:10px}#indicator-screen::-webkit-scrollbar-track{background:#eee8df}#indicator-screen::-webkit-scrollbar-thumb{background:#b3a799;border:2px solid #eee8df;border-radius:99px}
+.indoc-shell{width:min(100%,980px);margin:0 auto;}
+.indoc-head{display:flex;gap:16px;align-items:flex-start;margin-bottom:16px}.indoc-head-main{flex:1;min-width:0}.indoc-eyebrow{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--accent);margin-bottom:7px}.indoc-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.4rem,2.2vw,2.15rem);line-height:1.05;letter-spacing:-.05em}.indoc-lead{font-size:.92rem;line-height:1.55;color:var(--muted);margin-top:9px;max-width:780px}.indoc-actions{display:flex;gap:8px;flex-wrap:wrap}.indoc-action{border:1px solid var(--border);background:#fff;border-radius:12px;padding:9px 12px;font:700 .75rem 'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;color:var(--text)}.indoc-action svg{width:14px;height:14px}.indoc-action:hover{border-color:#efcabc;color:var(--accent)}
+.indoc-pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}.indoc-pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#fff;border:1px solid var(--border);font-size:.72rem;color:var(--muted)}.indoc-pill b{color:var(--text)}
+.indoc-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(260px,.7fr);gap:14px;align-items:start}.indoc-card{background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:var(--shadow-soft);margin-bottom:14px}.indoc-card h3{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:800;margin-bottom:9px;letter-spacing:-.02em}.indoc-card p{font-size:.82rem;line-height:1.58;color:var(--muted)}.indoc-card p+p{margin-top:8px}.indoc-card strong{color:var(--text)}
+.indoc-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.indoc-stat{padding:11px 12px;border-radius:14px;background:#faf7f2;border:1px solid var(--border)}.indoc-stat .k{font-size:.64rem;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.05em}.indoc-stat .v{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-top:4px}.indoc-source{display:flex;flex-direction:column;gap:8px;margin-top:10px}.indoc-link{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text);font-size:.76rem;font-weight:700;background:#fff}.indoc-link:hover{border-color:#efcabc;color:var(--accent)}.indoc-link svg{width:14px;height:14px;flex-shrink:0}.indoc-caution{font-size:.72rem;color:#76552d;background:#fff8e9;border:1px solid #efdfb8;border-radius:13px;padding:10px 11px;line-height:1.5;margin-top:10px}
+@media(max-width:880px){.indoc-grid{grid-template-columns:1fr}.indoc-head{flex-direction:column}.indoc-actions{width:100%}#indicator-screen{padding:18px 16px 28px}}
+
 /* TRANSIÇÃO SUAVE ao trocar indicador (fill animável via CSS) */
 #map path.leaflet-interactive{
   transition:fill .3s ease, fill-opacity .3s ease;
@@ -641,6 +679,7 @@ body.desktop #btn-panel{display:none;}
       <button class="tab"    onclick="showTab('rankings',this)"><i data-lucide="trophy"></i><span>Rankings</span></button>
       <button class="tab"    onclick="showTab('comparar',this)"><i data-lucide="git-compare-arrows"></i><span>Comparar</span></button>
       <button class="tab"    onclick="showTab('stats',this)"><i data-lucide="sigma"></i><span>Relações</span></button>
+      <button class="tab"    onclick="showTab('indicadores',this)"><i data-lucide="book-open"></i><span>Indicadores</span></button>
     </div>
 
     <!-- TAB MAPA -->
@@ -739,6 +778,16 @@ body.desktop #btn-panel{display:none;}
       <div class="stats-scroll-cue" id="stats-scroll-cue"><span><i data-lucide="chevrons-down"></i> role para ver mais</span></div>
     </div>
 
+    <!-- TAB DICIONÁRIO DE INDICADORES -->
+    <div id="tab-indicadores" class="tab-body" style="display:none;">
+      <div class="scroll-area">
+        <div class="indoc-intro"><b>Dicionário do painel.</b> Consulte o que cada indicador representa, sua unidade, direção de leitura e como ele entra na metodologia do IPS.</div>
+        <div class="indoc-search"><i data-lucide="search"></i><input id="indoc-search" type="text" placeholder="Buscar indicador…" oninput="renderIndicatorList()"></div>
+        <select class="indoc-cat" id="indoc-cat" onchange="renderIndicatorList()"></select>
+        <div class="indoc-list" id="indoc-list"></div>
+      </div>
+    </div>
+
     <!-- LEGENDA — sempre visível, fora do scroll -->
     <div id="legenda">
       <div id="leg-ind">—</div>
@@ -799,6 +848,11 @@ body.desktop #btn-panel{display:none;}
       </div>
     </div>
 
+    <!-- DICIONÁRIO / METODOLOGIA (ocupa a área do mapa) -->
+    <div id="indicator-screen">
+      <div class="indoc-shell" id="indoc-detail"></div>
+    </div>
+
     <!-- TELA DE COMPARAÇÃO (ocupa a área do mapa) -->
     <div id="compare-screen">
       <div class="cmp-screen-head">
@@ -841,6 +895,7 @@ let catMapa='Geral',catRank='Geral';
 let cmpReady=false;
 const CMP={mode:'mun',a:null,b:null,cat:'Geral',ind:'Índice de Progresso Social'};
 let FUSE=null;          // índice de busca fuzzy
+let INDOC='Índice de Progresso Social';
 let escCache={}, rankCache={}, quintCache={}; // caches por indicador
 let selfHash='';        // hash que a própria app definiu (evita loop)
 
@@ -1552,16 +1607,18 @@ function onHashChange(){
 function showTab(tab,btn){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
   if(btn) btn.classList.add('on');
-  ['mapa','explorar','rankings','comparar','stats'].forEach(t=>{
+  ['mapa','explorar','rankings','comparar','stats','indicadores'].forEach(t=>{
     document.getElementById('tab-'+t).style.display=t===tab?'flex':'none';
   });
   if(tab==='mapa') document.getElementById('tab-mapa').style.flexDirection='column';
-  const isStats=tab==='stats', isCompare=tab==='comparar';
+  const isStats=tab==='stats', isCompare=tab==='comparar', isIndoc=tab==='indicadores';
   document.getElementById('stats-screen').style.display=isStats?'flex':'none';
   document.getElementById('compare-screen').style.display=isCompare?'flex':'none';
-  document.getElementById('legenda').style.display=(isStats||isCompare)?'none':'';
+  document.getElementById('indicator-screen').style.display=isIndoc?'block':'none';
+  document.getElementById('legenda').style.display=(isStats||isCompare||isIndoc)?'none':'';
   if(isStats){ if(chaveSel) statSel=chaveSel; ensureStatsInit(); if(statReady) renderStats(); requestAnimationFrame(updateStatsScrollCue); }
   if(isCompare){ ensureCompareInit(); renderCompare(); }
+  if(isIndoc){ ensureIndicatorDocs(); renderIndicatorDetail(INDOC); }
   if(window.innerWidth<=768&&!document.body.classList.contains('desktop')) openPanel();
 }
 
@@ -1579,6 +1636,52 @@ function toggleDesktop(){
   setTimeout(()=>leaf&&leaf.invalidateSize(),350);
 }
 
+
+
+// ─── DICIONÁRIO / METODOLOGIA ───────────────────────────────────────────────
+let indocReady=false;
+const IPS_DIM=['Necessidades Humanas Básicas','Fundamentos do Bem-estar','Oportunidades'];
+const IPS_COMP=['Nutrição e Cuidados Médicos Básicos','Água e Saneamento','Moradia','Segurança Pessoal','Acesso ao Conhecimento Básico','Acesso à Informação e Comunicação','Saúde e Bem-estar','Qualidade do Meio Ambiente','Direitos Individuais','Liberdades Individuais e de Escolha','Inclusão Social','Acesso à Educação Superior'];
+const CONTEXT_IND=['POPULAÇÃO 2025','PIB PER CAPITA','ÁREA km²'];
+function indocCategory(ind){for(const [cat,arr] of Object.entries(GRUPOS))if(arr.includes(ind))return cat;return 'Outros';}
+function indocKind(ind){if(ind==='Índice de Progresso Social')return 'Índice geral';if(IPS_DIM.includes(ind))return 'Dimensão do IPS';if(IPS_COMP.includes(ind))return 'Componente do IPS';if(CONTEXT_IND.includes(ind))return 'Indicador de contexto';return 'Indicador base';}
+function indocMethod(ind){
+  if(ind==='Índice de Progresso Social')return '<strong>Cálculo:</strong> média simples das notas das três dimensões do IPS: Necessidades Humanas Básicas, Fundamentos do Bem-estar e Oportunidades. A escala final vai de 0 a 100.';
+  if(IPS_DIM.includes(ind))return '<strong>Cálculo:</strong> a nota da dimensão é a média simples dos resultados dos quatro componentes que a formam.';
+  if(IPS_COMP.includes(ind))return '<strong>Cálculo:</strong> o componente é construído a partir de seus indicadores, após validação e normalização. Os pesos dos indicadores no componente são obtidos por Análise de Componentes Principais (ACP), conforme a metodologia oficial do IPS Brasil 2026.';
+  if(CONTEXT_IND.includes(ind))return '<strong>No painel:</strong> este é um dado de contexto territorial e não compõe o cálculo do IPS. O valor é exibido diretamente conforme a base carregada.';
+  return '<strong>No painel:</strong> o valor municipal é lido diretamente da base IPS Brasil 2026, sem ser recalculado. Na construção do IPS, os indicadores base passam por validação e normalização antes de compor seus respectivos componentes. A fórmula específica, ano de referência e fonte primária variam por indicador e devem ser consultados na ficha oficial.';
+}
+function indocInterpret(ind){const m=D.meta[ind]||{};let d=m.maior||'neutro';if(d==='melhor')return 'Valores maiores representam melhor desempenho neste indicador. As cores e rankings do painel respeitam essa direção.';if(d==='pior')return 'Valores menores representam melhor desempenho neste indicador. O painel inverte a direção ao interpretar qualidade e ranking.';return 'Indicador de leitura neutra: valores maiores ou menores não são automaticamente tratados como melhores ou piores.';}
+function ensureIndicatorDocs(){
+  if(indocReady)return;indocReady=true;
+  const sel=document.getElementById('indoc-cat');
+  sel.innerHTML='<option value="Todos">Todos os grupos</option>'+Object.keys(GRUPOS).map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  renderIndicatorList();
+}
+function renderIndicatorList(){
+  if(!D)return;const q=(document.getElementById('indoc-search')?.value||'').trim().toLowerCase();const cat=document.getElementById('indoc-cat')?.value||'Todos';
+  let inds=Object.keys(D.meta).filter(ind=>cat==='Todos'||(GRUPOS[cat]||[]).includes(ind));
+  if(q)inds=inds.filter(ind=>((D.meta[ind]?.nome||ind)+' '+(D.meta[ind]?.simples||'')+' '+ind).toLowerCase().includes(q));
+  const box=document.getElementById('indoc-list');
+  box.innerHTML=inds.map(ind=>{const m=D.meta[ind]||{};return `<div class="indoc-item ${ind===INDOC?'on':''}" onclick='renderIndicatorDetail(${JSON.stringify(ind)})'><b>${esc(m.nome||ind)}</b><span>${esc(indocKind(ind))} · ${esc(m.unidade||'unidade não informada')}</span></div>`}).join('')||'<div class="sr-empty">Nenhum indicador encontrado.</div>';
+}
+function renderIndicatorDetail(ind){
+  if(!D||!D.meta[ind])return;INDOC=ind;renderIndicatorList();const m=D.meta[ind]||{};const vals=D.municipios.map(x=>x.i[ind]).filter(v=>Number.isFinite(v)).sort((a,b)=>a-b);const n=vals.length,miss=D.municipios.length-n;const med=n?vals[Math.floor(n/2)]:null;const min=n?vals[0]:null,max=n?vals[n-1]:null;const cat=indocCategory(ind);const dir=m.maior==='melhor'?'maior = melhor':m.maior==='pior'?'menor = melhor':'leitura neutra';
+  const detail=document.getElementById('indoc-detail');
+  detail.innerHTML=`
+    <div class="indoc-head"><div class="indoc-head-main"><div class="indoc-eyebrow">${esc(indocKind(ind))} · ${esc(cat)}</div><div class="indoc-title">${esc(m.nome||ind)}</div><div class="indoc-lead">${esc(m.simples||'Descrição resumida não disponível na base local.')}</div></div><div class="indoc-actions"><button class="indoc-action" onclick='setIndicador(${JSON.stringify(ind)},true);showTab("mapa",document.querySelector("#tabs .tab:nth-child(1)"))'><i data-lucide="map"></i> Ver no mapa</button></div></div>
+    <div class="indoc-pills"><span class="indoc-pill"><b>Unidade</b> ${esc(m.unidade||'—')}</span><span class="indoc-pill"><b>Leitura</b> ${esc(dir)}</span><span class="indoc-pill"><b>Cobertura</b> ${n.toLocaleString('pt-BR')} municípios</span></div>
+    <div class="indoc-grid"><div>
+      <div class="indoc-card"><h3>O que este indicador mede</h3><p>${esc(m.simples||'A base local não traz uma definição textual adicional para este indicador.')}</p></div>
+      <div class="indoc-card"><h3>Como é calculado e usado</h3><p>${indocMethod(ind)}</p><p><strong>Importante:</strong> esta plataforma não altera nem recalcula o valor municipal original quando exibe um indicador base.</p>${(!IPS_DIM.includes(ind)&&!IPS_COMP.includes(ind)&&ind!=='Índice de Progresso Social'&&!CONTEXT_IND.includes(ind))?'<div class="indoc-caution">A base local não armazena, para cada indicador, a ficha completa com numerador, denominador, ano e fonte primária. Para esses detalhes, consulte a ficha oficial do IPS Brasil 2026 no link ao lado.</div>':''}</div>
+      <div class="indoc-card"><h3>Como interpretar no painel</h3><p>${esc(indocInterpret(ind))}</p></div>
+    </div><div>
+      <div class="indoc-card"><h3>Disponibilidade na base</h3><div class="indoc-stats"><div class="indoc-stat"><div class="k">Com dados</div><div class="v">${n.toLocaleString('pt-BR')}</div></div><div class="indoc-stat"><div class="k">Sem dados</div><div class="v">${miss.toLocaleString('pt-BR')}</div></div><div class="indoc-stat"><div class="k">Mediana</div><div class="v">${med==null?'—':fmt(med)}</div></div><div class="indoc-stat"><div class="k">Faixa</div><div class="v">${min==null?'—':fmt(min)+'–'+fmt(max)}</div></div></div></div>
+      <div class="indoc-card"><h3>Fonte e documentação</h3><p><strong>Base carregada:</strong> ${esc(D.fonte_ips||'IPS Brasil 2026')}.</p><div class="indoc-source"><a class="indoc-link" href="https://ipsbrasil.org.br/conheca/indicadores" target="_blank" rel="noopener">Ficha oficial dos indicadores <i data-lucide="external-link"></i></a><a class="indoc-link" href="https://ipsbrasil.org.br/conheca/metodologia" target="_blank" rel="noopener">Metodologia do IPS <i data-lucide="external-link"></i></a><a class="indoc-link" href="https://ipsbrasil.org.br/relatorios" target="_blank" rel="noopener">Relatórios metodológicos <i data-lucide="external-link"></i></a></div></div>
+    </div></div>`;
+  icons();
+}
 
 // ─── COMPARAÇÕES TERRITORIAIS ────────────────────────────────────────────────
 const UF_NOMES={AC:'Acre',AL:'Alagoas',AP:'Amapá',AM:'Amazonas',BA:'Bahia',CE:'Ceará',DF:'Distrito Federal',ES:'Espírito Santo',GO:'Goiás',MA:'Maranhão',MT:'Mato Grosso',MS:'Mato Grosso do Sul',MG:'Minas Gerais',PA:'Pará',PB:'Paraíba',PR:'Paraná',PE:'Pernambuco',PI:'Piauí',RJ:'Rio de Janeiro',RN:'Rio Grande do Norte',RS:'Rio Grande do Sul',RO:'Rondônia',RR:'Roraima',SC:'Santa Catarina',SP:'São Paulo',SE:'Sergipe',TO:'Tocantins'};
