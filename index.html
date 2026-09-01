@@ -104,10 +104,10 @@ body{letter-spacing:-.01em;}
 .gis-clear:hover{background:#eee8df;color:var(--text)}.gis-clear svg{width:15px;height:15px;}
 #global-ind-results{display:none;position:absolute;left:14px;right:14px;top:77px;max-height:310px;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 42px rgba(28,22,16,.16);padding:6px;z-index:999;scrollbar-gutter:stable;}
 #global-ind-results.open{display:block;}
-.gis-result{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;border-radius:11px;cursor:pointer;border:1px solid transparent;}
+.gis-result{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;border-radius:11px;cursor:pointer;border:1px solid transparent;background:transparent;color:inherit;text-align:left;font:inherit;pointer-events:auto;touch-action:manipulation;user-select:none;-webkit-tap-highlight-color:transparent;}
 .gis-result:hover,.gis-result.active{background:var(--accent-soft);border-color:#f0c8b9;}
-.gis-result-main{min-width:0}.gis-result-name{font-size:.82rem;font-weight:800;color:var(--text);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.gis-result-meta{font-size:.66rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.gis-go{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:.65rem;font-weight:800;white-space:nowrap}.gis-go svg{width:13px;height:13px;}
+.gis-result-main{min-width:0;display:block}.gis-result-name{display:block;font-size:.82rem;font-weight:800;color:var(--text);line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.gis-result-meta{display:block;font-size:.66rem;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gis-go{display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-size:.65rem;font-weight:800;white-space:nowrap}.gis-go svg{width:13px;height:13px;pointer-events:none;}
 .gis-empty{padding:14px 12px;font-size:.75rem;color:var(--muted);line-height:1.45;}.gis-empty b{color:var(--text)}
 @media(max-width:768px){#global-ind-search{padding:10px 12px 9px}#global-ind-results{left:12px;right:12px;top:73px}.gis-label span:last-child{display:none}}
 
@@ -1764,7 +1764,8 @@ function globalIndicatorSearch(){
   globalIndMatches=Object.keys(D.meta).map(ind=>({ind,score:indicatorSearchScore(ind,raw)})).filter(x=>x.score!==null).sort((a,b)=>a.score-b.score||(D.meta[a.ind]?.nome||a.ind).localeCompare(D.meta[b.ind]?.nome||b.ind,'pt-BR')).slice(0,12).map(x=>x.ind);
   globalIndActive=-1;
   if(!globalIndMatches.length){box.innerHTML='<div class="gis-empty"><b>Nenhum indicador encontrado.</b><br>Tente outra parte da palavra, como “emp”, “água”, “saúde” ou “internet”.</div>';box.classList.add('open');return;}
-  box.innerHTML=globalIndMatches.map((ind,i)=>{const m=D.meta[ind]||{};return `<div class="gis-result" data-idx="${i}" onmousedown="event.preventDefault();chooseGlobalIndicator(${JSON.stringify(ind)})"><div class="gis-result-main"><div class="gis-result-name">${esc(m.nome||ind)}</div><div class="gis-result-meta">${esc(indocCategory(ind))} · ${esc(m.unidade||'unidade não informada')}</div></div><span class="gis-go">ver no mapa <i data-lucide="arrow-right"></i></span></div>`}).join('');
+  box.innerHTML=globalIndMatches.map((ind,i)=>{const m=D.meta[ind]||{};return `<button type="button" class="gis-result" data-idx="${i}" onpointerdown="selectGlobalIndicatorByIndex(event,${i})"><span class="gis-result-main"><span class="gis-result-name">${esc(m.nome||ind)}</span><span class="gis-result-meta">${esc(indocCategory(ind))} · ${esc(m.unidade||'unidade não informada')}</span></span><span class="gis-go">ver no mapa <i data-lucide="arrow-right"></i></span></button>`}).join('');
+  // Cada resultado é um botão nativo; a seleção ocorre no pointerdown, antes do blur/click.
   box.classList.add('open');icons();
 }
 function chooseGlobalIndicator(ind){
@@ -1774,6 +1775,7 @@ function chooseGlobalIndicator(ind){
   const clear=document.getElementById('global-ind-clear');if(clear)clear.style.display='flex';
   setIndicador(ind);
   showTab('mapa',document.querySelector('#tabs .tab:nth-child(1)'));
+  requestAnimationFrame(()=>document.querySelector('#ind-list .ind-item.on')?.scrollIntoView({block:'nearest',behavior:'smooth'}));
   if(window.innerWidth<=768)closePanel();
 }
 function clearGlobalIndicatorSearch(){
@@ -1794,6 +1796,30 @@ function globalIndicatorKey(e){
     e.preventDefault();chooseGlobalIndicator(globalIndMatches[globalIndActive>=0?globalIndActive:0]);
   }
 }
+
+// Seleção por índice: o HTML usa apenas um número, sem nomes/aspas dinâmicas.
+// O pointerdown acontece antes de qualquer blur do campo de busca.
+function selectGlobalIndicatorByIndex(e,idx){
+  if(e){e.preventDefault();e.stopPropagation();}
+  const ind=globalIndMatches[Number(idx)];
+  if(ind) chooseGlobalIndicator(ind);
+}
+
+// Fallback por delegação no contêiner, para máxima compatibilidade.
+function initGlobalIndicatorPointer(){
+  const box=document.getElementById('global-ind-results');
+  if(!box || box.dataset.pointerReady==='1')return;
+  box.dataset.pointerReady='1';
+  // Fallback para navegadores sem Pointer Events. Nos navegadores atuais,
+  // cada botão usa onpointerdown com índice numérico.
+  box.addEventListener('mousedown',function(e){
+    if(window.PointerEvent)return;
+    const row=e.target.closest('.gis-result');
+    if(!row || !box.contains(row))return;
+    selectGlobalIndicatorByIndex(e,row.dataset.idx);
+  }, true);
+}
+initGlobalIndicatorPointer();
 document.addEventListener('click',e=>{const wrap=document.getElementById('global-ind-search');if(wrap&&!wrap.contains(e.target))document.getElementById('global-ind-results')?.classList.remove('open');});
 
 // ─── DICIONÁRIO / METODOLOGIA ───────────────────────────────────────────────
