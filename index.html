@@ -8,6 +8,12 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=12">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=12">
 <link rel="shortcut icon" href="favicon.ico?v=12">
+<link rel="manifest" href="./manifest.webmanifest?v=12">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IPS Brasil">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://unpkg.com/topojson-client@3"></script>
@@ -765,6 +771,7 @@ body.desktop #btn-panel{display:none;}
   <div id="hdr-logo">IPS <span>Brasil</span> 2026</div>
   <select id="global-region" class="hdr-select" onchange="setGlobalRegion(this.value)" title="Recorte regional"><option value="Brasil">Brasil inteiro</option><option>Norte</option><option>Nordeste</option><option>Centro-Oeste</option><option>Sudeste</option><option>Sul</option></select>
   <button class="hdr-btn" onclick="exportDataCSV()" title="Baixar base do recorte atual"><i data-lucide="download"></i><span class="hdr-txt"> Dados</span></button>
+  <button class="hdr-btn" id="btn-install" type="button" style="display:none" title="Instalar IPS Brasil no dispositivo"><i data-lucide="smartphone"></i><span class="hdr-txt"> Instalar</span></button>
   <button class="hdr-btn" id="btn-panel" onclick="togglePanel()"><i data-lucide="panel-left"></i> <span class="hdr-txt">Painel</span></button>
   <button class="hdr-btn" id="btn-desktop" onclick="toggleDesktop()"><i data-lucide="monitor"></i> <span class="hdr-txt">Modo amplo</span></button>
 </div>
@@ -2386,6 +2393,38 @@ function fmtPop(v){
   if(v>=1e3) return(v/1e3).toFixed(0)+'k';
   return Math.round(v).toString();
 }
+
+// ─── PWA / INSTALAÇÃO NO CELULAR ─────────────────────────────────────────────
+let deferredInstallPrompt=null;
+function isIOSDevice(){return /iphone|ipad|ipod/i.test(navigator.userAgent);}
+function isStandaloneMode(){return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;}
+function setupInstallButton(){
+  const btn=document.getElementById('btn-install'); if(!btn)return;
+  if(isStandaloneMode()){btn.style.display='none';return;}
+  if(isIOSDevice()) btn.style.display='inline-flex';
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault(); deferredInstallPrompt=e; btn.style.display='inline-flex';
+  });
+  btn.addEventListener('click',async()=>{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      try{await deferredInstallPrompt.userChoice;}catch(_){ }
+      deferredInstallPrompt=null; btn.style.display='none'; return;
+    }
+    if(isIOSDevice()){
+      alert('No iPhone/iPad: abra este site no Safari, toque em Compartilhar e escolha “Adicionar à Tela de Início”.');
+    }else{
+      alert('Se a opção de instalação não aparecer, abra o menu do navegador e escolha “Instalar app” ou “Adicionar à tela inicial”.');
+    }
+  });
+  window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;btn.style.display='none';});
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./service-worker.js').catch(err=>console.warn('Service Worker não registrado:',err));
+  });
+}
+setupInstallButton();
 
 // ─── START ────────────────────────────────────────────────────────────────────
 icons();   // ícones estáticos do header/tabs
