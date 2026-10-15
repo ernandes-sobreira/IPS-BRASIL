@@ -62,7 +62,7 @@ body{letter-spacing:-.01em;}
 .hdr-select{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:12px;
   padding:0 36px 0 12px;height:40px;font-size:.8rem;font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;max-width:180px;}
 .hdr-select option{background:#fff;color:#181614;}
-@media(max-width:720px){#hdr{padding:0 12px;gap:8px}#hdr-logo{font-size:1.08rem}.hdr-select{max-width:120px;font-size:.72rem}.hdr-btn .hdr-txt{display:none}.hdr-btn{padding:0 9px;height:36px}}
+@media(max-width:720px){#hdr{padding:0 8px;gap:5px}#hdr-logo{font-size:.98rem;letter-spacing:-.045em;min-width:0}.hdr-select{width:98px;max-width:98px;font-size:.68rem;padding-left:9px;padding-right:25px}.hdr-btn .hdr-txt{display:none}.hdr-btn{padding:0 8px;height:36px;min-width:36px;justify-content:center}#btn-desktop{display:none!important}}
 
 /* APP SHELL */
 #app{display:flex;height:100vh;padding-top:calc(var(--hdr) + 16px);padding-left:18px;padding-right:18px;padding-bottom:18px;gap:18px;}
@@ -785,6 +785,8 @@ details.fgrp>summary::-webkit-details-marker{display:none}details.fgrp>summary::
 .welcome-steps{display:grid;gap:8px;margin-bottom:15px}.welcome-step{display:grid;grid-template-columns:30px 1fr;gap:9px;align-items:start;padding:9px 10px;border-radius:13px;background:var(--surface-2)}.welcome-step b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--text);color:#fff;font-size:.72rem}.welcome-step span{font-size:.77rem;line-height:1.4}.welcome-actions{display:flex;gap:8px;flex-wrap:wrap}.welcome-actions button{border:1px solid var(--border);border-radius:12px;padding:10px 12px;background:#fff;font:800 .78rem 'DM Sans',sans-serif;cursor:pointer}.welcome-actions .primary{background:var(--text);color:#fff;border-color:var(--text)}
 @media(max-width:768px){.mobile-map-tip{display:block}.map-help-btn{right:10px;top:10px;padding:8px 10px}.map-help-card{right:10px;top:54px}.f-summary-grid{grid-template-columns:1fr}.scope-filter-card{grid-template-columns:1fr}.app-toast{top:72px}#ficha-hdr{padding:16px}.find-n{font-size:.78rem}.find-s{font-size:.68rem}}
 
+
+@media(max-width:390px){#hdr{gap:4px;padding:0 6px}#hdr-logo{font-size:.9rem}.hdr-select{width:88px;max-width:88px;font-size:.64rem}.hdr-btn{min-width:34px;height:34px;padding:0 7px}}
 </style>
 </head>
 <body>
