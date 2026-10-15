@@ -787,6 +787,33 @@ details.fgrp>summary::-webkit-details-marker{display:none}details.fgrp>summary::
 
 
 @media(max-width:390px){#hdr{gap:4px;padding:0 6px}#hdr-logo{font-size:.9rem}.hdr-select{width:88px;max-width:88px;font-size:.64rem}.hdr-btn{min-width:34px;height:34px;padding:0 7px}}
+
+/* ─── MAPA DE PRIORIDADES + SEMÁFORO + HIERARQUIA ─────────────────────────── */
+.priority-card{border:1px solid var(--border);border-radius:16px;background:#fff;padding:12px;margin:0 0 12px;box-shadow:var(--shadow-soft)}
+.priority-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}
+.priority-head h3{font:800 .8rem 'Inter',sans-serif;margin:0}.priority-head span{font-size:.62rem;color:var(--muted);text-align:right}
+.priority-list{display:grid;gap:6px}.priority-row{display:grid;grid-template-columns:16px minmax(90px,1fr) 92px 62px;gap:7px;align-items:center;border:1px solid #eee8df;border-radius:11px;padding:8px 9px;background:var(--surface-2);cursor:pointer;transition:.14s ease}
+.priority-row:hover{background:#fff;border-color:var(--border-strong);transform:translateY(-1px)}
+.traffic{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 3px rgba(0,0,0,.035)}.traffic.green{background:#2b8a57}.traffic.yellow{background:#d5a115}.traffic.red{background:#c84b39}.traffic.gray{background:#7b8490}
+.priority-area{font-size:.73rem;font-weight:800;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.priority-situation{font-size:.65rem;color:var(--muted);line-height:1.2}.priority-level{font-size:.63rem;font-weight:800;text-align:right;text-transform:uppercase;letter-spacing:.035em}
+.priority-level.high{color:#a83a2d}.priority-level.medium{color:#99700d}.priority-level.low{color:#247448}
+.priority-note{font-size:.61rem;line-height:1.4;color:var(--muted);margin-top:8px}
+.primary-section{padding:10px 10px 4px}.primary-label{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.055em;color:var(--muted);margin:0 0 7px}
+.primary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:8px}
+.primary-ind{border:1px solid var(--border);border-radius:11px;padding:9px;background:#fff;cursor:pointer;transition:.14s ease;min-width:0}
+.primary-ind:hover{border-color:var(--border-strong);box-shadow:0 6px 16px rgba(0,0,0,.055)}
+.primary-top{display:flex;align-items:center;gap:6px;margin-bottom:4px}.primary-name{font-size:.69rem;font-weight:800;line-height:1.25;min-width:0}
+.primary-value{font:800 .88rem 'Inter',sans-serif}.primary-unit{font-size:.58rem;color:var(--muted);margin-left:3px}
+.primary-sub{font-size:.6rem;color:var(--muted);line-height:1.3;margin-top:3px}
+.secondary-label{font-size:.61rem;font-weight:800;text-transform:uppercase;letter-spacing:.055em;color:var(--muted);padding:4px 10px 3px}
+.find-light{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}.find-light.good{background:#2b8a57}.find-light.mid{background:#d5a115}.find-light.bad{background:#c84b39}.find-light.neutral{background:#7b8490}
+@media(max-width:768px){
+  .priority-row{grid-template-columns:14px minmax(86px,1fr) 82px 54px;padding:8px 7px;gap:6px}
+  .priority-area{font-size:.7rem}.priority-situation{font-size:.61rem}.priority-level{font-size:.59rem}
+  .primary-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -1126,6 +1153,16 @@ const GRUPOS={
   'Justiça':['Direitos Individuais','Índice de Atendimento à Demanda de Justiça',
     'Resposta a Processos Previdenciários','Resposta a Processos Familiares',
     'Taxa de Congestionamento Líquida de Processos']
+};
+const PRIMARY_BY_GROUP={
+  'Geral':['Índice de Progresso Social','Necessidades Humanas Básicas','Fundamentos do Bem-estar','Oportunidades'],
+  'Saúde':['Nutrição e Cuidados Médicos Básicos','Saúde e Bem-estar'],
+  'Segurança':['Segurança Pessoal'],
+  'Educação':['Acesso ao Conhecimento Básico','Acesso à Educação Superior'],
+  'Infraestrutura':['Água e Saneamento','Moradia','Acesso à Informação e Comunicação'],
+  'Meio Ambiente':['Qualidade do Meio Ambiente'],
+  'Social':['Inclusão Social','Liberdades Individuais e de Escolha'],
+  'Justiça':['Direitos Individuais']
 };
 
 // slug <-> indicador (permalink)
@@ -1580,6 +1617,46 @@ function qualityPct(v,ind){if(v==null||isNeutro(ind))return null;const p=pctRank
 function quickInterpret(m,ind){const v=m.i[ind],meta=D.meta[ind];if(v==null||!meta)return null;if(isNeutro(ind))return{cls:'neutral',label:'Valor de contexto',text:'Este indicador não é classificado como melhor ou pior no painel.'};const q=quintQual(v,ind);if(q>=3)return{cls:'good',label:q===4?'Desempenho muito favorável':'Desempenho favorável',text:'O município está entre as faixas de melhor desempenho relativo no Brasil para este indicador.'};if(q===2)return{cls:'mid',label:'Próximo à faixa intermediária',text:'O município está próximo ao centro da distribuição nacional para este indicador.'};return{cls:'bad',label:q===0?'Prioridade de atenção':'Atenção',text:'O município está entre as faixas de menor desempenho relativo no Brasil para este indicador.'};}
 function municipioHighlights(m){const context=new Set(['POPULAÇÃO 2025','PIB PER CAPITA','ÁREA km²']);const rows=[];for(const ind of Object.keys(D.meta)){if(context.has(ind)||ind==='Índice de Progresso Social'||isNeutro(ind))continue;const v=m.i[ind],p=qualityPct(v,ind);if(v==null||p==null)continue;rows.push({ind,p,v,meta:D.meta[ind]});}rows.sort((a,b)=>b.p-a.p);return{best:rows.slice(0,3),attention:[...rows].sort((a,b)=>a.p-b.p).slice(0,3)};}
 function highlightList(items){return items.map(x=>`<li><b>${x.meta.nome}</b><br><span style="color:var(--muted)">${fmt(x.v)} ${x.meta.unidade||''}</span></li>`).join('');}
+function medianValue(a){if(!a.length)return null;const x=[...a].sort((p,q)=>p-q),n=x.length,m=Math.floor(n/2);return n%2?x[m]:(x[m-1]+x[m])/2;}
+function indicatorSignal(v,ind){
+  if(v==null||!D.meta[ind])return{cls:'neutral',color:'gray',label:'sem dado'};
+  if(isNeutro(ind))return{cls:'neutral',color:'gray',label:'contexto'};
+  const q=quintQual(v,ind);
+  if(q>=3)return{cls:'good',color:'green',label:'favorável'};
+  if(q===2)return{cls:'mid',color:'yellow',label:'intermediário'};
+  return{cls:'bad',color:'red',label:'atenção'};
+}
+function groupPriority(m,grp){
+  const inds=GRUPOS[grp]||[], prim=new Set(PRIMARY_BY_GROUP[grp]||[]);
+  let usable=inds.filter(ind=>!prim.has(ind)&&m.i[ind]!=null&&!isNeutro(ind));
+  if(usable.length<2)usable=inds.filter(ind=>m.i[ind]!=null&&!isNeutro(ind));
+  const scores=usable.map(ind=>qualityPct(m.i[ind],ind)).filter(v=>v!=null);
+  const med=medianValue(scores);
+  if(med==null)return{grp,color:'gray',situation:'Dados insuficientes',priority:'—',priorityCls:'',n:scores.length,score:null};
+  if(med<.40)return{grp,color:'red',situation:'Desempenho baixo',priority:'Alta',priorityCls:'high',n:scores.length,score:med};
+  if(med<.60)return{grp,color:'yellow',situation:'Faixa intermediária',priority:'Média',priorityCls:'medium',n:scores.length,score:med};
+  return{grp,color:'green',situation:'Desempenho favorável',priority:'Baixa',priorityCls:'low',n:scores.length,score:med};
+}
+function priorityMapRows(m){
+  return Object.keys(GRUPOS).filter(g=>g!=='Geral').map(g=>groupPriority(m,g));
+}
+function groupDomId(grp){return 'grp-'+nrm(grp).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
+function openPriorityGroup(grp){
+  const el=document.getElementById(groupDomId(grp));if(!el)return;el.open=true;
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'start'}),40);
+}
+function priorityMapHTML(m){
+  const rows=priorityMapRows(m);
+  return `<div class="priority-card"><div class="priority-head"><h3>Mapa de prioridades</h3><span>síntese descritiva por área</span></div><div class="priority-list">${rows.map(r=>`<div class="priority-row" onclick="openPriorityGroup('${r.grp.replace(/'/g,"\\'")}')" title="Abrir indicadores de ${r.grp}"><span class="traffic ${r.color}"></span><span class="priority-area">${r.grp}</span><span class="priority-situation">${r.situation}</span><span class="priority-level ${r.priorityCls}">${r.priority}</span></div>`).join('')}</div><div class="priority-note"><b>Semáforo:</b> verde = situação relativamente favorável; amarelo = intermediária; vermelho = prioridade de atenção. A classificação resume a posição nacional dos indicadores disponíveis e <b>não é um índice oficial novo</b>.</div></div>`;
+}
+function primaryIndicatorHTML(m,grp){
+  const prim=PRIMARY_BY_GROUP[grp]||[];
+  const rows=prim.filter(ind=>D.meta[ind]&&m.i[ind]!=null).map(ind=>{
+    const meta=D.meta[ind],v=m.i[ind],sig=indicatorSignal(v,ind),slug=indToSlug[ind];
+    return `<div class="primary-ind" onclick="mudarIndicador('${slug}')" title="Ver ${meta.nome} no mapa"><div class="primary-top"><span class="traffic ${sig.color}"></span><span class="primary-name">${meta.nome}</span></div><div><span class="primary-value">${fmt(v)}</span><span class="primary-unit">${meta.unidade||''}</span></div><div class="primary-sub">${sig.label} · toque para ver no mapa</div></div>`;
+  });
+  return rows.length?`<div class="primary-section"><div class="primary-label">Indicadores principais</div><div class="primary-grid">${rows.join('')}</div></div>`:'';
+}
 function abrirFicha(m){
   showTab('explorar',document.querySelectorAll('.tab')[1]);
   document.getElementById('srch-sec').style.display='none';
@@ -1606,34 +1683,33 @@ function abrirFicha(m){
   const qi=quickInterpret(m,IND);
   const hi=municipioHighlights(m);
   html+=`<div class="f-quick"><div class="f-quick-title">Leitura rápida de ${m.m}</div>${qi?`<div class="f-status ${qi.cls}"><span class="f-status-dot"></span><div><strong>${qi.label}</strong><span>${qi.text}</span></div></div>`:''}<div class="f-summary-grid"><div class="f-mini-card"><h4>Destaques relativos</h4><ul>${highlightList(hi.best)}</ul></div><div class="f-mini-card"><h4>Pontos de atenção</h4><ul>${highlightList(hi.attention)}</ul></div></div><div class="f-quick-note">Leitura descritiva baseada na posição do município na distribuição nacional dos indicadores. Não indica causa, qualidade de política pública ou significância estatística.</div></div>`;
+  html+=priorityMapHTML(m);
 
   const medUF=D.medias_por_uf[m.u]||{};
 
   for(const[grp,inds]of Object.entries(GRUPOS)){
-    const corGrp=CORES[grp];
-    const linhas=inds.map(ind=>{
+    const corGrp=CORES[grp], primSet=new Set(PRIMARY_BY_GROUP[grp]||[]);
+    const detailRows=inds.filter(ind=>!primSet.has(ind)).map(ind=>{
       const meta=D.meta[ind],v=m.i[ind];
       if(!meta||v==null) return'';
-      // comprimento da barra = valor (escalas 0–N vão de 0 a N); cor = quintil
       const pct=Math.round(barFrac(v,ind)*100);
-      const barCor=corInd(v,ind);
-      const med=medUF[ind];
-      const medFrac=med!=null?barFrac(med,ind):null;
-      const isAtivo=ind===IND;
-      const slug=indToSlug[ind];
+      const barCor=corInd(v,ind), med=medUF[ind], medFrac=med!=null?barFrac(med,ind):null;
+      const isAtivo=ind===IND, slug=indToSlug[ind], sig=indicatorSignal(v,ind);
       const tick=medFrac!=null?`<div class="find-tick" style="left:${(medFrac*100).toFixed(1)}%" title="média ${m.u}: ${fmt(med)} ${meta.unidade}"></div>`:'';
       return`<div class="find${isAtivo?' find-ativo':''}" data-ind="${slug}" onclick="mudarIndicador('${slug}')" title="Ver no mapa">
         <div class="find-info">
-          <div class="find-n">${meta.nome} <span class="find-badge ${isAtivo?'find-no-mapa':'find-ver-mapa'}">${isAtivo?'no mapa ↗':'ver no mapa'}</span></div>
+          <div class="find-n"><span class="find-light ${sig.cls}"></span>${meta.nome} <span class="find-badge ${isAtivo?'find-no-mapa':'find-ver-mapa'}">${isAtivo?'no mapa ↗':'ver no mapa'}</span></div>
           <div class="find-s">${meta.simples}</div>
           <div class="find-bar-wrap"><div class="find-bar" style="width:${pct}%;background:${barCor}"></div>${tick}</div>
         </div>
         <div class="find-v">${fmt(v)}<span class="find-u">${meta.unidade}</span></div>
       </div>`;
-    }).filter(Boolean).join('');
-    if(!linhas) continue;
-    const nLinhas=(linhas.match(/class="find/g)||[]).length;
-    html+=`<details class="fgrp" ${grp==='Geral'?'open':''}><summary><span class="fgrp-dot" style="background:${corGrp}"></span>${grp}<span class="fgrp-count">${nLinhas} indicadores</span></summary>${linhas}</details>`;
+    }).filter(Boolean);
+    const primary=primaryIndicatorHTML(m,grp);
+    const totalVisible=inds.filter(ind=>D.meta[ind]&&m.i[ind]!=null).length;
+    if(!primary&&!detailRows.length) continue;
+    const detailsId=groupDomId(grp);
+    html+=`<details class="fgrp" id="${detailsId}" ${grp==='Geral'?'open':''}><summary><span class="fgrp-dot" style="background:${corGrp}"></span>${grp}<span class="fgrp-count">${totalVisible} indicadores</span></summary>${primary}${detailRows.length?'<div class="secondary-label">Indicadores detalhados</div>'+detailRows.join(''):''}</details>`;
   }
 
   document.getElementById('ficha').innerHTML=html;
