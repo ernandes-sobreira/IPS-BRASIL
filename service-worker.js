@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ips-brasil-pwa-v12';
+const CACHE_NAME = 'ips-brasil-pwa-v13';
 const APP_SHELL = [
   './',
   './index.html',
