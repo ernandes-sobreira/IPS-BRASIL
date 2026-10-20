@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ips-brasil-pwa-v15';
+const CACHE_NAME = 'ips-brasil-pwa-v16';
 const APP_SHELL = [
   './',
   './index.html',
@@ -42,10 +42,10 @@ self.addEventListener('fetch', event => {
       fetch(req)
         .then(res => {
           const copy = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
+          caches.open(CACHE_NAME).then(cache => cache.put(req, copy));
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
     );
     return;
   }
